@@ -1,0 +1,77 @@
+__pycache__/
+# Common Python ignores
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# pip and pipenv
+pip-log.txt
+pip-delete-this-directory.txt
+Pipfile.lock
+
+# mypy, pytest, coverage, profiling
+.mypy_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# pyenv
+.python-version
+
+# Distribution / packaging
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# macOS, Windows
+.DS_Store
+Thumbs.db
+
+# dotenv environment variables file
+*.env
+.env.*
+# VSCode local history
+.history/
+# Pyre type checker
+.pyre/
+# Bandit security linter
+.bandit
+
+*.lock
