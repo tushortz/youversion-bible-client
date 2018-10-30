@@ -12,6 +12,8 @@ Unofficial Youversion bible api
 * [ ] modify notes
 * [ ] delete note
 
+* [ ] write documentation
+* [ ] write test
 
 > Many more todo
 
