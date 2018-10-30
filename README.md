@@ -11,7 +11,6 @@ Unofficial Youversion bible api
 * [ ] create notes
 * [ ] modify notes
 * [ ] delete note
-
 * [ ] write documentation
 * [ ] write test
 
