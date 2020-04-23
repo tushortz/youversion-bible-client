@@ -80,5 +80,9 @@ class Bible:
     def my_images(self, page=1):
         return self._cards({"kind": "image", "page": page})
 
+    def notes(self, page=1):
+        return self._cards({"kind": "note", "page": page})
+
     def plan_subscriptions(self, page=1):
         return self._cards({"kind": "plan_subscription", "page": page})
+
