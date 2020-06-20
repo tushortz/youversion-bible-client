@@ -86,3 +86,6 @@ class Bible:
     def plan_subscriptions(self, page=1):
         return self._cards({"kind": "plan_subscription", "page": page})
 
+    def convert_note_to_md(self):
+        notes = self.notes()
+        
