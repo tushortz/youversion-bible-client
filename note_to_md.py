@@ -3,23 +3,25 @@ import os
 import json
 import time
 import random
+import re
+
 
 HEADER = """
 ---
 title: "{0}"
 date: {1}
 draft: true
+book: {2}
 ---
 """
 
 template = """
-### {0}
+## {0}
 
 {1}
 
-> Related verses: {2}
-> See [notes](https://my.bible.com/notes/{3})
-----------------
+Related verses: {2}. See [notes](https://my.bible.com/notes/{3})
+
 """
 
 has_data = True
@@ -37,6 +39,8 @@ while has_data:
         _obj = note["object"]
         text = _obj["content"]
         dt = _obj.get("updated_dt") or _obj.get("created_dt")
+        dt = re.sub(r'\.\d+', " ", dt).replace("T", " ")
+
         id = _obj.get("id")
         
         _refs = _obj.get("references")
@@ -59,7 +63,7 @@ while has_data:
 
             md_file = f"{folder}/{chapter}.md"
             mode = "w"
-            HEAD = HEADER.format(f"{book} {chapter}", dt)
+            HEAD = HEADER.format(f"{book} {chapter}", dt, book)
             
             content = ""
             if os.path.exists(md_file):
@@ -71,7 +75,7 @@ while has_data:
                 if "draft: true" in content:
                     HEAD = ""
 
-            with open(md_file, mode) as f:
+            with open(md_file, mode, encoding="ascii", errors='replace') as f:
                 f.write(HEAD)
                 
                 if id in content:
@@ -79,8 +83,9 @@ while has_data:
                 else:
                     f.write(template.format(
                         f"{book} {chapter}:{verse}", 
-                        text.replace("�", "'").encode("utf-8").decode("utf-8", "replace"),
-                        human_references, id
+                        text,
+                        human_references, id, 
+                        dt
                     ))
 
     print(f"Page {index} complete")
