@@ -10,8 +10,8 @@ HEADER = """
 ---
 title: "{0}"
 date: {1}
-draft: true
 book: {2}
+draft: false
 ---
 """
 
@@ -20,21 +20,24 @@ template = """
 
 {1}
 
-Related verses: {2}. See [notes](https://my.bible.com/notes/{3})
+**Related verses**: {2}. See [notes](https://my.bible.com/notes/{3})
 
 """
 
 has_data = True
 index = 1
 
-b = Bible("kareem_taiwo", "Victoria1.")
+USERNAME = os.getenv("BIBLE_USERNAME")
+PASSWORD = os.getenv("BIBLE_PASSWORD")
+
+b = Bible(USERNAME, PASSWORD)
 
 while has_data:
     notes = b.notes(index)
 
     if type(notes) == dict and notes.get("error"):
         has_data = False
-
+        
     for note in notes:
         _obj = note["object"]
         text = _obj["content"]
@@ -72,7 +75,7 @@ while has_data:
                 f.close()
                 mode = "a"
 
-                if "draft: true" in content:
+                if "draft: true" in content or "draft: false" in content:
                     HEAD = ""
 
             with open(md_file, mode, encoding="ascii", errors='replace') as f:
