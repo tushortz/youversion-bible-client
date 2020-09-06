@@ -6,8 +6,8 @@ Unofficial Youversion bible api
 * [x] login
 * [ ] send friend request
 * [ ] view friend requests
-* [ ] view moments
-* [ ] view notes
+* [x] view moments
+* [x] view notes
 * [ ] create notes
 * [ ] modify notes
 * [ ] delete note
