@@ -1,4 +1,4 @@
-from youversion.bible import Bible
+from youversion.utils import Client
 import os
 import json
 import time
@@ -30,14 +30,14 @@ index = 1
 USERNAME = os.getenv("BIBLE_USERNAME")
 PASSWORD = os.getenv("BIBLE_PASSWORD")
 
-b = Bible(USERNAME, PASSWORD)
+b = Client(USERNAME, PASSWORD)
 
 while has_data:
     notes = b.notes(index)
 
     if type(notes) == dict and notes.get("error"):
         has_data = False
-        
+
     for note in notes:
         _obj = note["object"]
         text = _obj["content"]
@@ -45,7 +45,7 @@ while has_data:
         dt = re.sub(r'\.\d+', " ", dt).replace("T", " ")
 
         id = _obj.get("id")
-        
+
         _refs = _obj.get("references")
         locs = []
 
@@ -67,7 +67,7 @@ while has_data:
             md_file = f"{folder}/{chapter}.md"
             mode = "w"
             HEAD = HEADER.format(f"{book} {chapter}", dt, book)
-            
+
             content = ""
             if os.path.exists(md_file):
                 f = open(md_file, "r")
@@ -80,14 +80,14 @@ while has_data:
 
             with open(md_file, mode, encoding="ascii", errors='replace') as f:
                 f.write(HEAD)
-                
+
                 if id in content:
                     print(f"Skipping note with id: {id} in {loc}")
                 else:
                     f.write(template.format(
-                        f"{book} {chapter}:{verse}", 
+                        f"{book} {chapter}:{verse}",
                         text,
-                        human_references, id, 
+                        human_references, id,
                         dt
                     ))
 
