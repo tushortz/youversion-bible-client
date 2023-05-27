@@ -6,6 +6,8 @@ Unofficial Youversion bible api
 
 Run the following command in the terminal
 
+>Note: Not implemented yet
+
 ```sh
 $ pip install youversion-bible-client
 ```
@@ -21,7 +23,7 @@ from youversion.utils import Client
 Create a new client object and instantiate it with a login credential.
 
 ```py
-client = Client("<username_or_email>", "<password>")
+client = Client("<username>", "<password>")
 ```
 
 call available methods on it
