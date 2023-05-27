@@ -21,11 +21,6 @@ class Base:
 @dc.dataclass
 class Votd(Base):
     """Verse of the day object
-
-    properties are:
-        day: int
-        usfm: list
-        image_id: str
     """
     day: int
     usfm: List[str]
@@ -34,6 +29,8 @@ class Votd(Base):
 
 @dc.dataclass
 class Image(Base):
+    """Image class for Youversion moment objects
+    """
     height: int
     width: int
     url: str
@@ -42,20 +39,6 @@ class Image(Base):
 @dc.dataclass
 class Moment(Base):
     """Base class for Youversion moment objects
-
-
-    properties are:
-        id: str
-        kind: str
-        moment_title: str
-        body_images: list
-        action_url: str
-        created_dt: str
-        updated_dt: str
-        path: str
-        avatar: str
-        time_ago: str
-        owned_by_me: str
     """
 
     id: str
@@ -78,7 +61,7 @@ class Moment(Base):
             datetime: A valid date time object
         """
         if self.created_dt:
-            return parser.parse(self.created_dt, "%Y-%m-%dT%H:%m%s%z")
+            return parser.parse(self.created_dt)
 
     @property
     def updated_date(self):
@@ -88,4 +71,4 @@ class Moment(Base):
             datetime: A valid date time object
         """
         if self.updated_dt:
-            return parser.parse(self.updated_dt, "%Y-%m-%dT%H:%m%s%z")
+            return parser.parse(self.updated_dt)

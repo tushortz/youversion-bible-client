@@ -69,7 +69,9 @@ print(votd)
 ```
 
 
-###
+## Contributing
+
+Interested in contributing, please create a fork of the project, modify your changes and create a pull request.
 
 # TODO
 
