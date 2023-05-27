@@ -78,6 +78,7 @@ class Client:
             ``image``,
             ``plan_segment_completion``,
             ``plan_subscription``,
+            ``reading_plan_carousel``
         """
 
         params = {

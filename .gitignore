@@ -107,5 +107,4 @@ venv.bak/
 .vscode
 notes/**
 _notes/**
-*.json
 test.py
