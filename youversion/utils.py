@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 
 from youversion import _endpoints as _ep
-from youversion.item import Votd
+from youversion.item import Votd, Highlight, Reference, Action
 
 
 class Client:
@@ -43,7 +43,7 @@ class Client:
 
         return session
 
-    def verse_of_the_day(self, day=None):
+    def verse_of_the_day(self, day=None) -> Votd:
         """Returns the verse of the day
 
         Args:
@@ -59,13 +59,9 @@ class Client:
         if not day:
             day = datetime.now().day
 
-        data = None
         for ref in response.get("votd"):
             if ref["day"] == day:
-                data = ref
-                return Votd(**data)
-
-        return None
+                return Votd(**ref)
 
     def _cards(self, options=None):
         """Represents the different kinds of data available
@@ -100,7 +96,48 @@ class Client:
         return response.json()
 
     def moments(self, page=1):
-        return self._cards({"page": page})
+        data = self._cards({"page": page})
+        moments = []
+
+        for item in data:
+            obj = item["object"]
+            references = obj.get("references", [])
+
+            reference_item = [
+                Reference(
+                    version_id=ref["version_id"],
+                    human=ref["human"],
+                    usfm=ref["usfm"],
+                )
+
+                for ref in references
+            ]
+
+            action_item = obj.get("actions", {})
+            action_item = Action(**action_item)
+
+            print(item)
+            avatar = obj.get("avatar")
+            if avatar and avatar.startswith("//"):
+                avatar = "https:" + avatar
+
+            highlight_item = Highlight(
+                id=obj["id"],
+                kind=item["kind"],
+                moment_title=obj["moment_title"],
+                created_dt=obj["created_dt"],
+                updated_dt=obj["updated_dt"],
+                references=reference_item,
+                path=obj["path"],
+                avatar=avatar,
+                time_ago=obj["time_ago"],
+                owned_by_me=obj["owned_by_me"],
+                actions=action_item
+            )
+
+            moments.append(highlight_item)
+
+        return moments
 
     def highlights(self, page=1):
         return self._cards({"kind": "highlight", "page": page})
