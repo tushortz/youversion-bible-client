@@ -108,3 +108,4 @@ venv.bak/
 notes/**
 _notes/**
 test.py
+tests/
