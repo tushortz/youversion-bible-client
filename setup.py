@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='youversion-bible-client',
-    version='0.2.0',
+    version='0.2.1',
     description='A Command line interface for interacting with the YouVersion Bible API',
     long_description='A Command line interface for interacting with the YouVersion Bible API',
     keywords=[
@@ -22,6 +22,6 @@ setup(
     zip_safe=False,
     requires=[
         "requests",
-        "dataclasses",
+        "pydantic",
     ]
 )
