@@ -11,13 +11,15 @@ from .interfaces import IHttpClient
 class HttpClient(IHttpClient):
     """Handles HTTP operations for YouVersion API."""
 
-    def __init__(self, client: httpx.AsyncClient):
+    def __init__(self, client: httpx.AsyncClient, user_id: Optional[int] = None):
         """Initialize HTTP client.
 
         Args:
             client: Authenticated httpx.AsyncClient
+            user_id: Authenticated user ID
         """
         self._client = client
+        self._user_id = user_id
 
     async def get(self, url: str, **kwargs) -> dict[str, Any]:
         """Perform GET request.
@@ -29,6 +31,9 @@ class HttpClient(IHttpClient):
         Returns:
             JSON response as dictionary
         """
+        # Merge DEFAULT_HEADERS with any headers passed in kwargs
+        headers = {**Config.DEFAULT_HEADERS, **kwargs.get("headers", {})}
+        kwargs["headers"] = headers
         response = await self._client.get(url, **kwargs)
         try:
             data = response.json()
@@ -50,6 +55,9 @@ class HttpClient(IHttpClient):
         Returns:
             JSON response as dictionary
         """
+        # Merge DEFAULT_HEADERS with any headers passed in kwargs
+        headers = {**Config.DEFAULT_HEADERS, **kwargs.get("headers", {})}
+        kwargs["headers"] = headers
         response = await self._client.post(url, **kwargs)
         try:
             data = response.json()
@@ -67,20 +75,29 @@ class HttpClient(IHttpClient):
 
     # Legacy methods for backward compatibility
     async def get_cards(
-        self, username: str, page: int = 1, kind: str = ""
+        self, page: int = 1, kind: str = ""
     ) -> dict[str, Any]:
         """Get cards data from moments endpoint.
 
         Args:
-            username: Username for the request
             page: Page number
             kind: Kind of data to retrieve
 
         Returns:
             Cards data as dictionary
         """
-        url = f"{Config.BASE_URL}{Config.MOMENTS_URL.format(username=username)}"
-        params = {"page": page, "kind": kind}
+        url = (
+            f"{Config.MOMENTS_API_BASE}"
+            f"{Config.MOMENTS_ITEMS_URL}"
+        )
+        # Build params dict, omitting falsy values (False, None, empty strings)
+        params = {}
+        if page is not None and page is not False:
+            params["page"] = page
+        if kind:  # Excludes None, False, and empty strings
+            params["kind"] = kind
+        if self._user_id is not None and self._user_id is not False:
+            params["user_id"] = self._user_id
 
         return await self.get(url, params=params)
 

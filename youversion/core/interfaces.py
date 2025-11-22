@@ -58,6 +58,12 @@ class IDataProcessor(ABC):
 class IClient(ABC):
     """Interface for YouVersion API client."""
 
+    @property
+    @abstractmethod
+    def user_id(self) -> Optional[int]:
+        """Get the authenticated user ID."""
+        pass
+
     @abstractmethod
     async def moments(self, page: int = 1) -> list[Any]:
         """Get moments."""

@@ -1,6 +1,5 @@
+from dataclasses import dataclass
 from typing import List, Optional
-
-from pydantic import BaseModel, ConfigDict, field_validator
 
 from youversion.config import Config
 from youversion.enums import StatusEnum
@@ -30,22 +29,28 @@ from .moments import (
 )
 
 
-class Votd(BaseModel):
+@dataclass
+class Votd:
     """Verse of the day object"""
 
     day: int
-    image_id: Optional[str]
-    usfm: list[str]
+    image_id: Optional[str] = None
+    usfm: Optional[list[str]] = None
+
+    def __post_init__(self) -> None:
+        """Initialize usfm if not provided."""
+        if self.usfm is None:
+            self.usfm = []
 
 
+@dataclass
 class Highlight(Moment):
     """Highlight class for the Youversion moment object"""
 
     references: list[Reference]
-    # Allow carrying extra text field for tests
-    model_config = ConfigDict(extra="allow")
 
 
+@dataclass
 class Note(Moment):
     """Note class for the Youversion moment object"""
 
@@ -54,6 +59,7 @@ class Note(Moment):
     status: StatusEnum
 
 
+@dataclass
 class PlanSegmentCompletion(PlanModel):
     """Plan segment class for the Youversion moment"""
 
@@ -62,18 +68,21 @@ class PlanSegmentCompletion(PlanModel):
     total_segments: int
 
 
+@dataclass
 class PlanSubscription(PlanModel):
     """Plan subscription class for the Youversion moment"""
 
     plan_title: str
 
 
+@dataclass
 class PlanCompletion(PlanModel):
     """Plan completion class for the Youversion moment"""
 
     plan_title: str
 
 
+@dataclass
 class Friendship(Moment):
     """Friendship class for the Youversion moment"""
 
@@ -81,49 +90,32 @@ class Friendship(Moment):
     friend_name: str
     friend_avatar: str
 
-    @field_validator("friend_path", mode="before")
-    @classmethod
-    def _friend_path(cls, friend_path: str) -> str:
-        """Returns the full url to the moment path"""
-        if friend_path and friend_path.startswith("/"):
-            return f"{Config.BASE_URL}{friend_path}"
-
-        return friend_path
-
-    @field_validator("friend_avatar", mode="before")
-    @classmethod
-    def _friend_avatar(cls, friend_avatar: str) -> str:
-        """Returns the full url to the moment path"""
-        if friend_avatar and friend_avatar.startswith("//"):
-            return f"https:{friend_avatar}"
-
-        return friend_avatar
+    def __post_init__(self) -> None:
+        """Normalize friend_path and friend_avatar after initialization."""
+        super().__post_init__()
+        if self.friend_path and self.friend_path.startswith("/"):
+            self.friend_path = f"{Config.BASE_URL}{self.friend_path}"
+        if self.friend_avatar and self.friend_avatar.startswith("//"):
+            self.friend_avatar = "https:" + self.friend_avatar
 
 
+@dataclass
 class Image(Moment):
     """Image class for the Youversion moment"""
 
-    action_url: Optional[str]
-    body_image: str
-    references: list[Reference]
+    action_url: Optional[str] = None
+    body_image: str = ""
+    references: list[Reference] = None
 
-    @field_validator("action_url", mode="before")
-    @classmethod
-    def _action_url(cls, action_url: str) -> str:
-        """Returns the full url to the moment avatar"""
-        if action_url:
-            action_url = f"{Config.BASE_URL}{action_url}"
-
-        return action_url
-
-    @field_validator("body_image", mode="before")
-    @classmethod
-    def _body_image(cls, body_image: str) -> str:
-        """Returns the full url to the moment avatar"""
-        if body_image and body_image.startswith("//"):
-            body_image = "https:" + body_image
-
-        return body_image
+    def __post_init__(self) -> None:
+        """Normalize action_url and body_image after initialization."""
+        super().__post_init__()
+        if self.action_url:
+            self.action_url = f"{Config.BASE_URL}{self.action_url}"
+        if self.body_image and self.body_image.startswith("//"):
+            self.body_image = "https:" + self.body_image
+        if self.references is None:
+            self.references = []
 
 
 # Export all models

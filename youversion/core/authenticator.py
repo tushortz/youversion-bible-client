@@ -4,6 +4,7 @@ import os
 from typing import Optional
 
 import httpx
+import jwt
 from dotenv import load_dotenv
 
 from ..config import Config
@@ -30,6 +31,8 @@ class Authenticator(IAuthenticator):
                 "Username and password must be provided either as arguments "
                 "or as YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
             )
+        self.user_id = None
+        self.access_token = None
 
     async def authenticate(self, username: str, password: str) -> httpx.AsyncClient:
         """Authenticate using OAuth2 and return an HTTP client with Bearer token.
@@ -44,9 +47,10 @@ class Authenticator(IAuthenticator):
         # Get OAuth2 token
         token = await self._get_oauth2_token(username, password)
 
-        # Create HTTP client with Bearer token
+        # Create HTTP client with Bearer token and default headers
+        headers = {**Config.DEFAULT_HEADERS, "Authorization": f"Bearer {token}"}
         client = httpx.AsyncClient(
-            headers={"Authorization": f"Bearer {token}"}, timeout=Config.HTTP_TIMEOUT
+            headers=headers, timeout=Config.HTTP_TIMEOUT
         )
 
         return client
@@ -79,4 +83,28 @@ class Authenticator(IAuthenticator):
             token_data = response.json()
             if hasattr(token_data, "__await__"):
                 token_data = await token_data
+
+            # Decode JWT token to extract user information
+            try:
+                decoded_token = jwt.decode(
+                    token_data["access_token"],
+                    Config.CLIENT_SECRET,
+                    algorithms=["HS256"],
+                )
+                # Try user_id first, then sub (OAuth2 standard)
+                self.user_id = decoded_token.get("user_id") or decoded_token.get("sub")
+            except jwt.DecodeError:
+                # If token cannot be decoded/verified,
+                # try decoding without verification
+                decoded_token = jwt.decode(
+                    token_data["access_token"],
+                    options={"verify_signature": False},
+                )
+                # Try user_id first, then sub (OAuth2 standard)
+                self.user_id = decoded_token.get("user_id") or decoded_token.get("sub")
+            except jwt.InvalidTokenError:
+                # If decoding fails entirely, continue without user_id
+                self.user_id = None
+
+            self.access_token = token_data["access_token"]
             return token_data["access_token"]

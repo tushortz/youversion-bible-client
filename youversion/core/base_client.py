@@ -22,6 +22,8 @@ class BaseClient(IClient):
         self._authenticator = Authenticator(username, password)
         self._http_client: Optional[IHttpClient] = None
         self._data_processor = DataProcessor()
+        self._user_id = None
+        self._access_token = None
 
     async def _ensure_authenticated(self) -> None:
         """Ensure client is authenticated."""
@@ -29,7 +31,9 @@ class BaseClient(IClient):
             client = await self._authenticator.authenticate(
                 self._authenticator.username, self._authenticator.password
             )
-            self._http_client = HttpClient(client)
+            self._user_id = self._authenticator.user_id
+            self._access_token = self._authenticator.access_token
+            self._http_client = HttpClient(client, user_id=self._user_id)
 
     async def _get_cards_data(
         self, kind: str = "", page: int = 1
@@ -41,13 +45,13 @@ class BaseClient(IClient):
             page: Page number
 
         Returns:
-            Raw cards data
+            Raw cards data (list of moments)
         """
         await self._ensure_authenticated()
-        data = await self._http_client.get_cards(
-            self._authenticator.username, page=page, kind=kind
-        )
-        return data
+        data = await self._http_client.get_cards(page=page, kind=kind)
+        # Extract moments array from response structure
+        moments_data = data.get("response", {}).get("data", {}).get("moments", [])
+        return moments_data
 
     async def moments(self, page: int = 1) -> list[Any]:
         """Get moments.
@@ -58,8 +62,13 @@ class BaseClient(IClient):
         Returns:
             List of Moment objects
         """
-        raw_data = await self._get_cards_data(page=page)
-        return self._data_processor.process_moments(raw_data)
+        await self._ensure_authenticated()
+        raw_data = await self._http_client.get_cards(
+            page=page, kind=""
+        )
+        # Extract moments array from response structure
+        moments_data = raw_data.get("response", {}).get("data", {}).get("moments", [])
+        return self._data_processor.process_moments(moments_data)
 
     async def highlights(self, page: int = 1) -> list[Any]:
         """Get highlights.
@@ -164,6 +173,11 @@ class BaseClient(IClient):
     def username(self) -> str:
         """Get the username."""
         return self._authenticator.username
+
+    @property
+    def user_id(self) -> Optional[int]:
+        """Get the authenticated user ID."""
+        return self._user_id
 
     # Bible API methods
     async def get_bible_configuration(self) -> Dict[str, Any]:

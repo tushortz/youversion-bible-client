@@ -1,13 +1,13 @@
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, Union
-
-from pydantic import BaseModel, ConfigDict, field_validator
 
 from youversion.config import Config
 from youversion.models.commons import Action, BodyImage, Comment, Like, User
 
 
-class PlanSegmentAction(BaseModel):
+@dataclass
+class PlanSegmentAction:
     """Actions for the Plan segment model"""
 
     about_plan: bool
@@ -15,7 +15,8 @@ class PlanSegmentAction(BaseModel):
     show: bool
 
 
-class PlanCompletionAction(BaseModel):
+@dataclass
+class PlanCompletionAction:
     """Actions for the Plan completion model"""
 
     about_plan: bool
@@ -23,48 +24,39 @@ class PlanCompletionAction(BaseModel):
     start_plan: bool
 
 
-class Moment(BaseModel):
+@dataclass
+class Moment:
     """Base model for all Youversion objects"""
 
     id: str
+    kind: str
     actions: Action
     avatar: str
     comments: Comment
-    created_dt: Optional[datetime]
-    kind: str
     likes: Like
     moment_title: str
     owned_by_me: bool
     path: str
     time_ago: str
-    updated_dt: Optional[datetime]
     user: User
+    created_dt: Optional[datetime] = None
+    updated_dt: Optional[datetime] = None
 
-    model_config = ConfigDict(extra="allow", use_enum_values=True)
+    def __post_init__(self) -> None:
+        """Normalize fields after initialization."""
+        if self.avatar and self.avatar.startswith("//"):
+            self.avatar = "https:" + self.avatar
+        if self.path and self.path.startswith("/"):
+            self.path = f"{Config.BASE_URL}{self.path}"
 
-    def __repr__(self):
-        return f"<{self.__class__.__name__}: {self.moment_title[:40]}>"
-
-    @field_validator("avatar", mode="before")
-    @classmethod
-    def _avatar(cls, avatar: str) -> str:
-        """Returns the full url to the moment avatar"""
-        if avatar and avatar.startswith("//"):
-            avatar = "https:" + avatar
-
-        return avatar
-
-    @field_validator("path", mode="before")
-    @classmethod
-    def _path(cls, path: str) -> str:
-        """Returns the full url to the moment path"""
-        if path and path.startswith("/"):
-            path = f"{Config.BASE_URL}{path}"
-
-        return path
+    def __repr__(self) -> str:
+        """String representation of the moment."""
+        title = self.moment_title[:40] if self.moment_title else ""
+        return f"<{self.__class__.__name__}: {title}>"
 
 
-class Reference(BaseModel):
+@dataclass
+class Reference:
     """Reference class for Youversion moment objects"""
 
     version_id: Union[str, int]
@@ -72,21 +64,19 @@ class Reference(BaseModel):
     usfm: Union[str, list[str]]
 
 
+@dataclass
 class PlanModel(Moment):
     """Generic moment class for Youversion plans"""
 
     action_url: str
     actions: Union[PlanCompletionAction, PlanSegmentAction]
-    body_images: Optional[list[BodyImage]] = []
-    body_text: Optional[str]
-    plan_id: int
-    subscribed: bool
+    body_images: Optional[list[BodyImage]] = field(default_factory=list)
+    body_text: Optional[str] = None
+    plan_id: int = 0
+    subscribed: bool = False
 
-    @field_validator("action_url", mode="before")
-    @classmethod
-    def _action_url(cls, action_url: str) -> str:
-        """Returns the full url to the moment avatar"""
-        if action_url:
-            action_url = f"{Config.BASE_URL}{action_url}"
-
-        return action_url
+    def __post_init__(self) -> None:
+        """Normalize action_url after initialization."""
+        super().__post_init__()
+        if self.action_url:
+            self.action_url = f"{Config.BASE_URL}{self.action_url}"

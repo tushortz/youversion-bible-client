@@ -1,11 +1,11 @@
+from dataclasses import dataclass
 from typing import Any, Optional, Union
-
-from pydantic import BaseModel, field_validator
 
 from youversion.config import Config
 
 
-class ReactionModel(BaseModel):
+@dataclass
+class ReactionModel:
     """Base model for several actions"""
 
     enabled: bool
@@ -14,24 +14,22 @@ class ReactionModel(BaseModel):
     all: list[Any]
 
 
-class BodyImage(BaseModel):
+@dataclass
+class BodyImage:
     """Image class for Youversion moment objects"""
 
     height: int
     width: int
     url: str
 
-    @field_validator("url", mode="before")
-    @classmethod
-    def _url(cls, url: str) -> str:
-        """Returns the full url to the moment avatar"""
-        if url and url.startswith("//"):
-            url = "https:" + url
-
-        return url
+    def __post_init__(self) -> None:
+        """Normalize URL after initialization."""
+        if self.url and self.url.startswith("//"):
+            self.url = "https:" + self.url
 
 
-class Action(BaseModel):
+@dataclass
+class Action:
     """Action class for the Youversion moment object"""
 
     deletable: bool = True
@@ -40,26 +38,26 @@ class Action(BaseModel):
     show: bool = False
 
 
-class User(BaseModel):
+@dataclass
+class User:
     """User model for the YouVersion object"""
 
     id: Optional[Union[str, int]]
     path: str
-    user_name: Optional[str]
+    user_name: Optional[str] = None
 
-    @field_validator("path", mode="before")
-    @classmethod
-    def _path(cls, path: str) -> str:
-        """Returns the full url to the moment user"""
-        if path:
-            path = f"{Config.BASE_URL}{path}"
-        return path
+    def __post_init__(self) -> None:
+        """Normalize path after initialization."""
+        if self.path:
+            self.path = f"{Config.BASE_URL}{self.path}"
 
 
+@dataclass
 class Comment(ReactionModel):
     """Comment class inheriting from ReactionModel"""
 
 
+@dataclass
 class Like(ReactionModel):
     """Comment class inheriting fields from ReactionModel"""
 

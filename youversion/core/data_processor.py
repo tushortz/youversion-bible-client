@@ -5,15 +5,8 @@ from typing import Any, Optional
 
 from ..enums import MomentKinds
 from ..models import (
-    Friendship,
-    Highlight,
-    Image,
-    Note,
-    PlanCompletion,
-    PlanSegmentCompletion,
-    PlanSubscription,
-    Reference,
-    Votd,
+    Friendship, Highlight, Image, Note, PlanCompletion, PlanSegmentCompletion,
+    PlanSubscription, Reference, Votd,
 )
 from ..models.base import Moment, PlanCompletionAction, PlanSegmentAction
 from ..models.commons import Action, Comment, Like, User
@@ -109,6 +102,20 @@ class DataProcessor(IDataProcessor):
 
         return obj
 
+    def _normalize_kind_id(self, kind_id: str) -> str:
+        """Normalize kind_id (e.g., 'note.v1') to kind (e.g., 'note').
+
+        Args:
+            kind_id: Kind ID from API (e.g., 'note.v1', 'highlight.v1')
+
+        Returns:
+            Normalized kind string (e.g., 'note', 'highlight')
+        """
+        if not kind_id:
+            return ""
+        # Remove version suffix (e.g., 'note.v1' -> 'note')
+        return kind_id.split(".")[0]
+
     def process_moments(self, raw_data: list[dict[str, Any]]) -> list[Moment]:
         """Process raw moments data.
 
@@ -121,23 +128,84 @@ class DataProcessor(IDataProcessor):
         moments = []
 
         for item in raw_data:
-            obj = item["object"]
-            kind = item["kind"]
+            # Extract kind from kind_id (e.g., 'note.v1' -> 'note')
+            kind_id = item.get("kind_id", "")
+            kind = self._normalize_kind_id(kind_id)
             model = self._moment_mapper.get(kind)
 
             if not model:
                 continue
 
-            # Process common fields
+            # Start with base moment data
+            obj = {
+                "id": item.get("id"),
+                "created_dt": item.get("created_dt"),
+                "updated_dt": item.get("updated_dt"),
+            }
+
+            # Merge extras data if present
+            extras = item.get("extras", {})
+            if extras:
+                # Extract user from extras
+                user = extras.get("user")
+                if user:
+                    obj["user"] = user
+                # Copy other extras fields
+                for key in ["title", "content", "color", "references"]:
+                    if key in extras:
+                        obj[key] = extras[key]
+
+            # Map commenting to comments format
+            commenting = item.get("commenting", {})
+            if commenting:
+                # Convert commenting structure to comments format
+                comments_data = {
+                    "enabled": commenting.get("enabled", True),
+                    "count": commenting.get("total", 0),
+                    "strings": {},
+                    "all": commenting.get("comments") or [],
+                }
+                obj["comments"] = comments_data
+
+            # Map liking to likes format
+            liking = item.get("liking", {})
+            if liking:
+                # Convert liking structure to likes format
+                likes_data = {
+                    "enabled": liking.get("enabled", True),
+                    "count": liking.get("total", 0),
+                    "strings": {},
+                    "all": liking.get("likes") or [],
+                    "is_liked": False,  # Default, can be set from all_users if needed
+                    "user_ids": None,
+                }
+                # Extract user_ids from all_users if present
+                all_users = liking.get("all_users")
+                if all_users:
+                    user_ids = [
+                        u.get("id") for u in all_users if u.get("id")
+                    ]
+                    likes_data["user_ids"] = user_ids
+                obj["likes"] = likes_data
+
+            # Process common fields (user, comments, likes)
             obj = self._process_common_fields(obj)
 
-            # Process actions
-            obj = self._process_actions(obj, kind)
+            # Process actions (if present in base or elsewhere)
+            base = item.get("base", {})
+            if base:
+                # Extract action_url or other action-related data
+                action_url = base.get("action_url")
+                if action_url or "actions" in obj:
+                    obj = self._process_actions(obj, kind)
 
             # Process references for non-friendship moments
             if kind != MomentKinds.FRIENDSHIP.value:
                 references = obj.get("references", [])
-                obj["references"] = self._create_references(references)
+                if references:
+                    obj["references"] = self._create_references(references)
+                else:
+                    obj["references"] = []
 
             # Create moment object
             moment = model(kind=kind, **obj)
@@ -198,6 +266,5 @@ class DataProcessor(IDataProcessor):
         if votd_data:
             return Votd(**votd_data[0])
         # No data at all
-        raise ValueError(
-            f"No verse of the day found for day {requested_day if requested_day is not None else day}"
-        )
+        day_value = requested_day if requested_day is not None else day
+        raise ValueError(f"No verse of the day found for day {day_value}")
