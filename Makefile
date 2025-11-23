@@ -205,13 +205,13 @@ fix: format lint-fix
 
 # Documentation
 docs:
-	cd documentation && poetry run make html
+	cd docs && poetry run make html
 
 docs-clean:
-	cd documentation && poetry run make clean
+	cd docs && poetry run make clean
 
 docs-serve:
-	cd documentation && poetry run make html && open build/html/index.html
+	cd docs && poetry run make html && open build/html/index.html
 
 # Build & Clean
 build:

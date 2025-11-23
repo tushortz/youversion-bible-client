@@ -1,6 +1,6 @@
 [project]
 name = "youversion-bible-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Command line interface for interacting with the YouVersion Bible API"
 authors = [
     {name = "Taiwo Kareem", email = "taiwo.kareem36@gmail.com"}
@@ -85,8 +85,8 @@ votd = "youversion.cli:poetry_cmd_votd"
 [tool.poetry]
 packages = [{ include = "youversion" }]
 exclude = [
-    "documentation/**/*",
-    "documentation",
+    "docs/**/*",
+    "docs",
     "examples/**/*",
     "examples",
     "tests/**/*",
@@ -111,7 +111,7 @@ pytest = "^8.2.0"
 pytest-cov = "^4.0.0"
 pytest-asyncio = "^0.21.0"
 black = "^23.0.0"
-ruff = "^0.1.0"
+ruff = "^0.1.1"
 sphinx = "^7.4.0"
 sphinx-rtd-theme = "^3.0.0"
 

@@ -60,7 +60,7 @@ Or check the version:
    python -c "import youversion; print(youversion.__version__)"
 
 Dependencies
------------
+------------
 
 The package has the following runtime dependencies:
 
@@ -90,7 +90,7 @@ Install development dependencies:
    poetry install --with dev
 
 Troubleshooting
---------------
+---------------
 
 Common Installation Issues
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
