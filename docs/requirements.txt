@@ -1,0 +1,13 @@
+# Requirements for building Sphinx documentation on Read the Docs
+# This file extracts the necessary dependencies from pyproject.toml
+
+# Sphinx and extensions
+sphinx>=7.4.0
+sphinx-rtd-theme>=3.0.0
+
+# Project dependencies (needed for autodoc to import modules)
+httpx>=0.25.0
+pydantic>=2.5.0
+pyjwt>=2.10.1
+typing-extensions>=4.0.0
+
