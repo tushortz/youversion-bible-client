@@ -557,3 +557,168 @@ class DataProcessor(IDataProcessor):
             Processed event IDs data with dynamically created objects
         """
         return create_instance_from_response("AllSavedEventIds", raw_data)
+
+    def process_save_event(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw save event response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw save event response data from API
+
+        Returns:
+            Processed save event response with dynamically created objects
+        """
+        return create_instance_from_response("SaveEvent", raw_data)
+
+    def process_delete_saved_event(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw delete saved event response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw delete saved event response data from API
+
+        Returns:
+            Processed delete response with dynamically created objects
+        """
+        return create_instance_from_response("DeleteSavedEvent", raw_data)
+
+    def process_create_moment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw create moment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw create moment response data from API
+
+        Returns:
+            Processed create moment response with dynamically created objects
+        """
+        return create_instance_from_response("CreateMomentResponse", raw_data)
+
+    def process_update_moment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw update moment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw update moment response data from API
+
+        Returns:
+            Processed update moment response with dynamically created objects
+        """
+        return create_instance_from_response("UpdateMomentResponse", raw_data)
+
+    def process_delete_moment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw delete moment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw delete moment response data from API
+
+        Returns:
+            Processed delete moment response with dynamically created objects
+        """
+        return create_instance_from_response("DeleteMomentResponse", raw_data)
+
+    def process_hide_verse_colors(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw hide verse colors response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw hide verse colors response data from API
+
+        Returns:
+            Processed hide verse colors response with dynamically created objects
+        """
+        return create_instance_from_response("HideVerseColors", raw_data)
+
+    def process_create_comment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw create comment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw create comment response data from API
+
+        Returns:
+            Processed create comment response with dynamically created objects
+        """
+        return create_instance_from_response("CreateComment", raw_data)
+
+    def process_delete_comment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw delete comment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw delete comment response data from API
+
+        Returns:
+            Processed delete comment response with dynamically created objects
+        """
+        return create_instance_from_response("DeleteComment", raw_data)
+
+    def process_like_moment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw like moment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw like moment response data from API
+
+        Returns:
+            Processed like moment response with dynamically created objects
+        """
+        return create_instance_from_response("LikeMoment", raw_data)
+
+    def process_unlike_moment(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw unlike moment response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw unlike moment response data from API
+
+        Returns:
+            Processed unlike moment response with dynamically created objects
+        """
+        return create_instance_from_response("UnlikeMoment", raw_data)
+
+    def process_register_device(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw register device response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw register device response data from API
+
+        Returns:
+            Processed register device response with dynamically created objects
+        """
+        return create_instance_from_response("RegisterDevice", raw_data)
+
+    def process_unregister_device(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw unregister device response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw unregister device response data from API
+
+        Returns:
+            Processed unregister device response with dynamically created objects
+        """
+        return create_instance_from_response("UnregisterDevice", raw_data)
+
+    def process_add_theme(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw add theme response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw add theme response data from API
+
+        Returns:
+            Processed add theme response with dynamically created objects
+        """
+        return create_instance_from_response("AddTheme", raw_data)
+
+    def process_remove_theme(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw remove theme response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw remove theme response data from API
+
+        Returns:
+            Processed remove theme response with dynamically created objects
+        """
+        return create_instance_from_response("RemoveTheme", raw_data)
+
+    def process_set_theme(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw set theme response using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw set theme response data from API
+
+        Returns:
+            Processed set theme response with dynamically created objects
+        """
+        return create_instance_from_response("SetTheme", raw_data)

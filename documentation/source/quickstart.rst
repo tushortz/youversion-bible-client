@@ -89,7 +89,7 @@ Run Your Script
    python example.py
 
 Common Operations
-----------------
+-----------------
 
 Getting Moments
 ~~~~~~~~~~~~~~~

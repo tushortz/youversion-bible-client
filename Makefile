@@ -36,17 +36,75 @@ help:
 	@echo "  make clean-all        Clean all generated files"
 	@echo ""
 	@echo "CLI Commands:"
-	@echo "  make cli-help              Show CLI help"
-	@echo "  make cli-votd              Get verse of the day"
-	@echo "  make cli-moments           Get moments"
-	@echo "  make cli-highlights        Get highlights"
-	@echo "  make cli-notes             Get notes"
-	@echo "  make cli-bookmarks         Get bookmarks"
-	@echo "  make cli-images            Get images"
-	@echo "  make cli-plan-progress     Get plan progress"
-	@echo "  make cli-plan-subscriptions Get plan subscriptions"
-	@echo "  make cli-plan-completions  Get plan completions"
-	@echo "  make cli-create-moment     Create a moment"
+	@echo "  Moments & Content:"
+	@echo "    make cli-votd              Get verse of the day"
+	@echo "    make cli-moments           Get moments"
+	@echo "    make cli-highlights        Get highlights"
+	@echo "    make cli-notes             Get notes"
+	@echo "    make cli-bookmarks         Get bookmarks"
+	@echo "    make cli-images            Get images"
+	@echo "    make cli-badges            Get badges"
+	@echo "    make cli-create-moment     Create a moment"
+	@echo "    make cli-convert-notes     Convert notes to markdown"
+	@echo "  Plans:"
+	@echo "    make cli-plan-progress     Get plan progress"
+	@echo "    make cli-plan-subscriptions Get plan subscriptions"
+	@echo "    make cli-plan-completions  Get plan completions"
+	@echo "  Bible & Audio:"
+	@echo "    make cli-get-bible-configuration Get Bible configuration"
+	@echo "    make cli-get-bible-versions Get Bible versions"
+	@echo "    make cli-get-bible-version Get Bible version by ID"
+	@echo "    make cli-get-bible-chapter Get Bible chapter"
+	@echo "    make cli-get-recommended-languages Get recommended languages"
+	@echo "    make cli-get-audio-chapter Get audio chapter"
+	@echo "    make cli-get-audio-version Get audio version"
+	@echo "  Search:"
+	@echo "    make cli-search-bible      Search Bible"
+	@echo "    make cli-search-plans      Search plans"
+	@echo "    make cli-search-users      Search users"
+	@echo "  Videos & Images:"
+	@echo "    make cli-get-videos        Get videos"
+	@echo "    make cli-get-video-details Get video details"
+	@echo "    make cli-get-images        Get images"
+	@echo "    make cli-get-image-upload-url Get image upload URL"
+	@echo "  Events:"
+	@echo "    make cli-search-events     Search events"
+	@echo "    make cli-get-event-details Get event details"
+	@echo "    make cli-get-saved-events  Get saved events"
+	@echo "    make cli-save-event       Save event"
+	@echo "    make cli-delete-saved-event Delete saved event"
+	@echo "    make cli-get-all-saved-event-ids Get all saved event IDs"
+	@echo "    make cli-get-event-configuration Get event configuration"
+	@echo "  Moments Management:"
+	@echo "    make cli-get-moments       Get moments"
+	@echo "    make cli-get-moment-details Get moment details"
+	@echo "    make cli-update-moment     Update moment"
+	@echo "    make cli-delete-moment     Delete moment"
+	@echo "    make cli-get-moment-colors Get moment colors"
+	@echo "    make cli-get-moment-labels Get moment labels"
+	@echo "    make cli-get-verse-colors  Get verse colors"
+	@echo "    make cli-hide-verse-colors Hide verse colors"
+	@echo "    make cli-get-moments-configuration Get moments configuration"
+	@echo "  Comments & Likes:"
+	@echo "    make cli-create-comment    Create comment"
+	@echo "    make cli-delete-comment    Delete comment"
+	@echo "    make cli-like-moment       Like moment"
+	@echo "    make cli-unlike-moment     Unlike moment"
+	@echo "  Devices:"
+	@echo "    make cli-register-device   Register device"
+	@echo "    make cli-unregister-device Unregister device"
+	@echo "  Themes:"
+	@echo "    make cli-get-themes        Get themes"
+	@echo "    make cli-add-theme         Add theme"
+	@echo "    make cli-remove-theme      Remove theme"
+	@echo "    make cli-set-theme         Set theme"
+	@echo "    make cli-get-theme-description Get theme description"
+	@echo "  Social:"
+	@echo "    make cli-send-friend-request Send friend request"
+	@echo "  Localization:"
+	@echo "    make cli-get-localization-items Get localization items"
+	@echo "  Help:"
+	@echo "    make cli-help              Show CLI help"
 	@echo ""
 	@echo "Dependencies:"
 	@echo "  make deps                  Show dependency tree"
@@ -207,6 +265,271 @@ cli-create-moment:
 		exit 1; \
 	fi
 	poetry run youversion create-moment --kind $(KIND) --content "$(CONTENT)" --title "$(TITLE)"
+
+cli-badges:
+	poetry run youversion badges
+
+cli-convert-notes:
+	poetry run youversion convert-notes
+
+cli-get-bible-configuration:
+	poetry run youversion get-bible-configuration
+
+cli-get-bible-versions:
+	poetry run youversion get-bible-versions
+
+cli-get-bible-version:
+	@echo "Usage: make cli-get-bible-version ID=1"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-bible-version $(ID)
+
+cli-get-bible-chapter:
+	@echo "Usage: make cli-get-bible-chapter REFERENCE='GEN.1' VERSION_ID=1"
+	@if [ -z "$(REFERENCE)" ] || [ -z "$(VERSION_ID)" ]; then \
+		echo "Error: REFERENCE and VERSION_ID are required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-bible-chapter $(REFERENCE) --version-id $(VERSION_ID)
+
+cli-get-recommended-languages:
+	poetry run youversion get-recommended-languages
+
+cli-get-audio-chapter:
+	@echo "Usage: make cli-get-audio-chapter REFERENCE='GEN.1' VERSION_ID=1"
+	@if [ -z "$(REFERENCE)" ] || [ -z "$(VERSION_ID)" ]; then \
+		echo "Error: REFERENCE and VERSION_ID are required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-audio-chapter $(REFERENCE) --version-id $(VERSION_ID)
+
+cli-get-audio-version:
+	@echo "Usage: make cli-get-audio-version ID=1"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-audio-version $(ID)
+
+cli-search-bible:
+	@echo "Usage: make cli-search-bible QUERY='love' VERSION_ID=1"
+	@if [ -z "$(QUERY)" ]; then \
+		echo "Error: QUERY is required"; \
+		exit 1; \
+	fi
+	poetry run youversion search-bible "$(QUERY)" --version-id $(VERSION_ID)
+
+cli-search-plans:
+	@echo "Usage: make cli-search-plans QUERY='daily' LANGUAGE_TAG='en'"
+	@if [ -z "$(QUERY)" ]; then \
+		echo "Error: QUERY is required"; \
+		exit 1; \
+	fi
+	poetry run youversion search-plans "$(QUERY)" --language-tag $(LANGUAGE_TAG)
+
+cli-search-users:
+	@echo "Usage: make cli-search-users QUERY='john'"
+	@if [ -z "$(QUERY)" ]; then \
+		echo "Error: QUERY is required"; \
+		exit 1; \
+	fi
+	poetry run youversion search-users "$(QUERY)"
+
+cli-get-videos:
+	poetry run youversion get-videos
+
+cli-get-video-details:
+	@echo "Usage: make cli-get-video-details ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-video-details $(ID)
+
+cli-get-images:
+	poetry run youversion get-images
+
+cli-get-image-upload-url:
+	poetry run youversion get-image-upload-url
+
+cli-search-events:
+	@echo "Usage: make cli-search-events QUERY='church' LATITUDE=40.7128 LONGITUDE=-74.0060"
+	@if [ -z "$(QUERY)" ]; then \
+		echo "Error: QUERY is required"; \
+		exit 1; \
+	fi
+	poetry run youversion search-events "$(QUERY)" --latitude $(LATITUDE) --longitude $(LONGITUDE)
+
+cli-get-event-details:
+	@echo "Usage: make cli-get-event-details ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-event-details $(ID)
+
+cli-get-saved-events:
+	poetry run youversion get-saved-events
+
+cli-save-event:
+	@echo "Usage: make cli-save-event ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion save-event $(ID)
+
+cli-delete-saved-event:
+	@echo "Usage: make cli-delete-saved-event ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion delete-saved-event $(ID)
+
+cli-get-all-saved-event-ids:
+	poetry run youversion get-all-saved-event-ids
+
+cli-get-event-configuration:
+	poetry run youversion get-event-configuration
+
+cli-get-moments:
+	poetry run youversion get-moments
+
+cli-get-moment-details:
+	@echo "Usage: make cli-get-moment-details ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-moment-details $(ID)
+
+cli-update-moment:
+	@echo "Usage: make cli-update-moment ID=123 CONTENT='...'"
+	@if [ -z "$(ID)" ] || [ -z "$(CONTENT)" ]; then \
+		echo "Error: ID and CONTENT are required"; \
+		exit 1; \
+	fi
+	poetry run youversion update-moment $(ID) --content "$(CONTENT)"
+
+cli-delete-moment:
+	@echo "Usage: make cli-delete-moment ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion delete-moment $(ID)
+
+cli-get-moment-colors:
+	poetry run youversion get-moment-colors
+
+cli-get-moment-labels:
+	poetry run youversion get-moment-labels
+
+cli-get-verse-colors:
+	poetry run youversion get-verse-colors
+
+cli-hide-verse-colors:
+	poetry run youversion hide-verse-colors
+
+cli-get-moments-configuration:
+	poetry run youversion get-moments-configuration
+
+cli-create-comment:
+	@echo "Usage: make cli-create-comment MOMENT_ID=123 BODY='...'"
+	@if [ -z "$(MOMENT_ID)" ] || [ -z "$(BODY)" ]; then \
+		echo "Error: MOMENT_ID and BODY are required"; \
+		exit 1; \
+	fi
+	poetry run youversion create-comment $(MOMENT_ID) --body "$(BODY)"
+
+cli-delete-comment:
+	@echo "Usage: make cli-delete-comment MOMENT_ID=123 COMMENT_ID=456"
+	@if [ -z "$(MOMENT_ID)" ] || [ -z "$(COMMENT_ID)" ]; then \
+		echo "Error: MOMENT_ID and COMMENT_ID are required"; \
+		exit 1; \
+	fi
+	poetry run youversion delete-comment $(MOMENT_ID) $(COMMENT_ID)
+
+cli-like-moment:
+	@echo "Usage: make cli-like-moment ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion like-moment $(ID)
+
+cli-unlike-moment:
+	@echo "Usage: make cli-unlike-moment ID=123"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion unlike-moment $(ID)
+
+cli-register-device:
+	@echo "Usage: make cli-register-device TOKEN='...' PLATFORM='android'"
+	@if [ -z "$(TOKEN)" ] || [ -z "$(PLATFORM)" ]; then \
+		echo "Error: TOKEN and PLATFORM are required"; \
+		exit 1; \
+	fi
+	poetry run youversion register-device --token "$(TOKEN)" --platform $(PLATFORM)
+
+cli-unregister-device:
+	@echo "Usage: make cli-unregister-device TOKEN='...'"
+	@if [ -z "$(TOKEN)" ]; then \
+		echo "Error: TOKEN is required"; \
+		exit 1; \
+	fi
+	poetry run youversion unregister-device --token "$(TOKEN)"
+
+cli-get-themes:
+	poetry run youversion get-themes
+
+cli-add-theme:
+	@echo "Usage: make cli-add-theme ID=1 LANGUAGE_TAG='eng'"
+	@if [ -z "$(ID)" ] || [ -z "$(LANGUAGE_TAG)" ]; then \
+		echo "Error: ID and LANGUAGE_TAG are required"; \
+		exit 1; \
+	fi
+	poetry run youversion add-theme $(ID) --language-tag $(LANGUAGE_TAG)
+
+cli-remove-theme:
+	@echo "Usage: make cli-remove-theme ID=1"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion remove-theme $(ID)
+
+cli-set-theme:
+	@echo "Usage: make cli-set-theme ID=1"
+	@if [ -z "$(ID)" ]; then \
+		echo "Error: ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion set-theme $(ID)
+
+cli-get-theme-description:
+	@echo "Usage: make cli-get-theme-description ID=1 LANGUAGE_TAG='eng'"
+	@if [ -z "$(ID)" ] || [ -z "$(LANGUAGE_TAG)" ]; then \
+		echo "Error: ID and LANGUAGE_TAG are required"; \
+		exit 1; \
+	fi
+	poetry run youversion get-theme-description $(ID) --language-tag $(LANGUAGE_TAG)
+
+cli-send-friend-request:
+	@echo "Usage: make cli-send-friend-request USER_ID=123456"
+	@if [ -z "$(USER_ID)" ]; then \
+		echo "Error: USER_ID is required"; \
+		exit 1; \
+	fi
+	poetry run youversion send-friend-request $(USER_ID)
+
+cli-get-localization-items:
+	poetry run youversion get-localization-items
 
 
 # Dependencies

@@ -39,6 +39,79 @@ from youversion.enums import MomentKinds, StatusEnum
 from youversion.models.moments import CreateMoment, ReferenceCreate
 
 
+def get_metadata(item: Any, index: int = 1) -> str:
+    """Extract and format metadata from item.
+
+    Returns formatted string with ID, TIME, kind, and l_args metadata.
+    All fields are aligned consistently.
+
+    Args:
+        item: Moment, highlight, note, or any item with base structure
+        index: Index number for the item (default: 1)
+
+    Returns:
+        Formatted metadata string
+    """
+    # Convert Pydantic model to dict if needed
+    if hasattr(item, "model_dump"):
+        item_dict = item.model_dump()
+    else:
+        item_dict = item if isinstance(item, dict) else {}
+
+    # Get kind from kind_id if available, otherwise try kind
+    kind = item_dict.get("kind_id") or item_dict.get("kind")
+    if not kind:
+        kind = getattr(item, "kind_id", getattr(item, "kind", "UNKNOWN"))
+    if isinstance(kind, str):
+        kind = kind.upper()
+    else:
+        kind = str(kind).upper()
+
+    # Get id
+    item_id = item_dict.get("id") or getattr(item, "id", "N/A")
+
+    # Get time
+    time_ago = item_dict.get("created_dt") or getattr(item, "created_dt", "N/A")
+
+    # Get l_args metadata from base/title/l_args node
+    base = item_dict.get("base") or getattr(item, "base", {})
+    l_args_metadata = []
+    if isinstance(base, dict):
+        base_title = base.get("title")
+        if isinstance(base_title, dict):
+            l_args = base_title.get("l_args", {})
+            if isinstance(l_args, dict) and l_args:
+                # Format all key-value pairs in l_args
+                for key, value in sorted(l_args.items()):
+                    if value is not None and value != "":
+                        # Format key nicely (replace underscores with spaces, capitalize)
+                        formatted_key = key.replace("_", " ").title()
+                        l_args_metadata.append((formatted_key, value))
+
+    # Align all fields consistently
+    label_width = 10  # Width for labels like "ID:", "Time:", etc.
+
+    # Format labels
+    id_label = ("ID" + ":").ljust(label_width + 1)
+    time_label = ("Time" + ":").ljust(label_width + 1)
+    kind_label = ("Kind" + ":").ljust(label_width + 1)
+
+    # Build formatted output
+    parts = [f"  {index}. {kind}"]
+    parts.append(f"     {id_label} {item_id}")
+    parts.append(f"     {kind_label} {kind}")
+
+    # Add l_args metadata if available
+    if l_args_metadata:
+        for formatted_key, value in l_args_metadata:
+            label = (formatted_key + ":").ljust(label_width + 1)
+            parts.append(f"     {label} {value}")
+
+    parts.append(f"     {time_label} {time_ago}")
+
+    return "\n".join(parts)
+
+
 def format_votd(votd) -> str:
     """Format verse of the day for display"""
     # Handle both dict and object
@@ -58,221 +131,19 @@ USFM: {usfm_str}
 Image ID: {image_id or 'None'}"""
 
 
-def format_moment(moment, index: int = 1) -> str:
-    """Format a moment for display"""
-    # Convert Pydantic model to dict if needed
-    if hasattr(moment, "model_dump"):
-        moment_dict = moment.model_dump()
-    else:
-        moment_dict = {}
+def format_item(item: Any, index: int = 1) -> str:
+    """Format any item for display using standardized format.
 
-    # Get kind from kind_id if available, otherwise try kind
-    kind = moment_dict.get("kind_id") or moment_dict.get("kind")
-    if not kind:
-        kind = getattr(moment, "kind_id", getattr(moment, "kind", "UNKNOWN"))
-    if isinstance(kind, str):
-        kind = kind.upper()
-    else:
-        kind = str(kind).upper()
+    Uses get_metadata to format ID, TIME, kind, and l_args metadata.
 
-    # Get title from various possible locations
-    title = moment_dict.get("moment_title") or getattr(moment, "moment_title", None)
-    if not title:
-        # Try to get from base or extras
-        base = moment_dict.get("base") or getattr(moment, "base", {})
-        extras = moment_dict.get("extras") or getattr(moment, "extras", {})
-        if isinstance(base, dict):
-            base_title = base.get("title")
-            if isinstance(base_title, dict):
-                # Title might be a dict with l_args or l_str
-                l_args = base_title.get("l_args", {})
-                if isinstance(l_args, dict):
-                    title = l_args.get("title")
-                if not title:
-                    title = base_title.get("l_str") or base_title.get("title")
-            if not title and isinstance(extras, dict):
-                title = extras.get("title")
-        elif isinstance(extras, dict):
-            title = extras.get("title")
-        if not title:
-            title = "N/A"
+    Args:
+        item: Any item (moment, highlight, note, bookmark, etc.)
+        index: Index number for the item (default: 1)
 
-    # Get time_ago if available
-    time_ago = moment_dict.get("created_dt") or getattr(moment, "created_dt", "N/A")
-
-    # Get id
-    moment_id = moment_dict.get("id") or getattr(moment, "id", "N/A")
-
-    return f"""  {index}. {kind}
-     ID: {moment_id}
-     Title: {title}
-     Time: {time_ago}"""
-
-
-def format_highlight(highlight, index: int = 1) -> str:
-    """Format a highlight for display"""
-    # Convert Pydantic model to dict if needed
-    if hasattr(highlight, "model_dump"):
-        highlight_dict = highlight.model_dump()
-    else:
-        highlight_dict = {}
-
-    # Get references safely
-    references = highlight_dict.get("references") or getattr(
-        highlight, "references", []
-    )
-    if not references:
-        # Try to get from extras
-        extras = highlight_dict.get("extras") or getattr(highlight, "extras", {})
-        if isinstance(extras, dict):
-            references = extras.get("references", [])
-
-    refs = "N/A"
-    if references:
-        if isinstance(references[0], dict):
-            refs = ", ".join([ref.get("human", "N/A") for ref in references])
-        else:
-            refs = ", ".join([getattr(ref, "human", "N/A") for ref in references])
-
-    # Get title
-    title = highlight_dict.get("moment_title") or getattr(
-        highlight, "moment_title", None
-    )
-    if not title:
-        base = highlight_dict.get("base") or getattr(highlight, "base", {})
-        extras = highlight_dict.get("extras") or getattr(highlight, "extras", {})
-        if isinstance(base, dict):
-            base_title = base.get("title")
-            if isinstance(base_title, dict):
-                # Title might be a dict with l_args or l_str
-                l_args = base_title.get("l_args", {})
-                if isinstance(l_args, dict):
-                    title = l_args.get("title")
-                if not title:
-                    title = base_title.get("l_str") or base_title.get("title")
-            if not title and isinstance(extras, dict):
-                title = extras.get("title")
-        elif isinstance(extras, dict):
-            title = extras.get("title")
-        if not title:
-            title = "N/A"
-
-    time_ago = highlight_dict.get("created_dt") or getattr(
-        highlight, "created_dt", "N/A"
-    )
-
-    # Get id
-    highlight_id = highlight_dict.get("id") or getattr(highlight, "id", "N/A")
-
-    return f"""  {index}. HIGHLIGHT
-     ID: {highlight_id}
-     Title: {title}
-     References: {refs}
-     Time: {time_ago}"""
-
-
-def format_note(note, index: int = 1) -> str:
-    """Format a note for display"""
-    # Convert Pydantic model to dict if needed
-    if hasattr(note, "model_dump"):
-        note_dict = note.model_dump()
-    else:
-        note_dict = {}
-
-    # Get content safely (no truncation)
-    content = note_dict.get("content") or getattr(note, "content", None)
-    if not content:
-        extras = note_dict.get("extras") or getattr(note, "extras", {})
-        if isinstance(extras, dict):
-            content = extras.get("content", "N/A")
-        else:
-            content = "N/A"
-
-    # Get title
-    title = note_dict.get("moment_title") or getattr(note, "moment_title", None)
-    if not title:
-        base = note_dict.get("base") or getattr(note, "base", {})
-        extras = note_dict.get("extras") or getattr(note, "extras", {})
-        if isinstance(base, dict):
-            base_title = base.get("title")
-            if isinstance(base_title, dict):
-                # Title might be a dict with l_args or l_str
-                l_args = base_title.get("l_args", {})
-                if isinstance(l_args, dict):
-                    title = l_args.get("title")
-                if not title:
-                    title = base_title.get("l_str") or base_title.get("title")
-            if not title and isinstance(extras, dict):
-                title = extras.get("title")
-        elif isinstance(extras, dict):
-            title = extras.get("title")
-        if not title:
-            title = "N/A"
-
-    # Get status
-    status = note_dict.get("status") or getattr(note, "status", None)
-    if status:
-        if hasattr(status, "value"):
-            status_str = status.value
-        else:
-            status_str = str(status)
-    else:
-        extras = note_dict.get("extras") or getattr(note, "extras", {})
-        if isinstance(extras, dict):
-            status_str = extras.get("user_status") or extras.get("system_status", "N/A")
-        else:
-            status_str = "N/A"
-
-    time_ago = note_dict.get("created_dt") or getattr(note, "created_dt", "N/A")
-
-    # Get id
-    note_id = note_dict.get("id") or getattr(note, "id", "N/A")
-
-    return f"""  {index}. NOTE
-     ID: {note_id}
-     Title: {title}
-     Content: {content}
-     Status: {status_str}
-     Time: {time_ago}"""
-
-
-def format_generic_item(item: Any, index: int = 1) -> str:
-    """Format generic items (bookmarks, images, etc.)"""
-    # Handle both dict and object
-    if isinstance(item, dict):
-        kind = item.get("kind_id") or item.get("kind", "ITEM")
-        title = item.get("moment_title") or item.get("title", "N/A")
-        time_ago = item.get("created_dt", "N/A")
-    else:
-        # Pydantic model or object
-        kind = getattr(item, "kind_id", getattr(item, "kind", "ITEM"))
-        title = getattr(item, "moment_title", None)
-        if not title:
-            base = getattr(item, "base", {})
-            extras = getattr(item, "extras", {})
-            if isinstance(base, dict):
-                title = base.get("title") or extras.get("title")
-            elif isinstance(extras, dict):
-                title = extras.get("title")
-            if not title:
-                title = "N/A"
-        time_ago = getattr(item, "created_dt", "N/A")
-
-    if isinstance(kind, str):
-        kind = kind.upper()
-    else:
-        kind = str(kind).upper()
-
-    # Get id
-    if isinstance(item, dict):
-        item_id = item.get("id", "N/A")
-    else:
-        item_id = getattr(item, "id", "N/A")
-
-    return f"""  {index}. {kind}
-     ID: {item_id}
-     Title: {title}
-     Time: {time_ago}"""
+    Returns:
+        Formatted item string
+    """
+    return get_metadata(item, index)
 
 
 def format_json_output(data: Any) -> str:
@@ -322,7 +193,7 @@ async def cmd_moments(args):
                 print("-" * 50)
 
                 for i, moment in enumerate(moments, 1):
-                    print(format_moment(moment, i))
+                    print(format_item(moment, i))
                     print()
 
     except Exception as e:
@@ -344,7 +215,7 @@ async def cmd_highlights(args):
                 print("-" * 50)
 
                 for i, highlight in enumerate(highlights, 1):
-                    print(format_highlight(highlight, i))
+                    print(format_item(highlight, i))
                     print()
 
     except Exception as e:
@@ -366,7 +237,7 @@ async def cmd_notes(args):
                 print("-" * 50)
 
                 for i, note in enumerate(notes, 1):
-                    print(format_note(note, i))
+                    print(format_item(note, i))
                     print()
 
     except Exception as e:
@@ -388,7 +259,7 @@ async def cmd_bookmarks(args):
                 print("-" * 50)
 
                 for i, bookmark in enumerate(bookmarks, 1):
-                    print(format_generic_item(bookmark, i))
+                    print(format_item(bookmark, i))
                     print()
 
     except Exception as e:
@@ -410,7 +281,7 @@ async def cmd_images(args):
                 print("-" * 50)
 
                 for i, image in enumerate(images, 1):
-                    print(format_generic_item(image, i))
+                    print(format_item(image, i))
                     if isinstance(image, dict) and "body_image" in image:
                         print(f"     Image: {image['body_image']}")
                     elif hasattr(image, "body_image"):
@@ -436,7 +307,7 @@ async def cmd_plan_progress(args):
                 print("-" * 50)
 
                 for i, item in enumerate(progress, 1):
-                    print(format_generic_item(item, i))
+                    print(format_item(item, i))
                     if isinstance(item, dict) and "percent_complete" in item:
                         print(f"     Progress: {item['percent_complete']}%")
                     elif hasattr(item, "percent_complete"):
@@ -464,7 +335,7 @@ async def cmd_plan_subscriptions(args):
                 print("-" * 50)
 
                 for i, sub in enumerate(subscriptions, 1):
-                    print(format_generic_item(sub, i))
+                    print(format_item(sub, i))
                     if isinstance(sub, dict) and "plan_title" in sub:
                         print(f"     Plan: {sub['plan_title']}")
                     elif hasattr(sub, "plan_title"):
@@ -490,7 +361,7 @@ async def cmd_plan_completions(args):
                 print("-" * 50)
 
                 for i, completion in enumerate(completions, 1):
-                    print(format_generic_item(completion, i))
+                    print(format_item(completion, i))
                     if isinstance(completion, dict) and "plan_title" in completion:
                         print(f"     Plan: {completion['plan_title']}")
                     elif hasattr(completion, "plan_title"):
@@ -516,7 +387,7 @@ async def cmd_badges(args):
                 print("-" * 50)
 
                 for i, badge in enumerate(badges, 1):
-                    print(format_generic_item(badge, i))
+                    print(format_item(badge, i))
                     print()
 
     except Exception as e:
@@ -1025,7 +896,8 @@ async def cmd_set_theme(args):
     try:
         async with AsyncClient() as client:
             result = await client.set_theme(
-                theme_id=args.theme_id, previous_theme_id=args.previous_theme_id
+                theme_id=args.theme_id,
+                previous_theme_id=args.previous_theme_id,
             )
             print(format_json_output(result) if args.json else str(result))
     except Exception as e:
@@ -1040,7 +912,8 @@ async def cmd_get_theme_description(args):
             description = await client.get_theme_description(
                 theme_id=args.theme_id, language_tag=args.language_tag
             )
-            print(format_json_output(description) if args.json else str(description))
+            output = format_json_output(description) if args.json else str(description)
+            print(output)
     except Exception as e:
         print(f"❌ Error: {e}", file=sys.stderr)
         sys.exit(1)
@@ -2081,6 +1954,620 @@ def poetry_cmd_create_moment():
     asyncio.run(cmd_create_moment(args))
 
 
+def poetry_cmd_badges():
+    """Poetry script entry point for badges command"""
+    parser = create_parser()
+    args = parser.parse_args(["badges"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_badges(args)
+    asyncio.run(cmd_badges(args))
+
+
+def poetry_cmd_get_bible_configuration():
+    """Poetry script entry point for get-bible-configuration command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-bible-configuration"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_bible_configuration(args)
+    asyncio.run(cmd_get_bible_configuration(args))
+
+
+def poetry_cmd_get_bible_versions():
+    """Poetry script entry point for get-bible-versions command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-bible-versions"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_bible_versions(args)
+    asyncio.run(cmd_get_bible_versions(args))
+
+
+def poetry_cmd_get_bible_version():
+    """Poetry script entry point for get-bible-version command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-bible-version"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_bible_version(args)
+    asyncio.run(cmd_get_bible_version(args))
+
+
+def poetry_cmd_get_bible_chapter():
+    """Poetry script entry point for get-bible-chapter command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-bible-chapter"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_bible_chapter(args)
+    asyncio.run(cmd_get_bible_chapter(args))
+
+
+def poetry_cmd_get_recommended_languages():
+    """Poetry script entry point for get-recommended-languages command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-recommended-languages"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_recommended_languages(args)
+    asyncio.run(cmd_get_recommended_languages(args))
+
+
+def poetry_cmd_get_audio_chapter():
+    """Poetry script entry point for get-audio-chapter command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-audio-chapter"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_audio_chapter(args)
+    asyncio.run(cmd_get_audio_chapter(args))
+
+
+def poetry_cmd_get_audio_version():
+    """Poetry script entry point for get-audio-version command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-audio-version"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_audio_version(args)
+    asyncio.run(cmd_get_audio_version(args))
+
+
+def poetry_cmd_search_bible():
+    """Poetry script entry point for search-bible command"""
+    parser = create_parser()
+    args = parser.parse_args(["search-bible"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_search_bible(args)
+    asyncio.run(cmd_search_bible(args))
+
+
+def poetry_cmd_search_plans():
+    """Poetry script entry point for search-plans command"""
+    parser = create_parser()
+    args = parser.parse_args(["search-plans"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_search_plans(args)
+    asyncio.run(cmd_search_plans(args))
+
+
+def poetry_cmd_search_users():
+    """Poetry script entry point for search-users command"""
+    parser = create_parser()
+    args = parser.parse_args(["search-users"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_search_users(args)
+    asyncio.run(cmd_search_users(args))
+
+
+def poetry_cmd_get_videos():
+    """Poetry script entry point for get-videos command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-videos"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_videos(args)
+    asyncio.run(cmd_get_videos(args))
+
+
+def poetry_cmd_get_video_details():
+    """Poetry script entry point for get-video-details command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-video-details"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_video_details(args)
+    asyncio.run(cmd_get_video_details(args))
+
+
+def poetry_cmd_get_images():
+    """Poetry script entry point for get-images command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-images"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_images(args)
+    asyncio.run(cmd_get_images(args))
+
+
+def poetry_cmd_get_image_upload_url():
+    """Poetry script entry point for get-image-upload-url command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-image-upload-url"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_image_upload_url(args)
+    asyncio.run(cmd_get_image_upload_url(args))
+
+
+def poetry_cmd_search_events():
+    """Poetry script entry point for search-events command"""
+    parser = create_parser()
+    args = parser.parse_args(["search-events"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_search_events(args)
+    asyncio.run(cmd_search_events(args))
+
+
+def poetry_cmd_get_event_details():
+    """Poetry script entry point for get-event-details command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-event-details"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_event_details(args)
+    asyncio.run(cmd_get_event_details(args))
+
+
+def poetry_cmd_get_saved_events():
+    """Poetry script entry point for get-saved-events command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-saved-events"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_saved_events(args)
+    asyncio.run(cmd_get_saved_events(args))
+
+
+def poetry_cmd_save_event():
+    """Poetry script entry point for save-event command"""
+    parser = create_parser()
+    args = parser.parse_args(["save-event"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_save_event(args)
+    asyncio.run(cmd_save_event(args))
+
+
+def poetry_cmd_delete_saved_event():
+    """Poetry script entry point for delete-saved-event command"""
+    parser = create_parser()
+    args = parser.parse_args(["delete-saved-event"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_delete_saved_event(args)
+    asyncio.run(cmd_delete_saved_event(args))
+
+
+def poetry_cmd_get_all_saved_event_ids():
+    """Poetry script entry point for get-all-saved-event-ids command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-all-saved-event-ids"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_all_saved_event_ids(args)
+    asyncio.run(cmd_get_all_saved_event_ids(args))
+
+
+def poetry_cmd_get_event_configuration():
+    """Poetry script entry point for get-event-configuration command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-event-configuration"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_event_configuration(args)
+    asyncio.run(cmd_get_event_configuration(args))
+
+
+def poetry_cmd_get_moments():
+    """Poetry script entry point for get-moments command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-moments"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_moments(args)
+    asyncio.run(cmd_get_moments(args))
+
+
+def poetry_cmd_get_moment_details():
+    """Poetry script entry point for get-moment-details command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-moment-details"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_moment_details(args)
+    asyncio.run(cmd_get_moment_details(args))
+
+
+def poetry_cmd_update_moment():
+    """Poetry script entry point for update-moment command"""
+    parser = create_parser()
+    args = parser.parse_args(["update-moment"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_update_moment(args)
+    asyncio.run(cmd_update_moment(args))
+
+
+def poetry_cmd_delete_moment():
+    """Poetry script entry point for delete-moment command"""
+    parser = create_parser()
+    args = parser.parse_args(["delete-moment"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_delete_moment(args)
+    asyncio.run(cmd_delete_moment(args))
+
+
+def poetry_cmd_get_moment_colors():
+    """Poetry script entry point for get-moment-colors command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-moment-colors"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_moment_colors(args)
+    asyncio.run(cmd_get_moment_colors(args))
+
+
+def poetry_cmd_get_moment_labels():
+    """Poetry script entry point for get-moment-labels command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-moment-labels"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_moment_labels(args)
+    asyncio.run(cmd_get_moment_labels(args))
+
+
+def poetry_cmd_get_verse_colors():
+    """Poetry script entry point for get-verse-colors command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-verse-colors"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_verse_colors(args)
+    asyncio.run(cmd_get_verse_colors(args))
+
+
+def poetry_cmd_hide_verse_colors():
+    """Poetry script entry point for hide-verse-colors command"""
+    parser = create_parser()
+    args = parser.parse_args(["hide-verse-colors"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_hide_verse_colors(args)
+    asyncio.run(cmd_hide_verse_colors(args))
+
+
+def poetry_cmd_get_moments_configuration():
+    """Poetry script entry point for get-moments-configuration command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-moments-configuration"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_moments_configuration(args)
+    asyncio.run(cmd_get_moments_configuration(args))
+
+
+def poetry_cmd_create_comment():
+    """Poetry script entry point for create-comment command"""
+    parser = create_parser()
+    args = parser.parse_args(["create-comment"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_create_comment(args)
+    asyncio.run(cmd_create_comment(args))
+
+
+def poetry_cmd_delete_comment():
+    """Poetry script entry point for delete-comment command"""
+    parser = create_parser()
+    args = parser.parse_args(["delete-comment"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_delete_comment(args)
+    asyncio.run(cmd_delete_comment(args))
+
+
+def poetry_cmd_like_moment():
+    """Poetry script entry point for like-moment command"""
+    parser = create_parser()
+    args = parser.parse_args(["like-moment"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_like_moment(args)
+    asyncio.run(cmd_like_moment(args))
+
+
+def poetry_cmd_unlike_moment():
+    """Poetry script entry point for unlike-moment command"""
+    parser = create_parser()
+    args = parser.parse_args(["unlike-moment"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_unlike_moment(args)
+    asyncio.run(cmd_unlike_moment(args))
+
+
+def poetry_cmd_register_device():
+    """Poetry script entry point for register-device command"""
+    parser = create_parser()
+    args = parser.parse_args(["register-device"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_register_device(args)
+    asyncio.run(cmd_register_device(args))
+
+
+def poetry_cmd_unregister_device():
+    """Poetry script entry point for unregister-device command"""
+    parser = create_parser()
+    args = parser.parse_args(["unregister-device"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_unregister_device(args)
+    asyncio.run(cmd_unregister_device(args))
+
+
+def poetry_cmd_get_themes():
+    """Poetry script entry point for get-themes command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-themes"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_themes(args)
+    asyncio.run(cmd_get_themes(args))
+
+
+def poetry_cmd_add_theme():
+    """Poetry script entry point for add-theme command"""
+    parser = create_parser()
+    args = parser.parse_args(["add-theme"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_add_theme(args)
+    asyncio.run(cmd_add_theme(args))
+
+
+def poetry_cmd_remove_theme():
+    """Poetry script entry point for remove-theme command"""
+    parser = create_parser()
+    args = parser.parse_args(["remove-theme"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_remove_theme(args)
+    asyncio.run(cmd_remove_theme(args))
+
+
+def poetry_cmd_set_theme():
+    """Poetry script entry point for set-theme command"""
+    parser = create_parser()
+    args = parser.parse_args(["set-theme"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_set_theme(args)
+    asyncio.run(cmd_set_theme(args))
+
+
+def poetry_cmd_get_theme_description():
+    """Poetry script entry point for get-theme-description command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-theme-description"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_theme_description(args)
+    asyncio.run(cmd_get_theme_description(args))
+
+
+def poetry_cmd_send_friend_request():
+    """Poetry script entry point for send-friend-request command"""
+    parser = create_parser()
+    args = parser.parse_args(["send-friend-request"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_send_friend_request(args)
+    asyncio.run(cmd_send_friend_request(args))
+
+
+def poetry_cmd_get_localization_items():
+    """Poetry script entry point for get-localization-items command"""
+    parser = create_parser()
+    args = parser.parse_args(["get-localization-items"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_get_localization_items(args)
+    asyncio.run(cmd_get_localization_items(args))
 
 
 if __name__ == "__main__":

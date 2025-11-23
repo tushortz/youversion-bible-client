@@ -1563,6 +1563,190 @@ The YouVersion API has rate limits. The client handles this automatically with a
 - Implement your own rate limiting if making many sequential requests
 - Handle `429 Too Many Requests` errors gracefully
 
+## Command Line Interface (CLI)
+
+The library includes a comprehensive CLI with 47+ commands accessible via Poetry scripts, Makefile targets, or directly.
+
+### Installation
+
+The CLI is automatically available when you install the package:
+
+```bash
+# Using Poetry
+poetry install
+poetry run youversion --help
+
+# Or using pip
+pip install youversion-bible-client
+youversion --help
+```
+
+### Standardized Output Format
+
+All CLI commands use a standardized output format that displays:
+- **ID**: Item identifier
+- **Kind**: Item type (e.g., NOTE, HIGHLIGHT, PLAN_SEGMENT_COMPLETION.V1)
+- **Metadata**: Key-value pairs from `base/title/l_args` (e.g., Segment, Title, etc.)
+- **Time**: Creation timestamp
+
+**Example Output:**
+```
+  1. PLAN_SEGMENT_COMPLETION.V1
+     ID         : 4892085495582558077
+     Kind       : PLAN_SEGMENT_COMPLETION.V1
+     Segment    : 1
+     Title      : Teach Us To Pray
+     Time       : 2025-11-22T19:00:35+00:00
+```
+
+### Using Poetry Scripts
+
+All commands are available as Poetry scripts:
+
+```bash
+# Moments & Content
+poetry run votd                    # Get verse of the day
+poetry run moments                 # Get moments
+poetry run highlights              # Get highlights
+poetry run notes                   # Get notes
+poetry run bookmarks               # Get bookmarks
+poetry run images                  # Get images
+poetry run badges                  # Get badges
+poetry run create-moment           # Create a moment
+poetry run convert-notes           # Convert notes to markdown
+
+# Plans
+poetry run plan-progress           # Get plan progress
+poetry run plan-subscriptions     # Get plan subscriptions
+poetry run plan-completions       # Get plan completions
+
+# Bible & Audio
+poetry run get-bible-configuration # Get Bible configuration
+poetry run get-bible-versions      # Get Bible versions
+poetry run get-bible-version       # Get Bible version by ID
+poetry run get-bible-chapter       # Get Bible chapter
+poetry run get-recommended-languages # Get recommended languages
+poetry run get-audio-chapter       # Get audio chapter
+poetry run get-audio-version       # Get audio version
+
+# Search
+poetry run search-bible            # Search Bible
+poetry run search-plans            # Search plans
+poetry run search-users            # Search users
+
+# And 25+ more commands...
+```
+
+### Using Makefile Commands
+
+All commands are also available via Makefile:
+
+```bash
+# Moments & Content
+make cli-votd                      # Get verse of the day
+make cli-moments                   # Get moments
+make cli-highlights                # Get highlights
+make cli-notes                     # Get notes
+make cli-bookmarks                 # Get bookmarks
+make cli-images                    # Get images
+make cli-badges                    # Get badges
+make cli-create-moment KIND='note' CONTENT='...' TITLE='...'  # Create moment
+make cli-convert-notes             # Convert notes to markdown
+
+# Plans
+make cli-plan-progress             # Get plan progress
+make cli-plan-subscriptions        # Get plan subscriptions
+make cli-plan-completions          # Get plan completions
+
+# Bible & Audio
+make cli-get-bible-configuration   # Get Bible configuration
+make cli-get-bible-versions        # Get Bible versions
+make cli-get-bible-version ID=1    # Get Bible version by ID
+make cli-get-bible-chapter REFERENCE='GEN.1' VERSION_ID=1  # Get chapter
+make cli-get-recommended-languages # Get recommended languages
+make cli-get-audio-chapter REFERENCE='GEN.1' VERSION_ID=1  # Get audio chapter
+make cli-get-audio-version ID=1    # Get audio version
+
+# Search
+make cli-search-bible QUERY='love' VERSION_ID=1  # Search Bible
+make cli-search-plans QUERY='daily' LANGUAGE_TAG='en'  # Search plans
+make cli-search-users QUERY='john'  # Search users
+
+# See all commands: make help
+```
+
+### Direct CLI Usage
+
+You can also use the CLI directly:
+
+```bash
+# Basic usage
+youversion votd
+youversion moments --page 2
+youversion highlights --limit 5
+youversion notes --json
+
+# With options
+youversion votd --day 100
+youversion moments --page 1 --limit 20 --json
+youversion create-moment --kind note --content "My note" --title "Title"
+youversion get-bible-chapter GEN.1 --version-id 1
+youversion search-bible "love" --version-id 1
+```
+
+### Global Options
+
+All commands support these global options:
+
+- `--json`: Output results in JSON format instead of human-readable format
+- `--limit LIMIT`: Limit the number of items displayed (default: 10)
+
+### Complete Command List
+
+The CLI provides 47+ commands organized into categories:
+
+**Moments & Content (9 commands):**
+- `votd`, `moments`, `highlights`, `notes`, `bookmarks`, `images`, `badges`, `create-moment`, `convert-notes`
+
+**Plans (3 commands):**
+- `plan-progress`, `plan-subscriptions`, `plan-completions`
+
+**Bible & Audio (7 commands):**
+- `get-bible-configuration`, `get-bible-versions`, `get-bible-version`, `get-bible-chapter`, `get-recommended-languages`, `get-audio-chapter`, `get-audio-version`
+
+**Search (3 commands):**
+- `search-bible`, `search-plans`, `search-users`
+
+**Videos & Images (4 commands):**
+- `get-videos`, `get-video-details`, `get-images`, `get-image-upload-url`
+
+**Events (6 commands):**
+- `search-events`, `get-event-details`, `get-saved-events`, `save-event`, `delete-saved-event`, `get-all-saved-event-ids`, `get-event-configuration`
+
+**Moments Management (8 commands):**
+- `get-moments`, `get-moment-details`, `update-moment`, `delete-moment`, `get-moment-colors`, `get-moment-labels`, `get-verse-colors`, `hide-verse-colors`, `get-moments-configuration`
+
+**Comments & Likes (4 commands):**
+- `create-comment`, `delete-comment`, `like-moment`, `unlike-moment`
+
+**Devices (2 commands):**
+- `register-device`, `unregister-device`
+
+**Themes (5 commands):**
+- `get-themes`, `add-theme`, `remove-theme`, `set-theme`, `get-theme-description`
+
+**Social (1 command):**
+- `send-friend-request`
+
+**Localization (1 command):**
+- `get-localization-items`
+
+For detailed usage of each command, run:
+
+```bash
+youversion <command> --help
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

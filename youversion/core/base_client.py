@@ -511,7 +511,8 @@ class BaseClient(IClient):
             Save result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.save_event(event_id, comments)
+        raw_data = await self._http_client.save_event(event_id, comments)
+        return self._data_processor.process_save_event(raw_data)
 
     async def delete_saved_event(self, event_id: int) -> dict[str, Any]:
         """Delete saved event.
@@ -523,7 +524,8 @@ class BaseClient(IClient):
             Delete result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.delete_saved_event(event_id)
+        raw_data = await self._http_client.delete_saved_event(event_id)
+        return self._data_processor.process_delete_saved_event(raw_data)
 
     async def get_all_saved_event_ids(self) -> dict[str, Any]:
         """Get all saved event IDs.
@@ -607,7 +609,8 @@ class BaseClient(IClient):
         moment_dict = moment_data.model_dump()
         moment_dict["created_dt"] = datetime.now(tz=timezone.utc).isoformat()
 
-        return await self._http_client.create_moment(moment_dict)
+        raw_data = await self._http_client.create_moment(moment_dict)
+        return self._data_processor.process_create_moment(raw_data)
 
     async def update_moment(self, data: dict[str, Any]) -> dict[str, Any]:
         """Update an existing moment.
@@ -619,7 +622,8 @@ class BaseClient(IClient):
             Updated moment data
         """
         await self._ensure_authenticated()
-        return await self._http_client.update_moment(data)
+        raw_data = await self._http_client.update_moment(data)
+        return self._data_processor.process_update_moment(raw_data)
 
     async def delete_moment(self, moment_id: int) -> dict[str, Any]:
         """Delete a moment.
@@ -631,7 +635,8 @@ class BaseClient(IClient):
             Delete result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.delete_moment(moment_id)
+        raw_data = await self._http_client.delete_moment(moment_id)
+        return self._data_processor.process_delete_moment(raw_data)
 
     async def get_moment_colors(self) -> dict[str, Any]:
         """Get available highlight colors.
@@ -677,7 +682,8 @@ class BaseClient(IClient):
             Hide result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.hide_verse_colors(data)
+        raw_data = await self._http_client.hide_verse_colors(data)
+        return self._data_processor.process_hide_verse_colors(raw_data)
 
     async def get_moments_configuration(self) -> dict[str, Any]:
         """Get moments configuration.
@@ -701,7 +707,8 @@ class BaseClient(IClient):
             Created comment data
         """
         await self._ensure_authenticated()
-        return await self._http_client.create_comment(moment_id, comment)
+        raw_data = await self._http_client.create_comment(moment_id, comment)
+        return self._data_processor.process_create_comment(raw_data)
 
     async def delete_comment(self, comment_id: int) -> dict[str, Any]:
         """Delete a comment.
@@ -713,7 +720,8 @@ class BaseClient(IClient):
             Delete result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.delete_comment(comment_id)
+        raw_data = await self._http_client.delete_comment(comment_id)
+        return self._data_processor.process_delete_comment(raw_data)
 
     # Likes API methods
     async def like_moment(self, moment_id: int) -> dict[str, Any]:
@@ -726,7 +734,8 @@ class BaseClient(IClient):
             Like result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.like_moment(moment_id)
+        raw_data = await self._http_client.like_moment(moment_id)
+        return self._data_processor.process_like_moment(raw_data)
 
     async def unlike_moment(self, moment_id: int) -> dict[str, Any]:
         """Unlike a moment.
@@ -738,7 +747,8 @@ class BaseClient(IClient):
             Unlike result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.unlike_moment(moment_id)
+        raw_data = await self._http_client.unlike_moment(moment_id)
+        return self._data_processor.process_unlike_moment(raw_data)
 
     # Messaging API methods
     async def register_device(
@@ -762,9 +772,10 @@ class BaseClient(IClient):
             Registration result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.register_device(
+        raw_data = await self._http_client.register_device(
             device_id, device_type, user_id, old_device_id, tags
         )
+        return self._data_processor.process_register_device(raw_data)
 
     async def unregister_device(self, device_id: str) -> dict[str, Any]:
         """Unregister device from push notifications.
@@ -776,7 +787,8 @@ class BaseClient(IClient):
             Unregistration result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.unregister_device(device_id)
+        raw_data = await self._http_client.unregister_device(device_id)
+        return self._data_processor.process_unregister_device(raw_data)
 
     # Themes API methods
     async def get_themes(
@@ -818,9 +830,10 @@ class BaseClient(IClient):
             Add result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.add_theme(
+        raw_data = await self._http_client.add_theme(
             theme_id, available_locales, colors, cta_urls, msgid_suffix, version_ids
         )
+        return self._data_processor.process_add_theme(raw_data)
 
     async def remove_theme(self, theme_id: int) -> dict[str, Any]:
         """Remove a theme from user's collection.
@@ -832,7 +845,8 @@ class BaseClient(IClient):
             Remove result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.remove_theme(theme_id)
+        raw_data = await self._http_client.remove_theme(theme_id)
+        return self._data_processor.process_remove_theme(raw_data)
 
     async def set_theme(
         self, theme_id: int, previous_theme_id: Optional[int] = None
@@ -847,7 +861,8 @@ class BaseClient(IClient):
             Set result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.set_theme(theme_id, previous_theme_id)
+        raw_data = await self._http_client.set_theme(theme_id, previous_theme_id)
+        return self._data_processor.process_set_theme(raw_data)
 
     async def get_theme_description(
         self, theme_id: int, language_tag: str = "eng"

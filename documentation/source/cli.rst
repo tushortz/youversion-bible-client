@@ -231,6 +231,184 @@ Examples:
    :code:`poetry run youversion convert-notes`
    :code:`poetry run youversion convert-notes --json`
 
+badges
+~~~~~~
+
+Get user badges.
+
+.. code-block:: bash
+
+   poetry run youversion badges [--page PAGE] [--limit LIMIT] [--json]
+
+Options:
+   ``--page PAGE``: Page number (default: 1)
+   ``--limit LIMIT``: Number of items to display (default: 10)
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion badges`
+   :code:`poetry run youversion badges --page 1`
+
+create-moment
+~~~~~~~~~~~~~
+
+Create a new moment (note, highlight, etc.).
+
+.. code-block:: bash
+
+   poetry run youversion create-moment --kind KIND --content CONTENT --title TITLE [options]
+
+Options:
+   ``--kind KIND``: Moment kind (note, highlight, bookmark, etc.)
+   ``--content CONTENT``: Moment content (required)
+   ``--title TITLE``: Moment title (required)
+   ``--status STATUS``: Status (private, draft, public)
+   ``--body BODY``: Body text
+   ``--color COLOR``: Highlight color (hex code)
+   ``--language-tag TAG``: Language tag (e.g., 'en')
+   ``--references REFS``: Bible references
+   ``--labels LABELS``: Labels/tags
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion create-moment --kind note --content "My note" --title "Title"`
+   :code:`poetry run youversion create-moment --kind highlight --content "Text" --title "Title" --color ff0000`
+
+get-bible-configuration
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Get Bible configuration.
+
+.. code-block:: bash
+
+   poetry run youversion get-bible-configuration [--json]
+
+Options:
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion get-bible-configuration`
+
+get-bible-versions
+~~~~~~~~~~~~~~~~~~
+
+Get Bible versions for a language.
+
+.. code-block:: bash
+
+   poetry run youversion get-bible-versions [--language-tag TAG] [--json]
+
+Options:
+   ``--language-tag TAG``: Language tag (default: 'eng')
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion get-bible-versions`
+   :code:`poetry run youversion get-bible-versions --language-tag spa`
+
+get-bible-version
+~~~~~~~~~~~~~~~~~
+
+Get specific Bible version details.
+
+.. code-block:: bash
+
+   poetry run youversion get-bible-version VERSION_ID [--json]
+
+Arguments:
+   ``VERSION_ID``: Version ID (required)
+
+Options:
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion get-bible-version 1`
+
+get-bible-chapter
+~~~~~~~~~~~~~~~~~
+
+Get Bible chapter content.
+
+.. code-block:: bash
+
+   poetry run youversion get-bible-chapter REFERENCE [--version-id ID] [--json]
+
+Arguments:
+   ``REFERENCE``: USFM reference (e.g., 'GEN.1', 'JHN.3.16') (required)
+
+Options:
+   ``--version-id ID``: Version ID (default: 1)
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion get-bible-chapter GEN.1`
+   :code:`poetry run youversion get-bible-chapter JHN.3.16 --version-id 1`
+
+search-bible
+~~~~~~~~~~~~
+
+Search Bible text.
+
+.. code-block:: bash
+
+   poetry run youversion search-bible QUERY [--version-id ID] [--book BOOK] [--json]
+
+Arguments:
+   ``QUERY``: Search query (required)
+
+Options:
+   ``--version-id ID``: Version ID to search in
+   ``--book BOOK``: Book filter (e.g., 'JHN', 'GEN')
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion search-bible "love"`
+   :code:`poetry run youversion search-bible "love" --version-id 1`
+   :code:`poetry run youversion search-bible "love" --book JHN`
+
+get-themes
+~~~~~~~~~~
+
+Get available themes.
+
+.. code-block:: bash
+
+   poetry run youversion get-themes [--language-tag TAG] [--json]
+
+Options:
+   ``--language-tag TAG``: Language tag (default: 'eng')
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion get-themes`
+   :code:`poetry run youversion get-themes --language-tag spa`
+
+send-friend-request
+~~~~~~~~~~~~~~~~~~~
+
+Send a friend request to a user.
+
+.. code-block:: bash
+
+   poetry run youversion send-friend-request USER_ID [--json]
+
+Arguments:
+   ``USER_ID``: User ID to send friend request to (required)
+
+Options:
+   :option:`--json`: Output as JSON
+
+Examples:
+   :code:`poetry run youversion send-friend-request 123456`
+
+.. note::
+
+   For a complete list of all 47+ commands, run:
+
+   .. code-block:: bash
+
+      poetry run youversion --help
+
 Configuration
 -------------
 
@@ -254,48 +432,178 @@ Or create a ``.env`` file in your project root:
 Poetry Scripts
 --------------
 
-The CLI commands are also available as Poetry scripts for easier access:
+All 47+ CLI commands are available as Poetry scripts for easier access:
+
+**Moments & Content:**
+.. code-block:: bash
+
+   poetry run votd                    # Get verse of the day
+   poetry run moments                 # Get moments
+   poetry run highlights              # Get highlights
+   poetry run notes                   # Get notes
+   poetry run bookmarks               # Get bookmarks
+   poetry run images                  # Get images
+   poetry run badges                  # Get badges
+   poetry run create-moment           # Create a moment
+   poetry run convert-notes           # Convert notes to markdown
+
+**Plans:**
+.. code-block:: bash
+
+   poetry run plan-progress           # Get plan progress
+   poetry run plan-subscriptions     # Get plan subscriptions
+   poetry run plan-completions       # Get plan completions
+
+**Bible & Audio:**
+.. code-block:: bash
+
+   poetry run get-bible-configuration # Get Bible configuration
+   poetry run get-bible-versions      # Get Bible versions
+   poetry run get-bible-version       # Get Bible version by ID
+   poetry run get-bible-chapter       # Get Bible chapter
+   poetry run get-recommended-languages # Get recommended languages
+   poetry run get-audio-chapter       # Get audio chapter
+   poetry run get-audio-version       # Get audio version
+
+**Search:**
+.. code-block:: bash
+
+   poetry run search-bible            # Search Bible
+   poetry run search-plans            # Search plans
+   poetry run search-users            # Search users
+
+**Videos & Images:**
+.. code-block:: bash
+
+   poetry run get-videos              # Get videos
+   poetry run get-video-details       # Get video details
+   poetry run get-images              # Get images
+   poetry run get-image-upload-url    # Get image upload URL
+
+**Events:**
+.. code-block:: bash
+
+   poetry run search-events           # Search events
+   poetry run get-event-details       # Get event details
+   poetry run get-saved-events        # Get saved events
+   poetry run save-event              # Save event
+   poetry run delete-saved-event      # Delete saved event
+   poetry run get-all-saved-event-ids # Get all saved event IDs
+   poetry run get-event-configuration # Get event configuration
+
+**Moments Management:**
+.. code-block:: bash
+
+   poetry run get-moments             # Get moments
+   poetry run get-moment-details      # Get moment details
+   poetry run update-moment           # Update moment
+   poetry run delete-moment           # Delete moment
+   poetry run get-moment-colors       # Get moment colors
+   poetry run get-moment-labels       # Get moment labels
+   poetry run get-verse-colors        # Get verse colors
+   poetry run hide-verse-colors      # Hide verse colors
+   poetry run get-moments-configuration # Get moments configuration
+
+**Comments & Likes:**
+.. code-block:: bash
+
+   poetry run create-comment          # Create comment
+   poetry run delete-comment          # Delete comment
+   poetry run like-moment             # Like moment
+   poetry run unlike-moment           # Unlike moment
+
+**Devices:**
+.. code-block:: bash
+
+   poetry run register-device         # Register device
+   poetry run unregister-device       # Unregister device
+
+**Themes:**
+.. code-block:: bash
+
+   poetry run get-themes              # Get themes
+   poetry run add-theme               # Add theme
+   poetry run remove-theme            # Remove theme
+   poetry run set-theme               # Set theme
+   poetry run get-theme-description   # Get theme description
+
+**Social:**
+.. code-block:: bash
+
+   poetry run send-friend-request     # Send friend request
+
+**Localization:**
+.. code-block:: bash
+
+   poetry run get-localization-items  # Get localization items
+
+Makefile Commands
+-----------------
+
+All commands are also available via Makefile targets:
 
 .. code-block:: bash
 
-   # Verse of the day
-   poetry run votd
-   poetry run votd --day 100
+   # Moments & Content
+   make cli-votd
+   make cli-moments
+   make cli-highlights
+   make cli-notes
+   make cli-bookmarks
+   make cli-images
+   make cli-badges
+   make cli-create-moment KIND='note' CONTENT='...' TITLE='...'
+   make cli-convert-notes
 
-   # Moments
-   poetry run moments
-   poetry run moments --page 2
+   # Plans
+   make cli-plan-progress
+   make cli-plan-subscriptions
+   make cli-plan-completions
 
-   # Highlights
-   poetry run highlights
-   poetry run highlights --limit 5
+   # Bible & Audio
+   make cli-get-bible-configuration
+   make cli-get-bible-versions
+   make cli-get-bible-version ID=1
+   make cli-get-bible-chapter REFERENCE='GEN.1' VERSION_ID=1
+   make cli-get-recommended-languages
+   make cli-get-audio-chapter REFERENCE='GEN.1' VERSION_ID=1
+   make cli-get-audio-version ID=1
 
-   # Notes
-   poetry run notes
-   poetry run notes --json
+   # Search
+   make cli-search-bible QUERY='love' VERSION_ID=1
+   make cli-search-plans QUERY='daily' LANGUAGE_TAG='en'
+   make cli-search-users QUERY='john'
 
-   # Bookmarks
-   poetry run bookmarks
-   poetry run bookmarks --page 1
-
-   # Images
-   poetry run images
-   poetry run images --json
-
-   # Plan progress
-   poetry run plan-progress
-   poetry run plan-progress --limit 5
-
-   # Plan subscriptions
-   poetry run plan-subscriptions
-   poetry run plan-subscriptions --json
-
-   # Convert notes
-   poetry run convert-notes
-   poetry run convert-notes --json
+   # See all commands: make help
 
 Output Formats
 --------------
+
+Standardized Format
+~~~~~~~~~~~~~~~~~~~
+
+All CLI commands use a standardized output format that displays:
+- **ID**: Item identifier
+- **Kind**: Item type (e.g., NOTE, HIGHLIGHT, PLAN_SEGMENT_COMPLETION.V1)
+- **Metadata**: Key-value pairs from ``base/title/l_args`` (e.g., Segment, Title, etc.)
+- **Time**: Creation timestamp
+
+All fields are consistently aligned for easy reading:
+
+.. code-block:: text
+
+   1. PLAN_SEGMENT_COMPLETION.V1
+      ID         : 4892085495582558077
+      Kind       : PLAN_SEGMENT_COMPLETION.V1
+      Segment    : 1
+      Title      : Teach Us To Pray
+      Time       : 2025-11-22T19:00:35+00:00
+
+   2. NOTE
+      ID         : 1234567890
+      Kind       : NOTE
+      Content    : This is my note
+      Time       : 2025-11-22T18:00:00+00:00
 
 Human-Readable Format
 ~~~~~~~~~~~~~~~~~~~~~
@@ -312,10 +620,12 @@ By default, the CLI outputs data in a human-readable format:
    📋 Moments (Page 1)
    Found 5 moments
    --------------------------------------------------
-     1. HIGHLIGHT
-        Title: John 3:16
-        Time: 2 hours ago
-        Owned by me: True
+     1. PLAN_SEGMENT_COMPLETION.V1
+        ID         : 4892085495582558077
+        Kind       : PLAN_SEGMENT_COMPLETION.V1
+        Segment    : 1
+        Title      : Teach Us To Pray
+        Time       : 2025-11-22T19:00:35+00:00
 
 JSON Format
 ~~~~~~~~~~~

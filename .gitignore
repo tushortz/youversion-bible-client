@@ -75,5 +75,5 @@ Thumbs.db
 .bandit
 
 *.lock
-main.py
+_main.py
 bandit-report.json

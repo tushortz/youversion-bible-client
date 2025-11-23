@@ -1,5 +1,6 @@
 """Authentication handler for YouVersion API."""
 
+import base64
 import os
 from typing import Optional
 
@@ -70,8 +71,8 @@ class Authenticator(IAuthenticator):
             response = await client.post(
                 Config.AUTH_URL,
                 data={
-                    "client_id": Config.CLIENT_ID,
-                    "client_secret": Config.CLIENT_SECRET,
+                    "client_id": base64.b64decode(Config.CLIENT_ID).decode(),
+                    "client_secret": base64.b64decode(Config.CLIENT_SECRET).decode(),
                     "grant_type": "password",
                     "username": username,
                     "password": password,

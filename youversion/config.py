@@ -27,8 +27,8 @@ class Config:
 
     # OAuth2 Configuration
     AUTH_URL = "https://auth.youversionapi.com/token"
-    CLIENT_ID = "85b61d97a79b96be465ebaeee83b1313"
-    CLIENT_SECRET = "75cf0e141cbf41ef410adce5b6537a49"
+    CLIENT_ID = "ODViNjFkOTdhNzliOTZiZTQ2NWViYWVlZTgzYjEzMTM="
+    CLIENT_SECRET = "NzVjZjBlMTQxY2JmNDFlZjQxMGFkY2U1YjY1MzdhNDk="
 
     # API Headers
     DEFAULT_HEADERS = {
