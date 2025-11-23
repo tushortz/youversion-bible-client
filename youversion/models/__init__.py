@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Protocol
+from typing import Any, Optional, Protocol
 
 try:
     from typing import TypeAlias

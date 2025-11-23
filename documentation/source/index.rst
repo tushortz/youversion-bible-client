@@ -1,22 +1,33 @@
 YouVersion Bible Client Documentation
 ====================================
 
-A modern Python client for accessing YouVersion Bible data with both synchronous and asynchronous support.
+Welcome to the comprehensive documentation for the YouVersion Bible Client library. This library provides both synchronous and asynchronous Python interfaces to interact with all YouVersion API endpoints.
 
 .. warning::
 
-   **Important Notice**: YouVersion has made their API private, so some functions may not work anymore. This client is maintained for educational and legacy purposes.
+   **Important Notice**: YouVersion has made their API private, so some functions may not work anymore. This client is maintained for educational and legacy purposes. Please use responsibly.
 
-Features
+Overview
 --------
 
-* **Dual Client Support**: Both synchronous (`Client`) and asynchronous (`AsyncClient`) implementations
+The YouVersion Bible Client is a modern Python library that provides:
+
+* **Dual Client Support**: Both synchronous (`SyncClient`) and asynchronous (`AsyncClient`) implementations
 * **OAuth2 Authentication**: Secure authentication using YouVersion's OAuth2 system
-* **Comprehensive Data Access**: Access to verses, moments, highlights, notes, bookmarks, and more
-* **Modern Python**: Built with Python 3.10+ using modern async/await patterns
-* **Type Safety**: Full type hints and Pydantic models for data validation
+* **Comprehensive API Coverage**: Access to 55+ API endpoints including:
+  - Bible content and versions
+  - Audio Bible
+  - Moments (highlights, notes, bookmarks, images, badges)
+  - Reading plans
+  - Events
+  - Videos
+  - Friendships
+  - Themes
+  - And much more
+* **Dynamic Pydantic Models**: Automatically generated models from API responses
+* **Type Safety**: Full type hints throughout the codebase
 * **CLI Support**: Command-line interface for easy access to all features
-* **Poetry Integration**: Modern dependency management and script execution
+* **Python 3.9+**: Compatible with Python 3.9 and above
 
 Quick Start
 -----------
@@ -26,12 +37,11 @@ Installation
 
 .. code-block:: bash
 
-   # Using Poetry (recommended)
-   poetry install
-   poetry shell
+   # Using pip
+   pip install youversion-bible-client
 
-   # Or using pip
-   pip install -e .
+   # Using Poetry
+   poetry add youversion-bible-client
 
 Basic Usage
 ~~~~~~~~~~~
@@ -42,7 +52,7 @@ Asynchronous Client
 .. code-block:: python
 
    import asyncio
-   from youversion import AsyncClient
+   from youversion.clients import AsyncClient
 
    async def main():
        async with AsyncClient() as client:
@@ -51,7 +61,7 @@ Asynchronous Client
            print(f"Verse: {votd.usfm}")
 
            # Get moments
-           moments = await client.moments()
+           moments = await client.moments(page=1)
            print(f"Found {len(moments)} moments")
 
    asyncio.run(main())
@@ -61,166 +71,80 @@ Synchronous Client
 
 .. code-block:: python
 
-   from youversion import Client
+   from youversion.clients import SyncClient
 
-   with Client() as client:
+   with SyncClient() as client:
        # Get verse of the day
        votd = client.verse_of_the_day()
        print(f"Verse: {votd.usfm}")
 
        # Get highlights
-       highlights = client.highlights()
+       highlights = client.highlights(page=1)
        print(f"Found {len(highlights)} highlights")
-
-Command Line Interface
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-   # Get verse of the day
-   poetry run youversion votd
-
-   # Get moments with JSON output
-   poetry run youversion moments --json
-
-   # Get highlights with limit
-   poetry run youversion highlights --limit 5
-
-   # Discover API endpoints
-   poetry run youversion discover-endpoints
 
 Configuration
 -------------
 
-Environment Variables
-~~~~~~~~~~~~~~~~~~~~~
+The client requires YouVersion API credentials. You can provide them in several ways:
 
-Create a `.env` file in your project root:
+1. **Environment Variables** (Recommended for production):
 
 .. code-block:: bash
 
+   export YOUVERSION_USERNAME="your_username"
+   export YOUVERSION_PASSWORD="your_password"
+
+2. **`.env` File** (Recommended for development):
+
+.. code-block:: bash
+
+   # Create .env file in project root
    YOUVERSION_USERNAME=your_username
    YOUVERSION_PASSWORD=your_password
 
-API Reference
--------------
+3. **Constructor Arguments**:
+
+.. code-block:: python
+
+   client = AsyncClient(username="user", password="pass")
+
+Documentation Contents
+----------------------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Complete API Reference:
+   :caption: Getting Started:
+
+   installation
+   quickstart
+   configuration
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference:
 
    api
-
-Clients
-~~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Client Documentation:
-
    clients
-
-Models
-~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Data Models:
-
    models
 
-CLI Reference
-~~~~~~~~~~~~~
-
 .. toctree::
    :maxdepth: 2
-   :caption: Command Line Interface:
-
-   cli
-
-Examples
---------
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Usage Examples:
+   :caption: Guides:
 
    examples
+   cli
+   authentication
+   error_handling
+   best_practices
 
-Development
------------
+.. toctree::
+   :maxdepth: 2
+   :caption: Advanced Topics:
 
-Testing
-~~~~~~~
-
-.. code-block:: bash
-
-   # Run all tests
-   poetry run pytest
-
-   # Run tests with coverage
-   poetry run pytest --cov=youversion
-
-   # Run specific test file
-   poetry run pytest tests/test_cli.py -v
-
-Code Quality
-~~~~~~~~~~~~
-
-.. code-block:: bash
-
-   # Format code
-   poetry run black .
-
-   # Lint code
-   poetry run ruff check . --fix
-
-   # Type checking
-   poetry run mypy youversion/
-
-Project Structure
------------------
-
-.. code-block::
-
-   youversion-bible-client/
-   ├── youversion/                 # Main package
-   │   ├── clients/               # Client implementations
-   │   ├── core/                  # Core functionality
-   │   ├── models/                # Data models
-   │   ├── cli.py                 # Command-line interface
-   │   └── __init__.py
-   ├── tests/                     # Test suite
-   ├── examples/                  # Usage examples
-   ├── documentation/             # Sphinx documentation
-   ├── pyproject.toml             # Project configuration
-   └── README.md                  # Project overview
-
-Changelog
----------
-
-Version 0.3.0
-~~~~~~~~~~~~~
-
-* Fixed RuntimeWarnings in test suite
-* Improved async mocking in tests
-* Updated dependencies
-
-Version 0.2.0
-~~~~~~~~~~~~~
-
-* Added dual client support (sync/async)
-* Implemented OAuth2 authentication
-* Added comprehensive CLI
-* Restructured codebase with SOLID principles
-* Added URL discovery functionality
-
-Version 0.1.x
-~~~~~~~~~~~~~
-
-* Initial release
-* Basic YouVersion API access
-* Pydantic data models
+   dynamic_models
+   concurrency
+   testing
+   deployment
 
 Indices and tables
 ==================

@@ -1,12 +1,10 @@
 """Unit tests for Pydantic models."""
 
-from datetime import datetime
 
 import pytest
 
-from youversion.models import Reference, Votd
-from youversion.models.moments import CreateMoment, ReferenceCreate
 from youversion.enums import MomentKinds, StatusEnum
+from youversion.models.moments import CreateMoment, ReferenceCreate
 
 
 class TestVotd:
@@ -15,6 +13,7 @@ class TestVotd:
     def test_votd_protocol_exists(self):
         """Test that Votd Protocol exists."""
         from youversion.models import VotdProtocol
+
         assert VotdProtocol is not None
 
 
@@ -24,6 +23,7 @@ class TestReference:
     def test_reference_protocol_exists(self):
         """Test that Reference Protocol exists."""
         from youversion.models import ReferenceProtocol
+
         assert ReferenceProtocol is not None
 
 
@@ -32,11 +32,7 @@ class TestReferenceCreate:
 
     def test_reference_create_creation(self):
         """Test ReferenceCreate model creation."""
-        reference_data = {
-            "human": "John 3:16",
-            "version_id": 1,
-            "usfm": ["JHN.3.16"]
-        }
+        reference_data = {"human": "John 3:16", "version_id": 1, "usfm": ["JHN.3.16"]}
 
         reference = ReferenceCreate(**reference_data)
 
@@ -46,11 +42,7 @@ class TestReferenceCreate:
 
     def test_reference_create_model_dump(self):
         """Test ReferenceCreate model serialization."""
-        reference_data = {
-            "human": "John 3:16",
-            "version_id": 1,
-            "usfm": ["JHN.3.16"]
-        }
+        reference_data = {"human": "John 3:16", "version_id": 1, "usfm": ["JHN.3.16"]}
 
         reference = ReferenceCreate(**reference_data)
         dumped = reference.model_dump()
@@ -65,11 +57,7 @@ class TestCreateMoment:
 
     def test_create_moment_creation(self):
         """Test CreateMoment model creation."""
-        reference = ReferenceCreate(
-            human="John 3:16",
-            version_id=1,
-            usfm=["JHN.3.16"]
-        )
+        reference = ReferenceCreate(human="John 3:16", version_id=1, usfm=["JHN.3.16"])
         moment_data = {
             "kind": MomentKinds.NOTE,
             "content": "Test content",
@@ -79,7 +67,7 @@ class TestCreateMoment:
             "body": "Test body",
             "color": "ff0000",
             "labels": ["test"],
-            "language_tag": "en"
+            "language_tag": "en",
         }
 
         moment = CreateMoment(**moment_data)
@@ -96,11 +84,7 @@ class TestCreateMoment:
 
     def test_create_moment_model_dump(self):
         """Test CreateMoment model serialization."""
-        reference = ReferenceCreate(
-            human="John 3:16",
-            version_id=1,
-            usfm=["JHN.3.16"]
-        )
+        reference = ReferenceCreate(human="John 3:16", version_id=1, usfm=["JHN.3.16"])
         moment_data = {
             "kind": MomentKinds.NOTE,
             "content": "Test content",
@@ -110,7 +94,7 @@ class TestCreateMoment:
             "body": "Test body",
             "color": "ff0000",
             "labels": ["test"],
-            "language_tag": "en"
+            "language_tag": "en",
         }
 
         moment = CreateMoment(**moment_data)
@@ -125,11 +109,7 @@ class TestCreateMoment:
 
     def test_create_moment_validation(self):
         """Test CreateMoment model validation."""
-        reference = ReferenceCreate(
-            human="John 3:16",
-            version_id=1,
-            usfm=["JHN.3.16"]
-        )
+        reference = ReferenceCreate(human="John 3:16", version_id=1, usfm=["JHN.3.16"])
 
         # Test valid moment
         moment = CreateMoment(
@@ -141,12 +121,12 @@ class TestCreateMoment:
             body="Body",
             color="ff0000",
             labels=["test"],
-            language_tag="en"
+            language_tag="en",
         )
         assert moment is not None
 
         # Test invalid color (too short)
-        with pytest.raises(Exception):  # Pydantic validation error
+        with pytest.raises(ValueError):  # Pydantic validation error
             CreateMoment(
                 kind=MomentKinds.NOTE,
                 content="Test",
@@ -156,11 +136,11 @@ class TestCreateMoment:
                 body="Body",
                 color="ff00",  # Too short
                 labels=["test"],
-                language_tag="en"
+                language_tag="en",
             )
 
         # Test invalid language_tag (too short)
-        with pytest.raises(Exception):  # Pydantic validation error
+        with pytest.raises(ValueError):  # Pydantic validation error
             CreateMoment(
                 kind=MomentKinds.NOTE,
                 content="Test",
@@ -170,11 +150,11 @@ class TestCreateMoment:
                 body="Body",
                 color="ff0000",
                 labels=["test"],
-                language_tag="e"  # Too short
+                language_tag="e",  # Too short
             )
 
         # Test too many labels
-        with pytest.raises(Exception):  # Pydantic validation error
+        with pytest.raises(ValueError):  # Pydantic validation error
             CreateMoment(
                 kind=MomentKinds.NOTE,
                 content="Test",
@@ -184,5 +164,5 @@ class TestCreateMoment:
                 body="Body",
                 color="ff0000",
                 labels=["test"] * 11,  # Too many
-                language_tag="en"
+                language_tag="en",
             )

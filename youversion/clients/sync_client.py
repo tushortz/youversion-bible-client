@@ -10,9 +10,7 @@ from ..models.moments import CreateMoment
 class SyncClient(BaseClient):
     """Synchronous wrapper for BaseClient."""
 
-    def __init__(
-        self, username: Optional[str] = None, password: Optional[str] = None
-    ):
+    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
         """Initialize sync client.
 
         Args:
@@ -254,9 +252,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().get_bible_configuration())
 
     def get_bible_versions(
-        self,
-        language_tag: str = "eng",
-        version_type: str = "all"
+        self, language_tag: str = "eng", version_type: str = "all"
     ) -> dict[str, Any]:
         """Get Bible versions for a language.
 
@@ -267,9 +263,7 @@ class SyncClient(BaseClient):
         Returns:
             Bible versions data
         """
-        return self._run_async(
-            super().get_bible_versions(language_tag, version_type)
-        )
+        return self._run_async(super().get_bible_versions(language_tag, version_type))
 
     def get_bible_version(self, version_id: int) -> dict[str, Any]:
         """Get specific Bible version details.
@@ -280,9 +274,7 @@ class SyncClient(BaseClient):
         Returns:
             Bible version data
         """
-        return self._run_async(
-            super().get_bible_version(version_id)
-        )
+        return self._run_async(super().get_bible_version(version_id))
 
     def get_bible_chapter(
         self,
@@ -298,13 +290,9 @@ class SyncClient(BaseClient):
         Returns:
             Chapter content data
         """
-        return self._run_async(
-            super().get_bible_chapter(reference, version_id)
-        )
+        return self._run_async(super().get_bible_chapter(reference, version_id))
 
-    def get_recommended_languages(
-        self, country: str = "US"
-    ) -> dict[str, Any]:
+    def get_recommended_languages(self, country: str = "US") -> dict[str, Any]:
         """Get recommended languages for a country.
 
         Args:
@@ -313,9 +301,7 @@ class SyncClient(BaseClient):
         Returns:
             Recommended languages data
         """
-        return self._run_async(
-            super().get_recommended_languages(country)
-        )
+        return self._run_async(super().get_recommended_languages(country))
 
     # Audio Bible API methods
     def get_audio_chapter(
@@ -332,9 +318,7 @@ class SyncClient(BaseClient):
         Returns:
             Audio chapter data
         """
-        return self._run_async(
-            super().get_audio_chapter(reference, version_id)
-        )
+        return self._run_async(super().get_audio_chapter(reference, version_id))
 
     def get_audio_version(self, audio_id: int) -> dict[str, Any]:
         """Get audio version details.
@@ -353,7 +337,7 @@ class SyncClient(BaseClient):
         query: str,
         version_id: Optional[int] = None,
         book: Optional[str] = None,
-        page: int = 1
+        page: int = 1,
     ) -> dict[str, Any]:
         """Search Bible text.
 
@@ -366,15 +350,10 @@ class SyncClient(BaseClient):
         Returns:
             Search results data
         """
-        return self._run_async(
-            super().search_bible(query, version_id, book, page)
-        )
+        return self._run_async(super().search_bible(query, version_id, book, page))
 
     def search_plans(
-        self,
-        query: str,
-        language_tag: str = "en",
-        page: int = 1
+        self, query: str, language_tag: str = "en", page: int = 1
     ) -> dict[str, Any]:
         """Search reading plans.
 
@@ -389,10 +368,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().search_plans(query, language_tag, page))
 
     def search_users(
-        self,
-        query: str,
-        language_tag: str = "eng",
-        page: int = 1
+        self, query: str, language_tag: str = "eng", page: int = 1
     ) -> dict[str, Any]:
         """Search users.
 
@@ -443,10 +419,7 @@ class SyncClient(BaseClient):
 
     # Images API methods
     def get_images(
-        self,
-        reference: str,
-        language_tag: str = "eng",
-        page: int = 1
+        self, reference: str, language_tag: str = "eng", page: int = 1
     ) -> dict[str, Any]:
         """Get images for a reference.
 
@@ -458,9 +431,7 @@ class SyncClient(BaseClient):
         Returns:
             Images data
         """
-        return self._run_async(
-            super().get_images(reference, language_tag, page)
-        )
+        return self._run_async(super().get_images(reference, language_tag, page))
 
     def get_image_upload_url(self) -> dict[str, Any]:
         """Get image upload URL and parameters.
@@ -476,7 +447,7 @@ class SyncClient(BaseClient):
         query: str,
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
-        page: int = 1
+        page: int = 1,
     ) -> dict[str, Any]:
         """Search events.
 
@@ -489,9 +460,7 @@ class SyncClient(BaseClient):
         Returns:
             Event search results data
         """
-        return self._run_async(
-            super().search_events(query, latitude, longitude, page)
-        )
+        return self._run_async(super().search_events(query, latitude, longitude, page))
 
     def get_event_details(self, event_id: int) -> dict[str, Any]:
         """Get event details.
@@ -516,9 +485,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().get_saved_events(page))
 
     def save_event(
-        self,
-        event_id: int,
-        comments: Optional[dict[str, Any]] = None
+        self, event_id: int, comments: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
         """Save event.
 
@@ -565,7 +532,7 @@ class SyncClient(BaseClient):
         user_id: Optional[int] = None,
         kind: Optional[str] = None,
         version_id: Optional[int] = None,
-        usfm: Optional[str] = None
+        usfm: Optional[str] = None,
     ) -> dict[str, Any]:
         """Get moments list.
 
@@ -645,11 +612,7 @@ class SyncClient(BaseClient):
         """
         return self._run_async(super().get_moment_labels())
 
-    def get_verse_colors(
-        self,
-        usfm: str,
-        version_id: int
-    ) -> dict[str, Any]:
+    def get_verse_colors(self, usfm: str, version_id: int) -> dict[str, Any]:
         """Get verse highlight colors.
 
         Args:
@@ -681,11 +644,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().get_moments_configuration())
 
     # Comments API methods
-    def create_comment(
-        self,
-        moment_id: int,
-        comment: str
-    ) -> dict[str, Any]:
+    def create_comment(self, moment_id: int, comment: str) -> dict[str, Any]:
         """Create a comment on a moment.
 
         Args:
@@ -738,7 +697,7 @@ class SyncClient(BaseClient):
         device_type: str = "android",
         user_id: Optional[int] = None,
         old_device_id: Optional[str] = None,
-        tags: Optional[str] = None
+        tags: Optional[str] = None,
     ) -> dict[str, Any]:
         """Register device for push notifications.
 
@@ -770,11 +729,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().unregister_device(device_id))
 
     # Themes API methods
-    def get_themes(
-        self,
-        page: int = 1,
-        language_tag: str = "eng"
-    ) -> dict[str, Any]:
+    def get_themes(self, page: int = 1, language_tag: str = "eng") -> dict[str, Any]:
         """Get available themes.
 
         Args:
@@ -793,7 +748,7 @@ class SyncClient(BaseClient):
         colors: dict[str, Any],
         cta_urls: dict[str, Any],
         msgid_suffix: str,
-        version_ids: dict[str, int]
+        version_ids: dict[str, int],
     ) -> dict[str, Any]:
         """Add a theme to user's collection.
 
@@ -810,12 +765,7 @@ class SyncClient(BaseClient):
         """
         return self._run_async(
             super().add_theme(
-                theme_id,
-                available_locales,
-                colors,
-                cta_urls,
-                msgid_suffix,
-                version_ids
+                theme_id, available_locales, colors, cta_urls, msgid_suffix, version_ids
             )
         )
 
@@ -831,9 +781,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().remove_theme(theme_id))
 
     def set_theme(
-        self,
-        theme_id: int,
-        previous_theme_id: Optional[int] = None
+        self, theme_id: int, previous_theme_id: Optional[int] = None
     ) -> dict[str, Any]:
         """Set active theme.
 
@@ -847,9 +795,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().set_theme(theme_id, previous_theme_id))
 
     def get_theme_description(
-        self,
-        theme_id: int,
-        language_tag: str = "eng"
+        self, theme_id: int, language_tag: str = "eng"
     ) -> dict[str, Any]:
         """Get theme description.
 
@@ -860,9 +806,7 @@ class SyncClient(BaseClient):
         Returns:
             Theme description data
         """
-        return self._run_async(
-            super().get_theme_description(theme_id, language_tag)
-        )
+        return self._run_async(super().get_theme_description(theme_id, language_tag))
 
     # Localization API methods
     def get_localization_items(self, language_tag: str = "eng") -> str:

@@ -14,9 +14,7 @@ class DataProcessor(IDataProcessor):
     def __init__(self):
         """Initialize data processor."""
 
-    def _create_references(
-        self, references: list[dict[str, Any]]
-    ) -> list[Reference]:
+    def _create_references(self, references: list[dict[str, Any]]) -> list[Reference]:
         """Create Reference objects from raw data using dynamic creation.
 
         Args:
@@ -52,9 +50,7 @@ class DataProcessor(IDataProcessor):
         # Process comments
         comments = obj.get("comments", {})
         if comments:
-            obj["comments"] = create_instance_from_response(
-                "Comment", comments
-            )
+            obj["comments"] = create_instance_from_response("Comment", comments)
 
         # Process likes
         likes = obj.get("likes", {})
@@ -68,9 +64,7 @@ class DataProcessor(IDataProcessor):
 
         return obj
 
-    def process_moments(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Moment]:
+    def process_moments(self, raw_data: list[dict[str, Any]]) -> list[Moment]:
         """Process raw moments data using dynamic Pydantic models.
 
         Args:
@@ -87,18 +81,14 @@ class DataProcessor(IDataProcessor):
             # Use kind_id to create a unique class name
             kind_id = item.get("kind_id", "moment")
             # Sanitize kind_id for class name
-            kind_base = kind_id.split('.')[0]
-            class_name = (
-                f"{kind_base.replace('.', '').replace('_', '').title()}"
-            )
+            kind_base = kind_id.split(".")[0]
+            class_name = f"{kind_base.replace('.', '').replace('_', '').title()}"
             moment = create_instance_from_response(class_name, item)
             moments.append(moment)
 
         return moments
 
-    def process_highlights(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_highlights(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw highlights data using dynamic Pydantic models.
 
         Args:
@@ -145,9 +135,7 @@ class DataProcessor(IDataProcessor):
         day_value = requested_day if requested_day is not None else day
         raise ValueError(f"No verse of the day found for day {day_value}")
 
-    def process_notes(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_notes(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw notes data using dynamic Pydantic models.
 
         Args:
@@ -162,9 +150,7 @@ class DataProcessor(IDataProcessor):
             notes.append(note)
         return notes
 
-    def process_bookmarks(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_bookmarks(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw bookmarks data using dynamic Pydantic models.
 
         Args:
@@ -179,9 +165,7 @@ class DataProcessor(IDataProcessor):
             bookmarks.append(bookmark)
         return bookmarks
 
-    def process_images(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_images(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw images data using dynamic Pydantic models.
 
         Args:
@@ -196,9 +180,7 @@ class DataProcessor(IDataProcessor):
             images.append(image)
         return images
 
-    def process_plan_progress(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_plan_progress(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw plan progress data using dynamic Pydantic models.
 
         Args:
@@ -213,9 +195,7 @@ class DataProcessor(IDataProcessor):
             plan_progress.append(progress)
         return plan_progress
 
-    def process_plan_subscriptions(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_plan_subscriptions(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw plan subscriptions data using dynamic Pydantic models.
 
         Args:
@@ -226,15 +206,11 @@ class DataProcessor(IDataProcessor):
         """
         plan_subscriptions = []
         for item in raw_data:
-            subscription = create_instance_from_response(
-                "PlanSubscription", item
-            )
+            subscription = create_instance_from_response("PlanSubscription", item)
             plan_subscriptions.append(subscription)
         return plan_subscriptions
 
-    def process_badges(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_badges(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw badges data using dynamic Pydantic models.
 
         Args:
@@ -249,9 +225,7 @@ class DataProcessor(IDataProcessor):
             badges.append(badge)
         return badges
 
-    def process_plan_completions(
-        self, raw_data: list[dict[str, Any]]
-    ) -> list[Any]:
+    def process_plan_completions(self, raw_data: list[dict[str, Any]]) -> list[Any]:
         """Process raw plan completions data using dynamic Pydantic models.
 
         Args:
@@ -262,15 +236,11 @@ class DataProcessor(IDataProcessor):
         """
         plan_completions = []
         for item in raw_data:
-            completion = create_instance_from_response(
-                "PlanCompletion", item
-            )
+            completion = create_instance_from_response("PlanCompletion", item)
             plan_completions.append(completion)
         return plan_completions
 
-    def process_search_bible(
-        self, raw_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    def process_search_bible(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         """Process raw Bible search results using dynamic Pydantic models.
 
         Args:
@@ -281,9 +251,7 @@ class DataProcessor(IDataProcessor):
         """
         return create_instance_from_response("BibleSearch", raw_data)
 
-    def process_bible_chapter(
-        self, raw_data: dict[str, Any]
-    ) -> Any:
+    def process_bible_chapter(self, raw_data: dict[str, Any]) -> Any:
         """Process raw Bible chapter data using dynamic Pydantic models.
 
         Args:
@@ -294,9 +262,7 @@ class DataProcessor(IDataProcessor):
         """
         return create_instance_from_response("BibleChapter", raw_data)
 
-    def process_bible_version(
-        self, raw_data: dict[str, Any]
-    ) -> Any:
+    def process_bible_version(self, raw_data: dict[str, Any]) -> Any:
         """Process raw Bible version data using dynamic Pydantic models.
 
         Args:
@@ -307,9 +273,7 @@ class DataProcessor(IDataProcessor):
         """
         return create_instance_from_response("Version", raw_data)
 
-    def process_bible_versions(
-        self, raw_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    def process_bible_versions(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         """Process raw Bible versions data using dynamic Pydantic models.
 
         Args:
@@ -352,9 +316,7 @@ class DataProcessor(IDataProcessor):
         # Handle dict input
         return create_instance_from_response("AudioChapter", raw_data)
 
-    def process_audio_version(
-        self, raw_data: dict[str, Any]
-    ) -> Any:
+    def process_audio_version(self, raw_data: dict[str, Any]) -> Any:
         """Process raw audio version data using dynamic Pydantic models.
 
         Args:
@@ -365,9 +327,7 @@ class DataProcessor(IDataProcessor):
         """
         return create_instance_from_response("AudioVersion", raw_data)
 
-    def process_send_friend_request(
-        self, raw_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    def process_send_friend_request(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         """Process raw friend request data using dynamic Pydantic models.
 
         Args:
@@ -377,3 +337,223 @@ class DataProcessor(IDataProcessor):
             Processed friend request data with dynamically created objects
         """
         return create_instance_from_response("FriendshipRequest", raw_data)
+
+    def process_bible_configuration(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw Bible configuration data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw Bible configuration data from API
+
+        Returns:
+            Processed configuration data with dynamically created objects
+        """
+        return create_instance_from_response("BibleConfiguration", raw_data)
+
+    def process_recommended_languages(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process recommended languages data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw recommended languages data from API
+
+        Returns:
+            Processed languages data with dynamically created objects
+        """
+        return create_instance_from_response("RecommendedLanguages", raw_data)
+
+    def process_search_plans(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw plan search results using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw plan search results data from API
+
+        Returns:
+            Processed search results with dynamically created objects
+        """
+        return create_instance_from_response("PlanSearch", raw_data)
+
+    def process_search_users(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw user search results using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw user search results data from API
+
+        Returns:
+            Processed search results with dynamically created objects
+        """
+        return create_instance_from_response("UserSearch", raw_data)
+
+    def process_videos(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw videos data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw videos data from API
+
+        Returns:
+            Processed videos data with dynamically created objects
+        """
+        return create_instance_from_response("Videos", raw_data)
+
+    def process_video_details(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw video details data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw video details data from API
+
+        Returns:
+            Processed video details with dynamically created objects
+        """
+        return create_instance_from_response("VideoDetails", raw_data)
+
+    def process_image_upload_url(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw image upload URL data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw image upload URL data from API
+
+        Returns:
+            Processed upload URL data with dynamically created objects
+        """
+        return create_instance_from_response("ImageUploadUrl", raw_data)
+
+    def process_search_events(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw event search results using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw event search results data from API
+
+        Returns:
+            Processed search results with dynamically created objects
+        """
+        return create_instance_from_response("EventSearch", raw_data)
+
+    def process_event_details(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw event details data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw event details data from API
+
+        Returns:
+            Processed event details with dynamically created objects
+        """
+        return create_instance_from_response("EventDetails", raw_data)
+
+    def process_saved_events(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw saved events data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw saved events data from API
+
+        Returns:
+            Processed saved events data with dynamically created objects
+        """
+        return create_instance_from_response("SavedEvents", raw_data)
+
+    def process_moments_list(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moments list data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw moments list data from API
+
+        Returns:
+            Processed moments list with dynamically created objects
+        """
+        return create_instance_from_response("MomentsList", raw_data)
+
+    def process_moment_details(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moment details data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw moment details data from API
+
+        Returns:
+            Processed moment details with dynamically created objects
+        """
+        return create_instance_from_response("MomentDetails", raw_data)
+
+    def process_moment_colors(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moment colors data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw moment colors data from API
+
+        Returns:
+            Processed colors data with dynamically created objects
+        """
+        return create_instance_from_response("MomentColors", raw_data)
+
+    def process_moment_labels(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moment labels data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw moment labels data from API
+
+        Returns:
+            Processed labels data with dynamically created objects
+        """
+        return create_instance_from_response("MomentLabels", raw_data)
+
+    def process_verse_colors(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw verse colors data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw verse colors data from API
+
+        Returns:
+            Processed verse colors data with dynamically created objects
+        """
+        return create_instance_from_response("VerseColors", raw_data)
+
+    def process_moments_configuration(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process moments configuration data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw moments configuration data from API
+
+        Returns:
+            Processed configuration data with dynamically created objects
+        """
+        return create_instance_from_response("MomentsConfiguration", raw_data)
+
+    def process_themes(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw themes data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw themes data from API
+
+        Returns:
+            Processed themes data with dynamically created objects
+        """
+        return create_instance_from_response("Themes", raw_data)
+
+    def process_theme_description(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw theme description data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw theme description data from API
+
+        Returns:
+            Processed theme description with dynamically created objects
+        """
+        return create_instance_from_response("ThemeDescription", raw_data)
+
+    def process_event_configuration(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw event configuration data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw event configuration data from API
+
+        Returns:
+            Processed configuration data with dynamically created objects
+        """
+        return create_instance_from_response("EventConfiguration", raw_data)
+
+    def process_all_saved_event_ids(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw all saved event IDs data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw all saved event IDs data from API
+
+        Returns:
+            Processed event IDs data with dynamically created objects
+        """
+        return create_instance_from_response("AllSavedEventIds", raw_data)

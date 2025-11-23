@@ -123,6 +123,30 @@ async def demonstrate_poetry_commands():
                 print(f"Error: {e}")
             print()
 
+            # Equivalent of: poetry run plan-completions
+            print("✅ poetry run plan-completions")
+            print("-" * 30)
+            try:
+                completions = await client.plan_completions(page=1)
+                print(f"Found {len(completions)} completions")
+                if completions:
+                    print(f"First completion type: {type(completions[0])}")
+            except Exception as e:
+                print(f"Error: {e}")
+            print()
+
+            # Equivalent of: poetry run badges
+            print("🏅 poetry run badges")
+            print("-" * 30)
+            try:
+                badges = await client.badges(page=1)
+                print(f"Found {len(badges)} badges")
+                if badges:
+                    print(f"First badge type: {type(badges[0])}")
+            except Exception as e:
+                print(f"Error: {e}")
+            print()
+
             # Equivalent of: poetry run convert-notes
             print("🔄 poetry run convert-notes")
             print("-" * 30)
@@ -146,6 +170,8 @@ async def demonstrate_poetry_commands():
             print("   poetry run images")
             print("   poetry run plan-progress")
             print("   poetry run plan-subscriptions")
+            print("   poetry run plan-completions")
+            print("   poetry run badges")
             print("   poetry run convert-notes")
             print()
             print("💡 To use the main CLI with arguments:")

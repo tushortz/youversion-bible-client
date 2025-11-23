@@ -27,17 +27,36 @@ pip install youversion-bible-client
 
 ## Quick start
 
-### Synchronous client
+### Client
 
 ## Examples
 
 ### Create sync client
 
+The sync client is a wrapper on top of the asynchronous client. See [DOCS.md](./DOCS.md) on examples on how to use
+
 ```py
 from youversion.clients import SyncClient
 
 client = SyncClient()
+
+# get verse of the day
+client.verse_of_the_day()
 ```
+
+### creating async client
+
+```py
+import asyncio
+from youversion.clients import AsyncClient
+
+async def main():
+    # Using async context manager (recommended)
+    async with AsyncClient() as client:
+        # Get verse of the day
+        votd = await client.verse_of_the_day()
+```
+
 
 ### Verse of the day
 

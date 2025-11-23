@@ -40,6 +40,10 @@ async def fetch_single_data(
             result = await client.plan_progress(page=page)
         elif data_type == "plan_subscriptions":
             result = await client.plan_subscriptions(page=page)
+        elif data_type == "plan_completions":
+            result = await client.plan_completions(page=page)
+        elif data_type == "badges":
+            result = await client.badges(page=page)
         elif data_type == "convert_note_to_md":
             result = await client.convert_note_to_md()
         else:
@@ -68,6 +72,8 @@ async def demonstrate_gather_pattern():
                 fetch_single_data(client, "my_images", 1),
                 fetch_single_data(client, "plan_progress", 1),
                 fetch_single_data(client, "plan_subscriptions", 1),
+                fetch_single_data(client, "plan_completions", 1),
+                fetch_single_data(client, "badges", 1),
                 fetch_single_data(client, "convert_note_to_md"),
                 return_exceptions=True,
             )
@@ -109,6 +115,8 @@ async def demonstrate_as_completed_pattern():
                 asyncio.create_task(fetch_single_data(client, "my_images", 1)),
                 asyncio.create_task(fetch_single_data(client, "plan_progress", 1)),
                 asyncio.create_task(fetch_single_data(client, "plan_subscriptions", 1)),
+                asyncio.create_task(fetch_single_data(client, "plan_completions", 1)),
+                asyncio.create_task(fetch_single_data(client, "badges", 1)),
                 asyncio.create_task(fetch_single_data(client, "convert_note_to_md")),
             ]
 
@@ -164,7 +172,8 @@ async def demonstrate_batch_requests():
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 # Process batch results
-                for page, (data_type, result, error) in zip(batch, batch_results):
+                for page, batch_result in zip(batch, batch_results):
+                    _data_type, result, error = batch_result
                     if error:
                         print(f"      ❌ Page {page}: Error - {error}")
                     else:
@@ -186,7 +195,7 @@ async def demonstrate_background_tasks():
     """Demonstrate background tasks"""
     print("\n🔄 Demonstrating background tasks...")
 
-    async def background_fetcher(client: Client, data_type: str, interval: float):
+    async def background_fetcher(client: AsyncClient, data_type: str, interval: float):
         """Background task that fetches data periodically"""
         try:
             while True:
@@ -236,7 +245,9 @@ async def demonstrate_error_handling_in_concurrent():
     """Demonstrate error handling in concurrent operations"""
     print("\n⚠️  Demonstrating error handling in concurrent operations...")
 
-    async def fetch_with_retry(client: Client, data_type: str, max_retries: int = 3):
+    async def fetch_with_retry(
+        client: AsyncClient, data_type: str, max_retries: int = 3
+    ):
         """Fetch data with retry logic"""
         for attempt in range(max_retries):
             try:
@@ -266,6 +277,8 @@ async def demonstrate_error_handling_in_concurrent():
                 asyncio.create_task(fetch_with_retry(client, "my_images")),
                 asyncio.create_task(fetch_with_retry(client, "plan_progress")),
                 asyncio.create_task(fetch_with_retry(client, "plan_subscriptions")),
+                asyncio.create_task(fetch_with_retry(client, "plan_completions")),
+                asyncio.create_task(fetch_with_retry(client, "badges")),
                 asyncio.create_task(fetch_with_retry(client, "convert_note_to_md")),
             ]
 

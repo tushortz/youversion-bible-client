@@ -93,6 +93,106 @@ class IDataProcessor(ABC):
         """Process raw audio version data."""
         pass
 
+    @abstractmethod
+    def process_bible_configuration(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw Bible configuration data."""
+        pass
+
+    @abstractmethod
+    def process_recommended_languages(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw recommended languages data."""
+        pass
+
+    @abstractmethod
+    def process_search_plans(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw plan search results data."""
+        pass
+
+    @abstractmethod
+    def process_search_users(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw user search results data."""
+        pass
+
+    @abstractmethod
+    def process_videos(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw videos data."""
+        pass
+
+    @abstractmethod
+    def process_video_details(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw video details data."""
+        pass
+
+    @abstractmethod
+    def process_image_upload_url(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw image upload URL data."""
+        pass
+
+    @abstractmethod
+    def process_search_events(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw event search results data."""
+        pass
+
+    @abstractmethod
+    def process_event_details(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw event details data."""
+        pass
+
+    @abstractmethod
+    def process_saved_events(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw saved events data."""
+        pass
+
+    @abstractmethod
+    def process_moments_list(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moments list data."""
+        pass
+
+    @abstractmethod
+    def process_moment_details(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moment details data."""
+        pass
+
+    @abstractmethod
+    def process_moment_colors(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moment colors data."""
+        pass
+
+    @abstractmethod
+    def process_moment_labels(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moment labels data."""
+        pass
+
+    @abstractmethod
+    def process_verse_colors(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw verse colors data."""
+        pass
+
+    @abstractmethod
+    def process_moments_configuration(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw moments configuration data."""
+        pass
+
+    @abstractmethod
+    def process_themes(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw themes data."""
+        pass
+
+    @abstractmethod
+    def process_theme_description(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw theme description data."""
+        pass
+
+    @abstractmethod
+    def process_event_configuration(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw event configuration data."""
+        pass
+
+    @abstractmethod
+    def process_all_saved_event_ids(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw all saved event IDs data."""
+        pass
+
 
 class IClient(ABC):
     """Interface for YouVersion API client."""

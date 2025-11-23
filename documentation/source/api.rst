@@ -1,7 +1,17 @@
 API Reference
 =============
 
-This section contains the complete API reference for the YouVersion Bible Client.
+This section contains the complete API reference for the YouVersion Bible Client, including all 55+ available methods.
+
+Overview
+--------
+
+The YouVersion Bible Client provides comprehensive access to the YouVersion API through two client implementations:
+
+* **AsyncClient**: Asynchronous client for modern async/await code
+* **SyncClient**: Synchronous wrapper around AsyncClient for traditional Python code
+
+Both clients provide identical functionality with the same method signatures. The only difference is that AsyncClient methods are `async` and must be awaited.
 
 Clients
 -------
@@ -15,6 +25,8 @@ Clients
 AsyncClient
 ~~~~~~~~~~~
 
+The primary client for async applications. All methods are coroutines that must be awaited.
+
 .. autoclass:: youversion.clients.AsyncClient
    :members:
    :undoc-members:
@@ -23,6 +35,8 @@ AsyncClient
 
 SyncClient
 ~~~~~~~~~~
+
+Synchronous wrapper around AsyncClient. All methods are regular functions (not coroutines).
 
 .. autoclass:: youversion.clients.SyncClient
    :members:
@@ -78,20 +92,6 @@ DataProcessor
    :show-inheritance:
    :no-index:
 
-URLDiscovery
-~~~~~~~~~~~~
-
-.. automodule:: youversion.core.url_discovery
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.core.url_discovery.URLDiscovery
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
 
 BaseClient
 ~~~~~~~~~~

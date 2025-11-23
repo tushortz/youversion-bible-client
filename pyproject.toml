@@ -1,22 +1,66 @@
-[tool.poetry]
+[project]
 name = "youversion-bible-client"
-version = "0.3.0"
+version = "0.1.0"
 description = "A Command line interface for interacting with the YouVersion Bible API"
-authors = ["Taiwo Kareem <taiwo.kareem36@gmail.com>"]
-maintainers = ["Taiwo Kareem <taiwo.kareem36@gmail.com>"]
+authors = [
+    {name = "Taiwo Kareem", email = "taiwo.kareem36@gmail.com"}
+]
+maintainers = [
+    {name = "Taiwo Kareem", email = "taiwo.kareem36@gmail.com"}
+]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/tushortz/youversion-bible-client"
-repository = "https://github.com/tushortz/youversion-bible-client"
 keywords = ["YouVersion Bible", "Bible", "Youversion", "Lifechurch"]
-packages = [{ include = "youversion" }]
+requires-python = ">=3.9"
+dependencies = [
+    "httpx>=0.25.0",
+    "python-dotenv>=0.19.0",
+    "pydantic>=2.5.0",
+    "pyjwt>=2.10.1",
+    "typing-extensions>=4.0.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-httpx = "^0.25.0"
-python-dotenv = "^0.19.0"
-pydantic = "^2.5.0"
-pyjwt = "^2.10.1"
+[project.urls]
+Homepage = "https://github.com/tushortz/youversion-bible-client"
+Repository = "https://github.com/tushortz/youversion-bible-client"
+
+[project.scripts]
+youversion = "youversion.cli:main"
+votd = "youversion.cli:poetry_cmd_votd"
+moments = "youversion.cli:poetry_cmd_moments"
+highlights = "youversion.cli:poetry_cmd_highlights"
+notes = "youversion.cli:poetry_cmd_notes"
+bookmarks = "youversion.cli:poetry_cmd_bookmarks"
+images = "youversion.cli:poetry_cmd_images"
+plan-progress = "youversion.cli:poetry_cmd_plan_progress"
+plan-subscriptions = "youversion.cli:poetry_cmd_plan_subscriptions"
+plan-completions = "youversion.cli:poetry_cmd_plan_completions"
+convert-notes = "youversion.cli:poetry_cmd_convert_notes"
+create-moment = "youversion.cli:poetry_cmd_create_moment"
+
+[tool.poetry]
+packages = [{ include = "youversion" }]
+exclude = [
+    "documentation/**/*",
+    "documentation",
+    "examples/**/*",
+    "examples",
+    "tests/**/*",
+    "tests",
+    "htmlcov/**/*",
+    "htmlcov",
+    "env/**/*",
+    "env",
+    "*.pyc",
+    "__pycache__/**/*",
+    "*.egg-info",
+    ".pytest_cache/**/*",
+    ".mypy_cache/**/*",
+    "bandit-report.json",
+    "main.py",
+    "note_to_markdown.py",
+    "run_tests.py",
+]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.0"
@@ -31,20 +75,6 @@ sphinx-rtd-theme = "^3.0.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
-youversion = "youversion.cli:main"
-votd = "youversion.cli:poetry_cmd_votd"
-moments = "youversion.cli:poetry_cmd_moments"
-highlights = "youversion.cli:poetry_cmd_highlights"
-notes = "youversion.cli:poetry_cmd_notes"
-bookmarks = "youversion.cli:poetry_cmd_bookmarks"
-images = "youversion.cli:poetry_cmd_images"
-plan-progress = "youversion.cli:poetry_cmd_plan_progress"
-plan-subscriptions = "youversion.cli:poetry_cmd_plan_subscriptions"
-plan-completions = "youversion.cli:poetry_cmd_plan_completions"
-convert-notes = "youversion.cli:poetry_cmd_convert_notes"
-create-moment = "youversion.cli:poetry_cmd_create_moment"
-discover-endpoints = "youversion.cli:poetry_cmd_discover_endpoints"
 
 [tool.black]
 line-length = 88
@@ -87,3 +117,22 @@ ignore = [
 
 [tool.ruff.isort]
 known-first-party = ["youversion"]
+
+[tool.coverage.run]
+source = ["youversion"]
+omit = [
+    "youversion/cli.py",
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]

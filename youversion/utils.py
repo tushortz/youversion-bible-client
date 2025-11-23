@@ -32,9 +32,7 @@ class DynamicPydanticFactory:
             name = "_empty"
         return name
 
-    def _infer_type(
-        self, value: Any, field_name: str = ""
-    ) -> tuple[Any, Any]:
+    def _infer_type(self, value: Any, field_name: str = "") -> tuple[Any, Any]:
         """Infer Python type from a value.
 
         Args:
@@ -61,21 +59,15 @@ class DynamicPydanticFactory:
                 # (e.g., "verses" -> "Verse")
                 if field_name:
                     # Singularize and PascalCase: "verses" -> "Verse"
-                    element_class_name = (
-                        self._get_element_class_name(field_name)
-                    )
+                    element_class_name = self._get_element_class_name(field_name)
                     element_class = self.create_model(element_class_name, {})
                     return (list[element_class], Field(default_factory=list))
                 return (list[Any], Field(default_factory=list))
             # Infer type from first element
             # Use field_name to create model name for dict elements
             if isinstance(value[0], dict) and field_name:
-                element_class_name = (
-                    self._get_element_class_name(field_name)
-                )
-                element_type, _ = self._infer_type(
-                    value[0], element_class_name
-                )
+                element_class_name = self._get_element_class_name(field_name)
+                element_type, _ = self._infer_type(value[0], element_class_name)
             else:
                 element_type, _ = self._infer_type(value[0], field_name)
             return (list[element_type], Field(default_factory=list))
@@ -123,9 +115,7 @@ class DynamicPydanticFactory:
                 pascal_case = singular
             else:
                 # Convert to PascalCase: capitalize each word
-                pascal_case = "".join(
-                    word.capitalize() for word in parts if word
-                )
+                pascal_case = "".join(word.capitalize() for word in parts if word)
 
             # Ensure it's not empty after processing
             if not pascal_case or pascal_case == "_empty":
@@ -133,9 +123,7 @@ class DynamicPydanticFactory:
             return pascal_case
         return "Item"
 
-    def create_model(
-        self, class_name: str, data: dict[str, Any]
-    ) -> type[BaseModel]:
+    def create_model(self, class_name: str, data: dict[str, Any]) -> type[BaseModel]:
         """Create a Pydantic model dynamically from a dictionary.
 
         Args:
@@ -154,9 +142,7 @@ class DynamicPydanticFactory:
             # If it contains underscores, convert to PascalCase
             if "_" in sanitized:
                 parts = sanitized.split("_")
-                final_class_name = "".join(
-                    word.capitalize() for word in parts if word
-                )
+                final_class_name = "".join(word.capitalize() for word in parts if word)
             else:
                 # Already PascalCase or single word - preserve it
                 final_class_name = sanitized
@@ -213,14 +199,10 @@ class DynamicPydanticFactory:
             return generated_class
         except (TypeError, ValueError):
             # Fallback to a simple model if creation fails
-            fallback_fields = {
-                self._sanitize_name(k): (Any, None) for k in data.keys()
-            }
+            fallback_fields = {self._sanitize_name(k): (Any, None) for k in data.keys()}
             return create_model(class_name, **fallback_fields)
 
-    def create_instance(
-        self, class_name: str, data: dict[str, Any]
-    ) -> Any:
+    def create_instance(self, class_name: str, data: dict[str, Any]) -> Any:
         """Create a Pydantic model instance from a dictionary.
 
         Args:
@@ -268,18 +250,16 @@ class DynamicPydanticFactory:
                                 nested_class = arg
                                 break
                         if nested_class:
-                            processed_data[field_name] = (
-                                self._create_instance_recursive(
-                                    nested_class, value
-                                )
-                            )
+                            processed_data[
+                                field_name
+                            ] = self._create_instance_recursive(nested_class, value)
                         else:
                             # No model type found, pass dict
                             processed_data[field_name] = value
                     elif hasattr(annotation, "model_fields"):
                         # Direct model type
-                        processed_data[field_name] = (
-                            self._create_instance_recursive(annotation, value)
+                        processed_data[field_name] = self._create_instance_recursive(
+                            annotation, value
                         )
                     else:
                         # dict type, pass as-is
@@ -359,9 +339,7 @@ def create_model_from_response(
     return _factory.create_model(class_name, data)
 
 
-def create_instance_from_response(
-    class_name: str, data: dict[str, Any]
-) -> Any:
+def create_instance_from_response(class_name: str, data: dict[str, Any]) -> Any:
     """Create a Pydantic model instance from an API response.
 
     Args:

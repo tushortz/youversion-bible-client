@@ -52,9 +52,6 @@ The CLI provides several commands for accessing different types of data:
    # Convert notes to markdown
    poetry run youversion convert-notes
 
-   # Discover API endpoints
-   poetry run youversion discover-endpoints
-
 Global Options
 --------------
 
@@ -234,22 +231,6 @@ Examples:
    :code:`poetry run youversion convert-notes`
    :code:`poetry run youversion convert-notes --json`
 
-discover-endpoints
-~~~~~~~~~~~~~~~~~~
-
-Discover available API endpoints and build ID.
-
-.. code-block:: bash
-
-   poetry run youversion discover-endpoints [--username USERNAME]
-
-Options:
-   ``--username USERNAME``: Specify username for endpoint discovery
-
-Examples:
-   :code:`poetry run youversion discover-endpoints`
-   :code:`poetry run youversion discover-endpoints --username myuser`
-
 Configuration
 -------------
 
@@ -312,10 +293,6 @@ The CLI commands are also available as Poetry scripts for easier access:
    # Convert notes
    poetry run convert-notes
    poetry run convert-notes --json
-
-   # Discover endpoints
-   poetry run discover-endpoints
-   poetry run discover-endpoints --username myuser
 
 Output Formats
 --------------
@@ -400,9 +377,6 @@ Advanced Usage
 
    # Get all notes as JSON for processing
    poetry run youversion notes --json > notes.json
-
-   # Discover API endpoints
-   poetry run youversion discover-endpoints --username myuser
 
    # Convert notes to markdown
    poetry run youversion convert-notes --json > notes.md

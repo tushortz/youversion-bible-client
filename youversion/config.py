@@ -1,8 +1,6 @@
 """Configuration constants for YouVersion API client."""
 
 
-
-
 class Config:
     """Configuration constants."""
 

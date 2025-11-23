@@ -42,15 +42,11 @@ class CreateMoment(BaseModel):
         ..., description="List of Bible references"
     )
     title: str = Field(..., description="Moment title")
-    status: StatusEnum = Field(
-        ..., description="Status (private, draft or public)"
-    )
+    status: StatusEnum = Field(..., description="Status (private, draft or public)")
     body: str = Field(..., description="Body text")
-    color: str = Field(
-        ..., description="Color hex code", min_length=6, max_length=6
-    )
+    color: str = Field(..., description="Color hex code", min_length=6, max_length=6)
     labels: list[str] = Field(
-        ..., description="List of labels", min_items=1, max_length=10
+        ..., description="List of labels", min_length=1, max_length=10
     )
     language_tag: str = Field(
         ...,
@@ -69,9 +65,7 @@ class CreateMoment(BaseModel):
             Dictionary representation of the model
         """
         # Use mode='python' to get enum values as strings
-        data = super().model_dump(
-            mode="python", **kwargs
-        )
+        data = super().model_dump(mode="python", **kwargs)
         # Convert enum values to their string values
         if "kind" in data and hasattr(data["kind"], "value"):
             data["kind"] = data["kind"].value

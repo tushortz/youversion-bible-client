@@ -6,8 +6,6 @@ import pytest
 from pydantic import BaseModel
 
 from youversion.core.data_processor import DataProcessor
-from youversion.enums import MomentKinds
-from youversion.models import Reference, Votd
 
 
 class TestDataProcessor:
@@ -17,14 +15,9 @@ class TestDataProcessor:
         """Test DataProcessor initialization."""
         processor = DataProcessor()
 
-        # Check that moment mapper is properly initialized
-        assert MomentKinds.FRIENDSHIP.value in processor._moment_mapper
-        assert MomentKinds.HIGHLIGHT.value in processor._moment_mapper
-        assert MomentKinds.IMAGE.value in processor._moment_mapper
-        assert MomentKinds.NOTE.value in processor._moment_mapper
-        assert MomentKinds.PLAN_COMPLETION.value in processor._moment_mapper
-        assert MomentKinds.PLAN_SEGMENT_COMPLETION.value in processor._moment_mapper
-        assert MomentKinds.PLAN_SUBSCRIPTION.value in processor._moment_mapper
+        # DataProcessor is now initialized without moment_mapper
+        # (using dynamic Pydantic models instead)
+        assert processor is not None
 
     def test_create_references(self):
         """Test creating Reference objects from raw data."""
@@ -38,12 +31,13 @@ class TestDataProcessor:
         references = processor._create_references(raw_references)
 
         assert len(references) == 2
-        assert isinstance(references[0], Reference)
+        # Check that dynamic Pydantic models were created
+        assert isinstance(references[0], BaseModel)
         assert references[0].version_id == "1"
         assert references[0].human == "John 3:16"
         assert references[0].usfm == "JHN.3.16"
 
-        assert isinstance(references[1], Reference)
+        assert isinstance(references[1], BaseModel)
         assert references[1].version_id == "2"
         assert references[1].human == "Psalm 23:1"
         assert references[1].usfm == "PSA.23.1"
@@ -109,80 +103,8 @@ class TestDataProcessor:
         assert "likes" not in processed_obj
         assert "user" not in processed_obj
 
-    def test_process_actions_plan_segment_completion(self):
-        """Test processing actions for plan segment completion."""
-        processor = DataProcessor()
-
-        raw_obj = {
-            "id": "123",
-            "actions": {"about_plan": True, "read_plan": True, "show": True},
-        }
-
-        processed_obj = processor._process_actions(
-            raw_obj, MomentKinds.PLAN_SEGMENT_COMPLETION.value
-        )
-
-        # Check that dynamic Pydantic model was created
-        assert isinstance(processed_obj["actions"], BaseModel)
-        assert hasattr(processed_obj["actions"], "about_plan")
-
-    def test_process_actions_plan_completion(self):
-        """Test processing actions for plan completion."""
-        processor = DataProcessor()
-
-        raw_obj = {
-            "id": "123",
-            "actions": {"about_plan": True, "show": True, "start_plan": True},
-        }
-
-        processed_obj = processor._process_actions(
-            raw_obj, MomentKinds.PLAN_COMPLETION.value
-        )
-
-        # Check that dynamic Pydantic model was created
-        assert isinstance(processed_obj["actions"], BaseModel)
-        assert hasattr(processed_obj["actions"], "about_plan")
-
-    def test_process_actions_friendship(self):
-        """Test processing actions for friendship (no actions)."""
-        processor = DataProcessor()
-
-        raw_obj = {
-            "id": "123",
-            "actions": {
-                "deletable": True,
-                "editable": False,
-                "read": True,
-                "show": False,
-            },
-        }
-
-        processed_obj = processor._process_actions(
-            raw_obj, MomentKinds.FRIENDSHIP.value
-        )
-
-        # Friendship should not have actions processed
-        assert processed_obj["actions"] == {"can_follow": True}
-
-    def test_process_actions_default(self):
-        """Test processing actions for default case."""
-        processor = DataProcessor()
-
-        raw_obj = {
-            "id": "123",
-            "actions": {
-                "deletable": True,
-                "editable": False,
-                "read": True,
-                "show": False,
-            },
-        }
-
-        processed_obj = processor._process_actions(raw_obj, MomentKinds.HIGHLIGHT.value)
-
-        # Check that dynamic Pydantic model was created
-        assert isinstance(processed_obj["actions"], BaseModel)
-        assert hasattr(processed_obj["actions"], "deletable")
+    # Note: _process_actions method was removed when switching to dynamic models
+    # Actions are now processed as part of the dynamic model creation
 
     def test_process_moments_success(self):
         """Test successful moments processing."""
@@ -190,47 +112,12 @@ class TestDataProcessor:
 
         raw_data = [
             {
-                "kind": MomentKinds.HIGHLIGHT.value,
-                "object": {
-                    "id": "123",
-                    "text": "Test highlight",
-                    "references": [
-                        {"version_id": "1", "human": "John 3:16", "usfm": ["JHN.3.16"]}
-                    ],
-                    "actions": {
-                        "deletable": True,
-                        "editable": False,
-                        "read": True,
-                        "show": False,
-                    },
-                    "comments": {
-                        "enabled": True,
-                        "count": 0,
-                        "strings": {"en": "Comments"},
-                        "all": [],
-                        "data": [],
-                    },
-                    "likes": {
-                        "enabled": True,
-                        "count": 0,
-                        "strings": {"en": "Likes"},
-                        "all": [],
-                        "data": [],
-                        "is_liked": False,
-                    },
-                    "user": {
-                        "id": "user123",
-                        "path": "/users/testuser",
-                        "user_name": "testuser",
-                    },
-                    "avatar": "//example.com/avatar.jpg",
-                    "moment_title": "Test Highlight",
-                    "owned_by_me": True,
-                    "path": "/moments/123",
-                    "time_ago": "2 hours ago",
-                    "created_dt": "2023-01-01T00:00:00Z",
-                    "updated_dt": "2023-01-01T00:00:00Z",
-                },
+                "kind_id": "highlight",
+                "id": "123",
+                "text": "Test highlight",
+                "references": [
+                    {"version_id": "1", "human": "John 3:16", "usfm": ["JHN.3.16"]}
+                ],
             }
         ]
 
@@ -240,7 +127,11 @@ class TestDataProcessor:
         # Check that dynamic Pydantic model was created
         assert isinstance(moments[0], BaseModel)
         # Verify attributes exist (using model_dump for dynamic models)
-        moment_dict = moments[0].model_dump() if hasattr(moments[0], "model_dump") else moments[0].__dict__
+        moment_dict = (
+            moments[0].model_dump()
+            if hasattr(moments[0], "model_dump")
+            else moments[0].__dict__
+        )
         assert moment_dict.get("id") == "123"
         assert moment_dict.get("text") == "Test highlight"
         # Check references if they exist
@@ -251,11 +142,13 @@ class TestDataProcessor:
         """Test processing moments with unknown kind."""
         processor = DataProcessor()
 
-        raw_data = [{"kind": "unknown_kind", "object": {"id": "123"}}]
+        raw_data = [{"kind_id": "unknown_kind", "id": "123"}]
 
         moments = processor.process_moments(raw_data)
 
-        assert len(moments) == 0
+        # Unknown kinds are still processed (no filtering)
+        assert len(moments) == 1
+        assert isinstance(moments[0], BaseModel)
 
     def test_process_moments_friendship_no_references(self):
         """Test processing friendship moments (no references)."""
@@ -263,46 +156,10 @@ class TestDataProcessor:
 
         raw_data = [
             {
-                "kind": MomentKinds.FRIENDSHIP.value,
-                "object": {
-                    "id": "123",
-                    "user": {
-                        "id": "user123",
-                        "path": "/users/testuser",
-                        "user_name": "testuser",
-                    },
-                    "friend_path": "/users/friend",
-                    "friend_name": "Friend User",
-                    "friend_avatar": "//example.com/friend.jpg",
-                    "actions": {
-                        "deletable": True,
-                        "editable": False,
-                        "read": True,
-                        "show": False,
-                    },
-                    "comments": {
-                        "enabled": True,
-                        "count": 0,
-                        "strings": {"en": "Comments"},
-                        "all": [],
-                        "data": [],
-                    },
-                    "likes": {
-                        "enabled": True,
-                        "count": 0,
-                        "strings": {"en": "Likes"},
-                        "all": [],
-                        "data": [],
-                        "is_liked": False,
-                    },
-                    "avatar": "//example.com/avatar.jpg",
-                    "moment_title": "Test Friendship",
-                    "owned_by_me": True,
-                    "path": "/moments/123",
-                    "time_ago": "2 hours ago",
-                    "created_dt": "2023-01-01T00:00:00Z",
-                    "updated_dt": "2023-01-01T00:00:00Z",
-                },
+                "kind_id": "friendship",
+                "id": "123",
+                "friend_path": "/users/friend",
+                "friend_name": "Friend User",
             }
         ]
 
@@ -312,10 +169,12 @@ class TestDataProcessor:
         # Check that dynamic Pydantic model was created
         assert isinstance(moments[0], BaseModel)
         # Verify attributes exist
-        moment_dict = moments[0].model_dump() if hasattr(moments[0], "model_dump") else moments[0].__dict__
+        moment_dict = (
+            moments[0].model_dump()
+            if hasattr(moments[0], "model_dump")
+            else moments[0].__dict__
+        )
         assert moment_dict.get("id") == "123"
-        # Friendship should not have references processed
-        assert "references" not in moment_dict
 
     def test_process_highlights_success(self):
         """Test successful highlights processing."""
@@ -323,47 +182,11 @@ class TestDataProcessor:
 
         raw_data = [
             {
-                "kind": MomentKinds.HIGHLIGHT.value,
-                "object": {
-                    "id": "123",
-                    "text": "Test highlight",
-                    "references": [
-                        {"version_id": "1", "human": "John 3:16", "usfm": ["JHN.3.16"]}
-                    ],
-                    "actions": {
-                        "deletable": True,
-                        "editable": False,
-                        "read": True,
-                        "show": False,
-                    },
-                    "comments": {
-                        "enabled": True,
-                        "count": 0,
-                        "strings": {"en": "Comments"},
-                        "all": [],
-                        "data": [],
-                    },
-                    "likes": {
-                        "enabled": True,
-                        "count": 0,
-                        "strings": {"en": "Likes"},
-                        "all": [],
-                        "data": [],
-                        "is_liked": False,
-                    },
-                    "user": {
-                        "id": "user123",
-                        "path": "/users/testuser",
-                        "user_name": "testuser",
-                    },
-                    "avatar": "//example.com/avatar.jpg",
-                    "moment_title": "Test Highlight",
-                    "owned_by_me": True,
-                    "path": "/moments/123",
-                    "time_ago": "2 hours ago",
-                    "created_dt": "2023-01-01T00:00:00Z",
-                    "updated_dt": "2023-01-01T00:00:00Z",
-                },
+                "id": "123",
+                "text": "Test highlight",
+                "references": [
+                    {"version_id": "1", "human": "John 3:16", "usfm": ["JHN.3.16"]}
+                ],
             }
         ]
 
@@ -373,15 +196,16 @@ class TestDataProcessor:
         # Check that dynamic Pydantic model was created
         assert isinstance(highlights[0], BaseModel)
         # Verify attributes exist
-        highlight_dict = highlights[0].model_dump() if hasattr(highlights[0], "model_dump") else highlights[0].__dict__
+        highlight_dict = (
+            highlights[0].model_dump()
+            if hasattr(highlights[0], "model_dump")
+            else highlights[0].__dict__
+        )
         assert highlight_dict.get("id") == "123"
         assert highlight_dict.get("text") == "Test highlight"
         # Check references if they exist
         if "references" in highlight_dict:
             assert len(highlight_dict["references"]) == 1
-        # Check actions if they exist
-        if "actions" in highlight_dict:
-            assert isinstance(highlight_dict["actions"], (BaseModel, dict))
 
     def test_process_verse_of_the_day_success(self):
         """Test successful verse of the day processing."""
@@ -396,7 +220,8 @@ class TestDataProcessor:
 
         votd = processor.process_verse_of_the_day(raw_data, day=15)
 
-        assert isinstance(votd, Votd)
+        # Check that dynamic Pydantic model was created
+        assert isinstance(votd, BaseModel)
         assert votd.day == 15
         assert votd.usfm == ["JHN.3.16"]
         assert votd.image_id == "img123"
@@ -413,7 +238,8 @@ class TestDataProcessor:
 
         votd = processor.process_verse_of_the_day(raw_data)
 
-        assert isinstance(votd, Votd)
+        # Check that dynamic Pydantic model was created
+        assert isinstance(votd, BaseModel)
         assert votd.day == 20
         assert votd.usfm == ["JHN.3.16"]
 
@@ -426,7 +252,8 @@ class TestDataProcessor:
         # When specific day not found, should fallback to first available
         votd = processor.process_verse_of_the_day(raw_data, day=20)
 
-        assert isinstance(votd, Votd)
+        # Check that dynamic Pydantic model was created
+        assert isinstance(votd, BaseModel)
         assert votd.day == 15
         assert votd.usfm == ["JHN.3.16"]
 
@@ -438,7 +265,8 @@ class TestDataProcessor:
 
         votd = processor.process_verse_of_the_day(raw_data, day=20)
 
-        assert isinstance(votd, Votd)
+        # Check that dynamic Pydantic model was created
+        assert isinstance(votd, BaseModel)
         assert votd.day == 15
         assert votd.usfm == ["JHN.3.16"]
 
@@ -476,7 +304,11 @@ class TestDataProcessor:
         assert isinstance(notes[0], BaseModel)
         assert isinstance(notes[1], BaseModel)
         # Verify attributes exist
-        note1_dict = notes[0].model_dump() if hasattr(notes[0], "model_dump") else notes[0].__dict__
+        note1_dict = (
+            notes[0].model_dump()
+            if hasattr(notes[0], "model_dump")
+            else notes[0].__dict__
+        )
         assert note1_dict.get("id") == "123"
         assert note1_dict.get("content") == "Test note"
 

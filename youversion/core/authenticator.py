@@ -49,9 +49,7 @@ class Authenticator(IAuthenticator):
 
         # Create HTTP client with Bearer token and default headers
         headers = {**Config.DEFAULT_HEADERS, "Authorization": f"Bearer {token}"}
-        client = httpx.AsyncClient(
-            headers=headers, timeout=Config.HTTP_TIMEOUT
-        )
+        client = httpx.AsyncClient(headers=headers, timeout=Config.HTTP_TIMEOUT)
 
         return client
 

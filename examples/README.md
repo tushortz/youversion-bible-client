@@ -22,47 +22,7 @@ Before running any examples, make sure you have:
 
 ## Example Files
 
-### 1. `poetry_scripts.py`
-
-**Poetry Script Commands Demo**
-
-This example demonstrates the equivalent of Poetry script commands and shows how to use them:
-
-```bash
-# Run the example
-python -m examples.poetry_scripts
-
-# Or use the actual Poetry commands
-poetry run votd
-poetry run moments
-poetry run highlights
-poetry run notes
-poetry run bookmarks
-poetry run images
-poetry run plan-progress
-poetry run plan-subscriptions
-poetry run convert-notes
-```
-
-**Available Poetry Script Commands:**
-
-- `poetry run votd` - Get verse of the day
-- `poetry run moments` - Get moments
-- `poetry run highlights` - Get highlights
-- `poetry run notes` - Get notes
-- `poetry run bookmarks` - Get bookmarks
-- `poetry run images` - Get images
-- `poetry run plan-progress` - Get plan progress
-- `poetry run plan-subscriptions` - Get plan subscriptions
-- `poetry run convert-notes` - Convert notes to markdown
-
-**Main CLI with arguments:**
-
-- `poetry run youversion votd --day 100`
-- `poetry run youversion moments --page 2 --limit 5`
-- `poetry run youversion highlights --json`
-
-### 2. `basic_usage.py`
+### 1. `basic_usage.py`
 
 **Complete API methods example demonstrating ALL public methods**
 
@@ -74,14 +34,39 @@ This example demonstrates every public method available in the Client class:
 - `notes(page=1)` - Get notes only
 - `bookmarks(page=1)` - Get bookmarks only
 - `my_images(page=1)` - Get images only
+- `badges(page=1)` - Get badges only
 - `plan_progress(page=1)` - Get plan progress/segment completion
 - `plan_subscriptions(page=1)` - Get plan subscriptions
+- `plan_completions(page=1)` - Get plan completions
 - `convert_note_to_md()` - Convert notes to markdown format
 
 **Run with**:
 
 ```bash
 python examples/basic_usage.py
+```
+
+### 2. `comprehensive_api_demo.py`
+
+**Comprehensive example demonstrating all YouVersion Bible API endpoints**
+
+This example demonstrates all API categories:
+
+- Bible API (configuration, versions, chapters, languages)
+- Audio Bible API (audio chapters, audio versions)
+- Search API (Bible text, plans, users)
+- Moments API (configuration, colors, labels, verse of the day)
+- Content API (moments, highlights, notes, bookmarks, badges, plans)
+- Events API (search, details, saved events)
+- Videos API (list, details)
+- Images API (reference images, upload URLs)
+- Themes API (list, descriptions)
+- Localization API (localization strings)
+
+**Run with**:
+
+```bash
+python examples/comprehensive_api_demo.py
 ```
 
 ### 3. `sync_vs_async.py`
@@ -92,7 +77,7 @@ This example demonstrates the difference between using the synchronous SyncClien
 
 ```bash
 # Run the example
-python -m examples.sync_vs_async
+python examples/sync_vs_async.py
 ```
 
 **Features:**
@@ -120,6 +105,73 @@ This example demonstrates how to use all API methods concurrently:
 ```bash
 python examples/concurrent_requests.py
 ```
+
+### 5. `create_moment_example.py`
+
+**Example demonstrating how to create moments**
+
+This example shows how to create notes, highlights, and other moments using the `CreateMoment` model:
+
+- Creating notes with references
+- Creating highlights with multiple references
+- Creating moments from dictionaries
+- Getting moment details
+- Listing and filtering moments
+
+**Run with**:
+
+```bash
+python examples/create_moment_example.py
+```
+
+### 6. `poetry_scripts.py`
+
+**Poetry Script Commands Demo**
+
+This example demonstrates the equivalent of Poetry script commands and shows how to use them:
+
+```bash
+# Run the example
+python examples/poetry_scripts.py
+
+# Or use the actual Poetry commands
+poetry run votd
+poetry run moments
+poetry run highlights
+poetry run notes
+poetry run bookmarks
+poetry run images
+poetry run plan-progress
+poetry run plan-subscriptions
+poetry run plan-completions
+poetry run badges
+poetry run convert-notes
+```
+
+**Available Poetry Script Commands:**
+
+- `poetry run votd` - Get verse of the day
+- `poetry run moments` - Get moments
+- `poetry run highlights` - Get highlights
+- `poetry run notes` - Get notes
+- `poetry run bookmarks` - Get bookmarks
+- `poetry run images` - Get images
+- `poetry run plan-progress` - Get plan progress
+- `poetry run plan-subscriptions` - Get plan subscriptions
+- `poetry run plan-completions` - Get plan completions
+- `poetry run badges` - Get badges
+- `poetry run convert-notes` - Convert notes to markdown
+
+**Main CLI with arguments:**
+
+- `poetry run youversion votd --day 100`
+- `poetry run youversion moments --page 2 --limit 5`
+- `poetry run youversion highlights --json`
+- `poetry run youversion search-bible "love" --version-id 1`
+- `poetry run youversion get-bible-chapter GEN.1 --version-id 1`
+- `poetry run youversion get-themes --language-tag eng`
+
+See the full CLI documentation with `poetry run youversion --help` for all 56+ available commands.
 
 ## Running Examples
 
@@ -169,59 +221,144 @@ Each example provides detailed output showing:
 
 ## API Methods Coverage
 
-### All Public Methods Demonstrated
+### Content Methods
 
 1. **`verse_of_the_day(day=None)`**
-
    - Gets verse of the day for current day or specific day
    - Returns `Votd` object with day, usfm, and image_id
 
 2. **`moments(page=1)`**
-
    - Gets all types of moments (friendships, highlights, notes, images, etc.)
-   - Returns list of `Moment` objects
+   - Returns list of dynamically created `Moment` objects
    - Supports pagination
 
 3. **`highlights(page=1)`**
-
    - Gets highlights only
    - Returns list of `Highlight` objects
    - Includes references and actions
 
 4. **`notes(page=1)`**
-
    - Gets notes only
    - Returns list of `Note` objects
    - Includes content, status, and references
 
 5. **`bookmarks(page=1)`**
-
    - Gets bookmarks only
    - Returns list of bookmark data
    - Supports pagination
 
 6. **`my_images(page=1)`**
-
    - Gets images only
    - Returns list of image data
    - Includes body_image and metadata
 
-7. **`plan_progress(page=1)`**
+7. **`badges(page=1)`**
+   - Gets badges only
+   - Returns list of badge data
+   - Supports pagination
 
+8. **`plan_progress(page=1)`**
    - Gets plan progress/segment completion
    - Returns list of plan progress data
    - Includes completion percentages
 
-8. **`plan_subscriptions(page=1)`**
-
+9. **`plan_subscriptions(page=1)`**
    - Gets plan subscriptions
    - Returns list of subscription data
    - Includes plan titles and metadata
 
-9. **`convert_note_to_md()`**
-   - Converts notes to markdown format
-   - Returns processed note data
-   - Useful for note export functionality
+10. **`plan_completions(page=1)`**
+    - Gets completed reading plans
+    - Returns list of completion data
+    - Supports pagination
+
+11. **`convert_note_to_md()`**
+    - Converts notes to markdown format
+    - Returns processed note data
+    - Useful for note export functionality
+
+### Bible API Methods
+
+- `get_bible_configuration()` - Get Bible configuration
+- `get_bible_versions(language_tag, version_type)` - Get Bible versions
+- `get_bible_version(version_id)` - Get specific version
+- `get_bible_chapter(reference, version_id)` - Get chapter content
+- `get_recommended_languages(country)` - Get recommended languages
+
+### Audio API Methods
+
+- `get_audio_chapter(reference, version_id)` - Get audio chapter
+- `get_audio_version(audio_id)` - Get audio version
+
+### Search API Methods
+
+- `search_bible(query, version_id, book, page)` - Search Bible text
+- `search_plans(query, language_tag, page)` - Search reading plans
+- `search_users(query, language_tag, page)` - Search users
+
+### Video API Methods
+
+- `get_videos(language_tag)` - Get videos list
+- `get_video_details(video_id)` - Get video details
+
+### Image API Methods
+
+- `get_images(reference, language_tag, page)` - Get images for reference
+- `get_image_upload_url()` - Get image upload URL
+
+### Event API Methods
+
+- `search_events(query, latitude, longitude, page)` - Search events
+- `get_event_details(event_id)` - Get event details
+- `get_saved_events(page)` - Get saved events
+- `save_event(event_id, comments)` - Save event
+- `delete_saved_event(event_id)` - Delete saved event
+- `get_all_saved_event_ids()` - Get all saved event IDs
+- `get_event_configuration()` - Get event configuration
+
+### Moment Management Methods
+
+- `get_moments(page, user_id, kind, version_id, usfm)` - Get moments with filters
+- `get_moment_details(moment_id)` - Get moment details
+- `create_moment(data)` - Create a moment
+- `update_moment(data)` - Update moment
+- `delete_moment(moment_id)` - Delete moment
+- `get_moment_colors()` - Get highlight colors
+- `get_moment_labels()` - Get moment labels
+- `get_verse_colors(usfm, version_id)` - Get verse colors
+- `hide_verse_colors(data)` - Hide verse colors
+- `get_moments_configuration()` - Get moments configuration
+
+### Comment API Methods
+
+- `create_comment(moment_id, comment)` - Create comment
+- `delete_comment(comment_id)` - Delete comment
+
+### Like API Methods
+
+- `like_moment(moment_id)` - Like moment
+- `unlike_moment(moment_id)` - Unlike moment
+
+### Device API Methods
+
+- `register_device(device_id, device_type, user_id, old_device_id, tags)` - Register device
+- `unregister_device(device_id)` - Unregister device
+
+### Theme API Methods
+
+- `get_themes(page, language_tag)` - Get themes
+- `add_theme(theme_id, available_locales, colors, cta_urls, msgid_suffix, version_ids)` - Add theme
+- `remove_theme(theme_id)` - Remove theme
+- `set_theme(theme_id, previous_theme_id)` - Set active theme
+- `get_theme_description(theme_id, language_tag)` - Get theme description
+
+### Friend API Methods
+
+- `send_friend_request(user_id)` - Send friend request
+
+### Localization API Methods
+
+- `get_localization_items(language_tag)` - Get localization strings
 
 ## Common Issues
 
@@ -259,10 +396,15 @@ ModuleNotFoundError: No module named 'youversion'
 
 ## Best Practices
 
-1. **Always use async context managers**:
+1. **Always use context managers**:
 
    ```python
-   async with Client() as client:
+   # Async
+   async with AsyncClient() as client:
+       # Your code here
+
+   # Sync
+   with SyncClient() as client:
        # Your code here
    ```
 
@@ -279,10 +421,10 @@ ModuleNotFoundError: No module named 'youversion'
 
    ```python
    # Good
-   async with Client() as client:  # Uses .env
+   async with AsyncClient() as client:  # Uses .env
 
    # Bad
-   async with Client("username", "password") as client:  # Hardcoded
+   async with AsyncClient("username", "password") as client:  # Hardcoded
    ```
 
 4. **Implement rate limiting for multiple requests**:
@@ -300,9 +442,10 @@ ModuleNotFoundError: No module named 'youversion'
        client.notes(),
        client.bookmarks(),
        client.my_images(),
+       client.badges(),
        client.plan_progress(),
        client.plan_subscriptions(),
-       client.convert_note_to_md()
+       client.plan_completions()
    )
    ```
 
@@ -316,18 +459,16 @@ ModuleNotFoundError: No module named 'youversion'
 
 - `verse_of_the_day(day=None)`: `day` can be None (current day) or specific day number
 - `convert_note_to_md()`: No parameters required
+- `get_bible_versions(language_tag="eng", version_type="all")`: Language and type filters
+- `search_bible(query, version_id=None, book=None, page=1)`: Search with optional filters
 
 ## Return Types
 
-- `verse_of_the_day()` → `Votd` object
-- `moments()` → `List[Moment]`
-- `highlights()` → `List[Highlight]`
-- `notes()` → `List[Note]`
-- `bookmarks()` → `List[dict]`
-- `my_images()` → `List[dict]`
-- `plan_progress()` → `List[dict]`
-- `plan_subscriptions()` → `List[dict]`
-- `convert_note_to_md()` → `List[dict]`
+All methods return dynamically created Pydantic models that can be:
+
+- Accessed as objects: `moment.id`, `moment.moment_title`
+- Converted to dicts: `moment.model_dump()`
+- Serialized to JSON: `json.dumps(moment.model_dump(), default=str)`
 
 ## Contributing
 
@@ -345,6 +486,7 @@ If you create new examples:
 For issues or questions:
 
 1. Check the main project README
-2. Review the example code
-3. Check your `.env` file configuration
-4. Verify your internet connection
+2. Review the DOCS.md file for comprehensive documentation
+3. Review the example code
+4. Check your `.env` file configuration
+5. Verify your internet connection
