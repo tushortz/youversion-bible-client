@@ -1,9 +1,6 @@
 """Configuration constants for YouVersion API client."""
 
-import re
-from typing import Optional
 
-import httpx
 
 
 class Config:
@@ -26,6 +23,7 @@ class Config:
     NOTIFICATIONS_API_BASE = "https://notifications.youversionapi.com"
     SEARCH_API_BASE = "https://search.youversionapi.com"
     SHARE_API_BASE = "https://share.youversionapi.com"
+    THEMES_API_BASE = "https://themes.youversionapi.com"
     VIDEOS_API_BASE = "https://videos.youversionapi.com"
     YOUVERSION_API_BASE = "https://youversionapi.com"
 
@@ -133,11 +131,11 @@ class Config:
     MESSAGING_UNREGISTER_URL = "/3.1/messaging/unregister.json"
 
     # Themes API Endpoints
-    THEMES_ADD_URL = "/3.1/themes/add.json"
-    THEMES_DESCRIPTION_URL = "/3.1/themes/description.json"
-    THEMES_ITEMS_URL = "/3.1/themes/items.json"
-    THEMES_REMOVE_URL = "/3.1/themes/remove.json"
-    THEMES_SET_URL = "/3.1/themes/set.json"
+    THEMES_ADD_URL = "/3.1/create.json"
+    THEMES_DESCRIPTION_URL = "/3.1/description.json"
+    THEMES_ITEMS_URL = "/3.1/items.json"
+    THEMES_REMOVE_URL = "/3.1/remove.json"
+    THEMES_SET_URL = "/3.1/set.json"
 
     # Localization API Endpoints
     LOCALIZATION_ITEMS_URL = "/3.1/localization/items.po"

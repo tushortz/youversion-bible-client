@@ -92,50 +92,61 @@ class TestHttpClient:
     @pytest.mark.asyncio
     async def test_get_cards_success(self):
         """Test successful get_cards request."""
-        username = "testuser"
+        user_id = 123
         page = 2
         kind = "highlights"
-        mock_response_data = {"cards": [{"id": 1, "type": "highlight"}]}
+        mock_response_data = {"moments": [{"id": 1, "type": "highlight"}]}
 
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.json = AsyncMock(return_value=mock_response_data)
         mock_client.get = AsyncMock(return_value=mock_response)
 
-        http_client = HttpClient(mock_client)
-        result = await http_client.get_cards(username, page=page, kind=kind)
+        http_client = HttpClient(mock_client, user_id=user_id)
+        result = await http_client.get_cards(page=page, kind=kind)
 
         assert result == mock_response_data
 
-        # Verify URL construction
-        expected_url = (
-            f"{Config.BASE_URL}{Config.MOMENTS_URL.format(username=username)}"
-        )
-        expected_params = {"page": page, "kind": kind}
-        mock_client.get.assert_called_once_with(expected_url, params=expected_params)
+        # Verify URL construction and params
+        from youversion.config import Config
+        expected_url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_ITEMS_URL}"
+        expected_params = {"page": page, "kind": kind, "user_id": user_id}
+        mock_client.get.assert_called_once()
+        call_args = mock_client.get.call_args
+        assert call_args[0][0] == expected_url
+        # Check params (headers are merged with DEFAULT_HEADERS)
+        actual_params = call_args[1].get("params", {})
+        assert actual_params["page"] == expected_params["page"]
+        assert actual_params["kind"] == expected_params["kind"]
+        assert actual_params["user_id"] == expected_params["user_id"]
 
     @pytest.mark.asyncio
     async def test_get_cards_default_params(self):
         """Test get_cards request with default parameters."""
-        username = "testuser"
-        mock_response_data = {"cards": []}
+        user_id = 123
+        mock_response_data = {"moments": []}
 
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.json = AsyncMock(return_value=mock_response_data)
         mock_client.get = AsyncMock(return_value=mock_response)
 
-        http_client = HttpClient(mock_client)
-        result = await http_client.get_cards(username)
+        http_client = HttpClient(mock_client, user_id=user_id)
+        result = await http_client.get_cards()
 
         assert result == mock_response_data
 
         # Verify default parameters
-        expected_url = (
-            f"{Config.BASE_URL}{Config.MOMENTS_URL.format(username=username)}"
-        )
-        expected_params = {"page": 1, "kind": ""}
-        mock_client.get.assert_called_once_with(expected_url, params=expected_params)
+        from youversion.config import Config
+        expected_url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_ITEMS_URL}"
+        expected_params = {"page": 1, "user_id": user_id}
+        mock_client.get.assert_called_once()
+        call_args = mock_client.get.call_args
+        assert call_args[0][0] == expected_url
+        # Check params (headers are merged with DEFAULT_HEADERS)
+        actual_params = call_args[1].get("params", {})
+        assert actual_params["page"] == expected_params["page"]
+        assert actual_params["user_id"] == expected_params["user_id"]
 
     @pytest.mark.asyncio
     async def test_get_verse_of_the_day_success(self):
@@ -187,17 +198,17 @@ class TestHttpClient:
     @pytest.mark.asyncio
     async def test_get_cards_json_error(self):
         """Test get_cards request with JSON parsing error."""
-        username = "testuser"
+        user_id = 123
 
         mock_client = AsyncMock()
         mock_response = AsyncMock()
         mock_response.json = AsyncMock(side_effect=ValueError("Invalid JSON"))
         mock_client.get = AsyncMock(return_value=mock_response)
 
-        http_client = HttpClient(mock_client)
+        http_client = HttpClient(mock_client, user_id=user_id)
 
         with pytest.raises(ValueError, match="Invalid JSON"):
-            await http_client.get_cards(username)
+            await http_client.get_cards()
 
     @pytest.mark.asyncio
     async def test_get_verse_of_the_day_json_error(self):

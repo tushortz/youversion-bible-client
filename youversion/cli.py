@@ -29,52 +29,238 @@ from dotenv import load_dotenv
 
 from youversion.clients import AsyncClient
 from youversion.core.url_discovery import URLDiscovery
+from youversion.enums import MomentKinds, StatusEnum
+from youversion.models.moments import CreateMoment, ReferenceCreate
 
 
 def format_votd(votd) -> str:
     """Format verse of the day for display"""
+    # Handle both dict and object
+    if isinstance(votd, dict):
+        day = votd.get("day", "N/A")
+        usfm = votd.get("usfm", [])
+        image_id = votd.get("image_id", "None")
+    else:
+        day = getattr(votd, "day", "N/A")
+        usfm = getattr(votd, "usfm", [])
+        image_id = getattr(votd, "image_id", "None")
+
+    usfm_str = ", ".join(usfm) if usfm else "N/A"
     return f"""📖 Verse of the Day
-Day: {votd.day}
-USFM: {', '.join(votd.usfm)}
-Image ID: {votd.image_id or 'None'}"""
+Day: {day}
+USFM: {usfm_str}
+Image ID: {image_id or 'None'}"""
 
 
 def format_moment(moment, index: int = 1) -> str:
     """Format a moment for display"""
-    return f"""  {index}. {moment.kind.upper()}
-     Title: {moment.moment_title}
-     Time: {moment.time_ago}
-     Owned by me: {moment.owned_by_me}"""
+    # Convert Pydantic model to dict if needed
+    if hasattr(moment, "model_dump"):
+        moment_dict = moment.model_dump()
+    else:
+        moment_dict = {}
+
+    # Get kind from kind_id if available, otherwise try kind
+    kind = moment_dict.get("kind_id") or moment_dict.get("kind")
+    if not kind:
+        kind = getattr(moment, "kind_id", getattr(moment, "kind", "UNKNOWN"))
+    if isinstance(kind, str):
+        kind = kind.upper()
+    else:
+        kind = str(kind).upper()
+
+    # Get title from various possible locations
+    title = moment_dict.get("moment_title") or getattr(moment, "moment_title", None)
+    if not title:
+        # Try to get from base or extras
+        base = moment_dict.get("base") or getattr(moment, "base", {})
+        extras = moment_dict.get("extras") or getattr(moment, "extras", {})
+        if isinstance(base, dict):
+            base_title = base.get("title")
+            if isinstance(base_title, dict):
+                # Title might be a dict with l_args or l_str
+                l_args = base_title.get("l_args", {})
+                if isinstance(l_args, dict):
+                    title = l_args.get("title")
+                if not title:
+                    title = base_title.get("l_str") or base_title.get("title")
+            if not title and isinstance(extras, dict):
+                title = extras.get("title")
+        elif isinstance(extras, dict):
+            title = extras.get("title")
+        if not title:
+            title = "N/A"
+
+    # Get time_ago if available
+    time_ago = moment_dict.get("created_dt") or getattr(moment, "created_dt", "N/A")
+
+    # Get id
+    moment_id = moment_dict.get("id") or getattr(moment, "id", "N/A")
+
+    return f"""  {index}. {kind}
+     ID: {moment_id}
+     Title: {title}
+     Time: {time_ago}"""
 
 
 def format_highlight(highlight, index: int = 1) -> str:
     """Format a highlight for display"""
-    refs = ", ".join([ref.human for ref in highlight.references[:3]])
-    if len(highlight.references) > 3:
-        refs += f" (+{len(highlight.references) - 3} more)"
+    # Convert Pydantic model to dict if needed
+    if hasattr(highlight, "model_dump"):
+        highlight_dict = highlight.model_dump()
+    else:
+        highlight_dict = {}
+
+    # Get references safely
+    references = highlight_dict.get("references") or getattr(highlight, "references", [])
+    if not references:
+        # Try to get from extras
+        extras = highlight_dict.get("extras") or getattr(highlight, "extras", {})
+        if isinstance(extras, dict):
+            references = extras.get("references", [])
+
+    refs = "N/A"
+    if references:
+        if isinstance(references[0], dict):
+            refs = ", ".join([ref.get("human", "N/A") for ref in references])
+        else:
+            refs = ", ".join([getattr(ref, "human", "N/A") for ref in references])
+
+    # Get title
+    title = highlight_dict.get("moment_title") or getattr(highlight, "moment_title", None)
+    if not title:
+        base = highlight_dict.get("base") or getattr(highlight, "base", {})
+        extras = highlight_dict.get("extras") or getattr(highlight, "extras", {})
+        if isinstance(base, dict):
+            base_title = base.get("title")
+            if isinstance(base_title, dict):
+                # Title might be a dict with l_args or l_str
+                l_args = base_title.get("l_args", {})
+                if isinstance(l_args, dict):
+                    title = l_args.get("title")
+                if not title:
+                    title = base_title.get("l_str") or base_title.get("title")
+            if not title and isinstance(extras, dict):
+                title = extras.get("title")
+        elif isinstance(extras, dict):
+            title = extras.get("title")
+        if not title:
+            title = "N/A"
+
+    time_ago = highlight_dict.get("created_dt") or getattr(highlight, "created_dt", "N/A")
+
+    # Get id
+    highlight_id = highlight_dict.get("id") or getattr(highlight, "id", "N/A")
 
     return f"""  {index}. HIGHLIGHT
-     Title: {highlight.moment_title}
+     ID: {highlight_id}
+     Title: {title}
      References: {refs}
-     Time: {highlight.time_ago}"""
+     Time: {time_ago}"""
 
 
 def format_note(note, index: int = 1) -> str:
     """Format a note for display"""
-    content = note.content[:100] + "..." if len(note.content) > 100 else note.content
+    # Convert Pydantic model to dict if needed
+    if hasattr(note, "model_dump"):
+        note_dict = note.model_dump()
+    else:
+        note_dict = {}
+
+    # Get content safely (no truncation)
+    content = note_dict.get("content") or getattr(note, "content", None)
+    if not content:
+        extras = note_dict.get("extras") or getattr(note, "extras", {})
+        if isinstance(extras, dict):
+            content = extras.get("content", "N/A")
+        else:
+            content = "N/A"
+
+    # Get title
+    title = note_dict.get("moment_title") or getattr(note, "moment_title", None)
+    if not title:
+        base = note_dict.get("base") or getattr(note, "base", {})
+        extras = note_dict.get("extras") or getattr(note, "extras", {})
+        if isinstance(base, dict):
+            base_title = base.get("title")
+            if isinstance(base_title, dict):
+                # Title might be a dict with l_args or l_str
+                l_args = base_title.get("l_args", {})
+                if isinstance(l_args, dict):
+                    title = l_args.get("title")
+                if not title:
+                    title = base_title.get("l_str") or base_title.get("title")
+            if not title and isinstance(extras, dict):
+                title = extras.get("title")
+        elif isinstance(extras, dict):
+            title = extras.get("title")
+        if not title:
+            title = "N/A"
+
+    # Get status
+    status = note_dict.get("status") or getattr(note, "status", None)
+    if status:
+        if hasattr(status, "value"):
+            status_str = status.value
+        else:
+            status_str = str(status)
+    else:
+        extras = note_dict.get("extras") or getattr(note, "extras", {})
+        if isinstance(extras, dict):
+            status_str = extras.get("user_status") or extras.get("system_status", "N/A")
+        else:
+            status_str = "N/A"
+
+    time_ago = note_dict.get("created_dt") or getattr(note, "created_dt", "N/A")
+
+    # Get id
+    note_id = note_dict.get("id") or getattr(note, "id", "N/A")
 
     return f"""  {index}. NOTE
-     Title: {note.moment_title}
+     ID: {note_id}
+     Title: {title}
      Content: {content}
-     Status: {note.status.value}
-     Time: {note.time_ago}"""
+     Status: {status_str}
+     Time: {time_ago}"""
 
 
-def format_generic_item(item: dict[str, Any], index: int = 1) -> str:
+def format_generic_item(item: Any, index: int = 1) -> str:
     """Format generic items (bookmarks, images, etc.)"""
-    return f"""  {index}. {item.get('kind', 'ITEM').upper()}
-     Title: {item.get('moment_title', 'N/A')}
-     Time: {item.get('time_ago', 'N/A')}"""
+    # Handle both dict and object
+    if isinstance(item, dict):
+        kind = item.get("kind_id") or item.get("kind", "ITEM")
+        title = item.get("moment_title") or item.get("title", "N/A")
+        time_ago = item.get("created_dt", "N/A")
+    else:
+        # Pydantic model or object
+        kind = getattr(item, "kind_id", getattr(item, "kind", "ITEM"))
+        title = getattr(item, "moment_title", None)
+        if not title:
+            base = getattr(item, "base", {})
+            extras = getattr(item, "extras", {})
+            if isinstance(base, dict):
+                title = base.get("title") or extras.get("title")
+            elif isinstance(extras, dict):
+                title = extras.get("title")
+            if not title:
+                title = "N/A"
+        time_ago = getattr(item, "created_dt", "N/A")
+
+    if isinstance(kind, str):
+        kind = kind.upper()
+    else:
+        kind = str(kind).upper()
+
+    # Get id
+    if isinstance(item, dict):
+        item_id = item.get("id", "N/A")
+    else:
+        item_id = getattr(item, "id", "N/A")
+
+    return f"""  {index}. {kind}
+     ID: {item_id}
+     Title: {title}
+     Time: {time_ago}"""
 
 
 def format_json_output(data: Any) -> str:
@@ -123,11 +309,9 @@ async def cmd_moments(args):
                 print(f"Found {len(moments)} moments")
                 print("-" * 50)
 
-                for i, moment in enumerate(moments[: args.limit], 1):
+                for i, moment in enumerate(moments, 1):
                     print(format_moment(moment, i))
-
-                if len(moments) > args.limit:
-                    print(f"\n... and {len(moments) - args.limit} more moments")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting moments: {e}", file=sys.stderr)
@@ -147,11 +331,9 @@ async def cmd_highlights(args):
                 print(f"Found {len(highlights)} highlights")
                 print("-" * 50)
 
-                for i, highlight in enumerate(highlights[: args.limit], 1):
+                for i, highlight in enumerate(highlights, 1):
                     print(format_highlight(highlight, i))
-
-                if len(highlights) > args.limit:
-                    print(f"\n... and {len(highlights) - args.limit} more highlights")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting highlights: {e}", file=sys.stderr)
@@ -171,11 +353,9 @@ async def cmd_notes(args):
                 print(f"Found {len(notes)} notes")
                 print("-" * 50)
 
-                for i, note in enumerate(notes[: args.limit], 1):
+                for i, note in enumerate(notes, 1):
                     print(format_note(note, i))
-
-                if len(notes) > args.limit:
-                    print(f"\n... and {len(notes) - args.limit} more notes")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting notes: {e}", file=sys.stderr)
@@ -195,11 +375,9 @@ async def cmd_bookmarks(args):
                 print(f"Found {len(bookmarks)} bookmarks")
                 print("-" * 50)
 
-                for i, bookmark in enumerate(bookmarks[: args.limit], 1):
+                for i, bookmark in enumerate(bookmarks, 1):
                     print(format_generic_item(bookmark, i))
-
-                if len(bookmarks) > args.limit:
-                    print(f"\n... and {len(bookmarks) - args.limit} more bookmarks")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting bookmarks: {e}", file=sys.stderr)
@@ -219,13 +397,13 @@ async def cmd_images(args):
                 print(f"Found {len(images)} images")
                 print("-" * 50)
 
-                for i, image in enumerate(images[: args.limit], 1):
+                for i, image in enumerate(images, 1):
                     print(format_generic_item(image, i))
-                    if "body_image" in image:
-                        print(f"     Image: {image['body_image'][:50]}...")
-
-                if len(images) > args.limit:
-                    print(f"\n... and {len(images) - args.limit} more images")
+                    if isinstance(image, dict) and "body_image" in image:
+                        print(f"     Image: {image['body_image']}")
+                    elif hasattr(image, "body_image"):
+                        print(f"     Image: {getattr(image, 'body_image', 'N/A')}")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting images: {e}", file=sys.stderr)
@@ -245,13 +423,13 @@ async def cmd_plan_progress(args):
                 print(f"Found {len(progress)} progress items")
                 print("-" * 50)
 
-                for i, item in enumerate(progress[: args.limit], 1):
+                for i, item in enumerate(progress, 1):
                     print(format_generic_item(item, i))
-                    if "percent_complete" in item:
+                    if isinstance(item, dict) and "percent_complete" in item:
                         print(f"     Progress: {item['percent_complete']}%")
-
-                if len(progress) > args.limit:
-                    print(f"\n... and {len(progress) - args.limit} more items")
+                    elif hasattr(item, "percent_complete"):
+                        print(f"     Progress: {getattr(item, 'percent_complete', 'N/A')}%")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting plan progress: {e}", file=sys.stderr)
@@ -271,18 +449,42 @@ async def cmd_plan_subscriptions(args):
                 print(f"Found {len(subscriptions)} subscriptions")
                 print("-" * 50)
 
-                for i, sub in enumerate(subscriptions[: args.limit], 1):
+                for i, sub in enumerate(subscriptions, 1):
                     print(format_generic_item(sub, i))
-                    if "plan_title" in sub:
+                    if isinstance(sub, dict) and "plan_title" in sub:
                         print(f"     Plan: {sub['plan_title']}")
-
-                if len(subscriptions) > args.limit:
-                    print(
-                        f"\n... and {len(subscriptions) - args.limit} more subscriptions"
-                    )
+                    elif hasattr(sub, "plan_title"):
+                        print(f"     Plan: {getattr(sub, 'plan_title', 'N/A')}")
+                    print()
 
     except Exception as e:
         print(f"❌ Error getting plan subscriptions: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+async def cmd_plan_completions(args):
+    """Get plan completions"""
+    try:
+        async with AsyncClient() as client:
+            completions = await client.plan_completions(page=args.page)
+
+            if args.json:
+                print(format_json_output(completions))
+            else:
+                print(f"✅ Plan Completions (Page {args.page})")
+                print(f"Found {len(completions)} completions")
+                print("-" * 50)
+
+                for i, completion in enumerate(completions, 1):
+                    print(format_generic_item(completion, i))
+                    if isinstance(completion, dict) and "plan_title" in completion:
+                        print(f"     Plan: {completion['plan_title']}")
+                    elif hasattr(completion, "plan_title"):
+                        print(f"     Plan: {getattr(completion, 'plan_title', 'N/A')}")
+                    print()
+
+    except Exception as e:
+        print(f"❌ Error getting plan completions: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -308,6 +510,104 @@ async def cmd_convert_notes(args):
 
     except Exception as e:
         print(f"❌ Error converting notes: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+async def cmd_create_moment(args):
+    """Create a new moment"""
+    try:
+        # Parse kind enum
+        try:
+            kind = MomentKinds(args.kind.lower())
+        except ValueError:
+            valid_kinds = [k.value for k in MomentKinds]
+            print(
+                f"❌ Error: Invalid kind '{args.kind}'. "
+                f"Valid kinds: {', '.join(valid_kinds)}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Parse status enum
+        try:
+            # StatusEnum values are lowercase: private, draft, public
+            status_value = args.status.lower()
+            status = StatusEnum(status_value)
+        except ValueError:
+            valid_statuses = [s.value for s in StatusEnum]
+            print(
+                f"❌ Error: Invalid status '{args.status}'. "
+                f"Valid statuses: {', '.join(valid_statuses)}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Parse references
+        references = []
+        for ref_str in args.references:
+            # Format: "human:version_id:usfm1,usfm2"
+            parts = ref_str.split(":")
+            if len(parts) < 3:
+                print(
+                    f"❌ Error: Invalid reference format '{ref_str}'. "
+                    "Expected: 'human:version_id:usfm1,usfm2'",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            human = parts[0]
+            try:
+                version_id = int(parts[1])
+            except ValueError:
+                print(
+                    f"❌ Error: Invalid version_id '{parts[1]}' in "
+                    f"reference '{ref_str}'. Must be an integer.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            usfm = parts[2].split(",")
+            references.append(
+                ReferenceCreate(human=human, version_id=version_id, usfm=usfm)
+            )
+
+        # Parse labels
+        labels = [label.strip() for label in args.labels.split(",") if label.strip()]
+
+        # Create moment model
+        moment = CreateMoment(
+            kind=kind,
+            content=args.content,
+            references=references,
+            title=args.title,
+            status=status,
+            body=args.body,
+            color=args.color,
+            labels=labels,
+            language_tag=args.language_tag,
+        )
+
+        async with AsyncClient() as client:
+            result = await client.create_moment(moment)
+
+            if args.json:
+                print(format_json_output(result))
+            else:
+                print("✅ Moment created successfully!")
+                print("-" * 50)
+                if "errors" in result:
+                    print("⚠️  Warnings/Errors:")
+                    for error in result["errors"]:
+                        print(f"  - {error}")
+                else:
+                    print(f"Kind: {moment.kind.value}")
+                    print(f"Title: {moment.title}")
+                    print(f"Status: {moment.status.value}")
+                    print(f"References: {len(moment.references)}")
+
+    except ValueError as e:
+        print(f"❌ Validation error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error creating moment: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -347,7 +647,9 @@ Examples:
   youversion images --page 1         # Get images from page 1
   youversion plan-progress           # Get plan progress
   youversion plan-subscriptions      # Get plan subscriptions
+  youversion plan-completions        # Get plan completions
   youversion convert-notes           # Convert notes to markdown
+  youversion create-moment --kind note --content "My note" --title "Title" --status private --body "Body" --color ff0000 --language-tag en --references "Genesis 1:1:1:GEN.1.1" --labels "test"
 
 Environment Variables:
   YOUVERSION_USERNAME    Your YouVersion username
@@ -417,9 +719,70 @@ Or create a .env file in the project root with these variables.
         "--page", type=int, default=1, help="Page number (default: 1)"
     )
 
+    # Plan completions
+    completions_parser = subparsers.add_parser(
+        "plan-completions", help="Get plan completions"
+    )
+    completions_parser.add_argument(
+        "--page", type=int, default=1, help="Page number (default: 1)"
+    )
+
     # Convert notes
     convert_parser = subparsers.add_parser(
         "convert-notes", help="Convert notes to markdown"
+    )
+
+    # Create moment
+    create_moment_parser = subparsers.add_parser(
+        "create-moment", help="Create a new moment"
+    )
+    create_moment_parser.add_argument(
+        "--kind",
+        type=str,
+        required=True,
+        help="Type of moment (note, highlight, bookmark, image, badge)",
+    )
+    create_moment_parser.add_argument(
+        "--content", type=str, required=True, help="Content text"
+    )
+    create_moment_parser.add_argument(
+        "--title", type=str, required=True, help="Moment title"
+    )
+    create_moment_parser.add_argument(
+        "--status",
+        type=str,
+        required=True,
+        help="Status (private, draft, or public)",
+    )
+    create_moment_parser.add_argument(
+        "--body", type=str, required=True, help="Body text"
+    )
+    create_moment_parser.add_argument(
+        "--color",
+        type=str,
+        required=True,
+        help="Color hex code (6 characters, e.g., ff0000)",
+    )
+    create_moment_parser.add_argument(
+        "--language-tag",
+        type=str,
+        required=True,
+        dest="language_tag",
+        help="Language tag (2 characters, e.g., en)",
+    )
+    create_moment_parser.add_argument(
+        "--references",
+        type=str,
+        nargs="+",
+        required=True,
+        help="Bible references in format 'human:version_id:usfm1,usfm2' "
+        "(can specify multiple)",
+    )
+    create_moment_parser.add_argument(
+        "--labels",
+        type=str,
+        required=True,
+        help="Comma-separated list of labels (1-10 labels)",
     )
 
     # Discover endpoints
@@ -444,7 +807,9 @@ Or create a .env file in the project root with these variables.
                 "images": images_parser,
                 "plan-progress": progress_parser,
                 "plan-subscriptions": subscriptions_parser,
+                "plan-completions": completions_parser,
                 "convert-notes": convert_parser,
+                "create-moment": create_moment_parser,
                 "discover-endpoints": discover_parser,
             }
         )
@@ -476,7 +841,9 @@ def main():
         "images": cmd_images,
         "plan-progress": cmd_plan_progress,
         "plan-subscriptions": cmd_plan_subscriptions,
+        "plan-completions": cmd_plan_completions,
         "convert-notes": cmd_convert_notes,
+        "create-moment": cmd_create_moment,
         "discover-endpoints": cmd_discover_endpoints,
     }
 
@@ -606,6 +973,20 @@ def poetry_cmd_plan_subscriptions():
     asyncio.run(cmd_plan_subscriptions(args))
 
 
+def poetry_cmd_plan_completions():
+    """Poetry script entry point for plan-completions command"""
+    parser = create_parser()
+    args = parser.parse_args(["plan-completions"])
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_plan_completions(args)
+    asyncio.run(cmd_plan_completions(args))
+
+
 def poetry_cmd_convert_notes():
     """Poetry script entry point for convert-notes command"""
     parser = create_parser()
@@ -620,6 +1001,20 @@ def poetry_cmd_convert_notes():
     asyncio.run(cmd_convert_notes(args))
 
 
+def poetry_cmd_create_moment():
+    """Poetry script entry point for create-moment command"""
+    parser = create_parser()
+    args = parser.parse_args()
+    check_credentials()
+    try:
+        is_running = asyncio.get_event_loop().is_running()
+    except RuntimeError:
+        is_running = False
+    if is_running:
+        return cmd_create_moment(args)
+    asyncio.run(cmd_create_moment(args))
+
+
 async def cmd_discover_endpoints(args):
     """Discover available API endpoints"""
     try:
@@ -628,11 +1023,23 @@ async def cmd_discover_endpoints(args):
         print("🔍 Discovering YouVersion API endpoints...")
         print("=" * 50)
 
-        # Get username from args or active client when available
+        # Get username from args or environment variables
         username = getattr(args, "username", None)
         if not username:
-            async with AsyncClient() as client:
-                username = client.username
+            load_dotenv()
+            username = os.getenv("YOUVERSION_USERNAME")
+            if not username:
+                # Try to get from authenticated client as fallback
+                try:
+                    async with AsyncClient() as client:
+                        username = client.username
+                except Exception:
+                    print(
+                        "❌ Error: Username not provided. "
+                        "Please provide --username or set YOUVERSION_USERNAME",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
 
         print(f"📋 Testing endpoints for user: {username}")
         print()
@@ -663,7 +1070,8 @@ async def cmd_discover_endpoints(args):
         print()
 
     except Exception as e:
-        print(f"❌ Error discovering endpoints: {e}")
+        print(f"❌ Error discovering endpoints: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def poetry_cmd_discover_endpoints():

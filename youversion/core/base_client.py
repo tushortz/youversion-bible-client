@@ -1,8 +1,11 @@
 """Base client class implementing common functionality."""
 
-from typing import Any, Dict, Optional
+from datetime import datetime, timezone
+from typing import Any, Optional, Union
 
 from ..enums import MomentKinds
+from ..models.base import Moment
+from ..models.moments import CreateMoment
 from .authenticator import Authenticator
 from .data_processor import DataProcessor
 from .http_client import HttpClient
@@ -49,25 +52,30 @@ class BaseClient(IClient):
         """
         await self._ensure_authenticated()
         data = await self._http_client.get_cards(page=page, kind=kind)
+
         # Extract moments array from response structure
+        if "response" not in data:
+            return data
+
         moments_data = data.get("response", {}).get("data", {}).get("moments", [])
         return moments_data
 
-    async def moments(self, page: int = 1) -> list[Any]:
+    async def moments(self, page: int = 1) -> list[Moment]:
         """Get moments.
 
         Args:
             page: Page number
 
         Returns:
-            List of Moment objects
+            List of dynamically created Moment objects conforming to
+            MomentProtocol
         """
         await self._ensure_authenticated()
         raw_data = await self._http_client.get_cards(
             page=page, kind=""
         )
         # Extract moments array from response structure
-        moments_data = raw_data.get("response", {}).get("data", {}).get("moments", [])
+        moments_data = raw_data.get("moments", [])
         return self._data_processor.process_moments(moments_data)
 
     async def highlights(self, page: int = 1) -> list[Any]:
@@ -82,7 +90,9 @@ class BaseClient(IClient):
         raw_data = await self._get_cards_data(
             kind=MomentKinds.HIGHLIGHT.value, page=page
         )
+        raw_data = raw_data.get("moments", [])
         return self._data_processor.process_highlights(raw_data)
+
 
     async def verse_of_the_day(self, day: Optional[int] = None) -> Any:
         """Get verse of the day.
@@ -93,7 +103,6 @@ class BaseClient(IClient):
         Returns:
             Votd object
         """
-        await self._ensure_authenticated()
         raw_data = await self._http_client.get_verse_of_the_day()
         return self._data_processor.process_verse_of_the_day(raw_data, day)
 
@@ -106,7 +115,9 @@ class BaseClient(IClient):
         Returns:
             List of note data
         """
-        return await self._get_cards_data(kind=MomentKinds.NOTE.value, page=page)
+        raw_data = await self._get_cards_data(kind=MomentKinds.NOTE.value, page=page)
+        raw_data = raw_data.get("moments", [])
+        return self._data_processor.process_notes(raw_data)
 
     async def bookmarks(self, page: int = 1) -> list[Any]:
         """Get bookmarks.
@@ -117,7 +128,9 @@ class BaseClient(IClient):
         Returns:
             List of bookmark data
         """
-        return await self._get_cards_data(kind=MomentKinds.BOOKMARK.value, page=page)
+        raw_data = await self._get_cards_data(kind=MomentKinds.BOOKMARK.value, page=page)
+        raw_data = raw_data.get("moments", [])
+        return self._data_processor.process_bookmarks(raw_data)
 
     async def my_images(self, page: int = 1) -> list[Any]:
         """Get images.
@@ -128,7 +141,9 @@ class BaseClient(IClient):
         Returns:
             List of image data
         """
-        return await self._get_cards_data(kind=MomentKinds.IMAGE.value, page=page)
+        raw_data = await self._get_cards_data(kind=MomentKinds.IMAGE.value, page=page)
+        raw_data = raw_data.get("moments", [])
+        return self._data_processor.process_images(raw_data)
 
     async def plan_progress(self, page: int = 1) -> list[Any]:
         """Get plan progress.
@@ -139,9 +154,11 @@ class BaseClient(IClient):
         Returns:
             List of plan progress data
         """
-        return await self._get_cards_data(
+        raw_data = await self._get_cards_data(
             kind=MomentKinds.PLAN_SEGMENT_COMPLETION.value, page=page
         )
+        raw_data = raw_data.get("moments", [])
+        return self._data_processor.process_plan_progress(raw_data)
 
     async def plan_subscriptions(self, page: int = 1) -> list[Any]:
         """Get plan subscriptions.
@@ -152,9 +169,26 @@ class BaseClient(IClient):
         Returns:
             List of plan subscription data
         """
-        return await self._get_cards_data(
+        raw_data = await self._get_cards_data(
             kind=MomentKinds.PLAN_SUBSCRIPTION.value, page=page
         )
+        raw_data = raw_data.get("moments", [])
+        return self._data_processor.process_plan_subscriptions(raw_data)
+
+    async def plan_completions(self, page: int = 1) -> list[Any]:
+        """Get plan completions.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of plan completion data
+        """
+        raw_data = await self._get_cards_data(
+            kind=MomentKinds.PLAN_COMPLETION.value, page=page
+        )
+        raw_data = raw_data.get("moments", [])
+        return self._data_processor.process_plan_completions(raw_data)
 
     async def convert_note_to_md(self) -> list[Any]:
         """Convert notes to markdown.
@@ -180,7 +214,7 @@ class BaseClient(IClient):
         return self._user_id
 
     # Bible API methods
-    async def get_bible_configuration(self) -> Dict[str, Any]:
+    async def get_bible_configuration(self) -> dict[str, Any]:
         """Get Bible configuration.
 
         Returns:
@@ -193,7 +227,7 @@ class BaseClient(IClient):
         self,
         language_tag: str = "eng",
         version_type: str = "all"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get Bible versions for a language.
 
         Args:
@@ -204,9 +238,10 @@ class BaseClient(IClient):
             Bible versions data
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_bible_versions(language_tag, version_type)
+        raw_data = await self._http_client.get_bible_versions(language_tag, version_type)
+        return self._data_processor.process_bible_versions(raw_data)
 
-    async def get_bible_version(self, version_id: int) -> Dict[str, Any]:
+    async def get_bible_version(self, version_id: int) -> dict[str, Any]:
         """Get specific Bible version details.
 
         Args:
@@ -216,26 +251,28 @@ class BaseClient(IClient):
             Bible version data
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_bible_version(version_id)
+        raw_data = await self._http_client.get_bible_version(version_id)
+        return self._data_processor.process_bible_version(raw_data)
 
     async def get_bible_chapter(
         self,
-        version_id: int,
-        reference: str
-    ) -> Dict[str, Any]:
+        reference: str,
+        version_id: int = 1,
+    ) -> dict[str, Any]:
         """Get Bible chapter content.
 
         Args:
-            version_id: Version ID
             reference: USFM reference (e.g., 'GEN.1')
+            version_id: Version ID
 
         Returns:
             Chapter content data
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_bible_chapter(version_id, reference)
+        raw_data = await self._http_client.get_bible_chapter(version_id, reference)
+        return self._data_processor.process_bible_chapter(raw_data)
 
-    async def get_recommended_languages(self, country: str = "US") -> Dict[str, Any]:
+    async def get_recommended_languages(self, country: str = "US") -> dict[str, Any]:
         """Get recommended languages for a country.
 
         Args:
@@ -250,22 +287,23 @@ class BaseClient(IClient):
     # Audio Bible API methods
     async def get_audio_chapter(
         self,
-        version_id: int,
-        reference: str
-    ) -> Dict[str, Any]:
+        reference: str,
+        version_id: int = 1,
+    ) -> dict[str, Any]:
         """Get audio chapter information.
 
         Args:
-            version_id: Audio version ID
             reference: USFM reference (e.g., 'GEN.1')
+            version_id: Audio version ID
 
         Returns:
             Audio chapter data
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_audio_chapter(version_id, reference)
+        raw_data = await self._http_client.get_audio_chapter(version_id, reference)
+        return self._data_processor.process_audio_chapter(raw_data)
 
-    async def get_audio_version(self, audio_id: int) -> Dict[str, Any]:
+    async def get_audio_version(self, audio_id: int) -> dict[str, Any]:
         """Get audio version details.
 
         Args:
@@ -275,7 +313,8 @@ class BaseClient(IClient):
             Audio version data
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_audio_version(audio_id)
+        raw_data = await self._http_client.get_audio_version(audio_id)
+        return self._data_processor.process_audio_version(raw_data)
 
     # Search API methods
     async def search_bible(
@@ -284,7 +323,7 @@ class BaseClient(IClient):
         version_id: Optional[int] = None,
         book: Optional[str] = None,
         page: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Search Bible text.
 
         Args:
@@ -297,14 +336,15 @@ class BaseClient(IClient):
             Search results data
         """
         await self._ensure_authenticated()
-        return await self._http_client.search_bible(query, version_id, book, page)
+        raw_data = await self._http_client.search_bible(query, version_id, book, page)
+        return self._data_processor.process_search_bible(raw_data)
 
     async def search_plans(
         self,
         query: str,
-        language_tag: str = "eng",
+        language_tag: str = "en",
         page: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Search reading plans.
 
         Args:
@@ -323,7 +363,7 @@ class BaseClient(IClient):
         query: str,
         language_tag: str = "eng",
         page: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Search users.
 
         Args:
@@ -338,7 +378,7 @@ class BaseClient(IClient):
         return await self._http_client.search_users(query, language_tag, page)
 
     # Videos API methods
-    async def get_videos(self, language_tag: str = "eng") -> Dict[str, Any]:
+    async def get_videos(self, language_tag: str = "eng") -> dict[str, Any]:
         """Get videos list.
 
         Args:
@@ -350,7 +390,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_videos(language_tag)
 
-    async def get_video_details(self, video_id: int) -> Dict[str, Any]:
+    async def get_video_details(self, video_id: int) -> dict[str, Any]:
         """Get video details.
 
         Args:
@@ -363,18 +403,23 @@ class BaseClient(IClient):
         return await self._http_client.get_video_details(video_id)
 
     # Badges API methods
-    async def get_badges(self, user_id: int, page: int = 1) -> Dict[str, Any]:
-        """Get user badges.
+    async def badges(self, page: int = 1) -> list[Any]:
+        """Get badges.
 
         Args:
-            user_id: User ID
             page: Page number
 
         Returns:
-            Badges data
+            List of badge data
         """
-        await self._ensure_authenticated()
-        return await self._http_client.get_badges(user_id, page)
+        raw_data = await self._get_cards_data(
+            kind=MomentKinds.BADGE.value, page=page
+        )
+
+        if raw_data.get("errors"):
+            raw_data = raw_data.get("errors")
+
+        return self._data_processor.process_badges(raw_data)
 
     # Images API methods
     async def get_images(
@@ -382,7 +427,7 @@ class BaseClient(IClient):
         reference: str,
         language_tag: str = "eng",
         page: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get images for a reference.
 
         Args:
@@ -394,9 +439,11 @@ class BaseClient(IClient):
             Images data
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_images(reference, language_tag, page)
+        raw_data = await self._http_client.get_images(reference, language_tag, page)
+        raw_data = raw_data.get("images", [])
+        return self._data_processor.process_images(raw_data)
 
-    async def get_image_upload_url(self) -> Dict[str, Any]:
+    async def get_image_upload_url(self) -> dict[str, Any]:
         """Get image upload URL and parameters.
 
         Returns:
@@ -412,7 +459,7 @@ class BaseClient(IClient):
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
         page: int = 1
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Search events.
 
         Args:
@@ -427,7 +474,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.search_events(query, latitude, longitude, page)
 
-    async def get_event_details(self, event_id: int) -> Dict[str, Any]:
+    async def get_event_details(self, event_id: int) -> dict[str, Any]:
         """Get event details.
 
         Args:
@@ -439,7 +486,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_event_details(event_id)
 
-    async def get_saved_events(self, page: int = 1) -> Dict[str, Any]:
+    async def get_saved_events(self, page: int = 1) -> dict[str, Any]:
         """Get saved events.
 
         Args:
@@ -454,8 +501,8 @@ class BaseClient(IClient):
     async def save_event(
         self,
         event_id: int,
-        comments: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        comments: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Save event.
 
         Args:
@@ -468,7 +515,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.save_event(event_id, comments)
 
-    async def delete_saved_event(self, event_id: int) -> Dict[str, Any]:
+    async def delete_saved_event(self, event_id: int) -> dict[str, Any]:
         """Delete saved event.
 
         Args:
@@ -480,7 +527,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.delete_saved_event(event_id)
 
-    async def get_all_saved_event_ids(self) -> Dict[str, Any]:
+    async def get_all_saved_event_ids(self) -> dict[str, Any]:
         """Get all saved event IDs.
 
         Returns:
@@ -489,7 +536,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_all_saved_event_ids()
 
-    async def get_event_configuration(self) -> Dict[str, Any]:
+    async def get_event_configuration(self) -> dict[str, Any]:
         """Get event configuration.
 
         Returns:
@@ -506,7 +553,7 @@ class BaseClient(IClient):
         kind: Optional[str] = None,
         version_id: Optional[int] = None,
         usfm: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get moments list.
 
         Args:
@@ -522,7 +569,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_moments(page, user_id, kind, version_id, usfm)
 
-    async def get_moment_details(self, moment_id: int) -> Dict[str, Any]:
+    async def get_moment_details(self, moment_id: int) -> dict[str, Any]:
         """Get moment details.
 
         Args:
@@ -534,19 +581,31 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_moment_details(moment_id)
 
-    async def create_moment(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def create_moment(
+        self, data: Union[CreateMoment, dict[str, Any]]
+    ) -> dict[str, Any]:
         """Create a new moment.
 
         Args:
-            data: Moment data
+            data: Moment data as CreateMoment model or dict
 
         Returns:
             Created moment data
         """
         await self._ensure_authenticated()
-        return await self._http_client.create_moment(data)
+        # Convert to CreateMoment if dict is provided
+        if isinstance(data, dict):
+            moment_data = CreateMoment(**data)
+        else:
+            moment_data = data
 
-    async def update_moment(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        # Add created_dt timestamp
+        moment_dict = moment_data.model_dump()
+        moment_dict["created_dt"] = datetime.now(tz=timezone.utc).isoformat()
+
+        return await self._http_client.create_moment(moment_dict)
+
+    async def update_moment(self, data: dict[str, Any]) -> dict[str, Any]:
         """Update an existing moment.
 
         Args:
@@ -558,7 +617,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.update_moment(data)
 
-    async def delete_moment(self, moment_id: int) -> Dict[str, Any]:
+    async def delete_moment(self, moment_id: int) -> dict[str, Any]:
         """Delete a moment.
 
         Args:
@@ -570,7 +629,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.delete_moment(moment_id)
 
-    async def get_moment_colors(self) -> Dict[str, Any]:
+    async def get_moment_colors(self) -> dict[str, Any]:
         """Get available highlight colors.
 
         Returns:
@@ -579,7 +638,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_moment_colors()
 
-    async def get_moment_labels(self) -> Dict[str, Any]:
+    async def get_moment_labels(self) -> dict[str, Any]:
         """Get moment labels.
 
         Returns:
@@ -592,7 +651,7 @@ class BaseClient(IClient):
         self,
         usfm: str,
         version_id: int
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get verse highlight colors.
 
         Args:
@@ -605,7 +664,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_verse_colors(usfm, version_id)
 
-    async def hide_verse_colors(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def hide_verse_colors(self, data: dict[str, Any]) -> dict[str, Any]:
         """Hide verse highlight colors.
 
         Args:
@@ -617,22 +676,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.hide_verse_colors(data)
 
-    async def get_verse_of_the_day_new(
-        self,
-        language_tag: str = "eng"
-    ) -> Dict[str, Any]:
-        """Get verse of the day (new API).
-
-        Args:
-            language_tag: Language tag
-
-        Returns:
-            Verse of the day data
-        """
-        await self._ensure_authenticated()
-        return await self._http_client.get_verse_of_the_day_new(language_tag)
-
-    async def get_moments_configuration(self) -> Dict[str, Any]:
+    async def get_moments_configuration(self) -> dict[str, Any]:
         """Get moments configuration.
 
         Returns:
@@ -646,7 +690,7 @@ class BaseClient(IClient):
         self,
         moment_id: int,
         comment: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a comment on a moment.
 
         Args:
@@ -659,7 +703,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.create_comment(moment_id, comment)
 
-    async def delete_comment(self, comment_id: int) -> Dict[str, Any]:
+    async def delete_comment(self, comment_id: int) -> dict[str, Any]:
         """Delete a comment.
 
         Args:
@@ -672,7 +716,7 @@ class BaseClient(IClient):
         return await self._http_client.delete_comment(comment_id)
 
     # Likes API methods
-    async def like_moment(self, moment_id: int) -> Dict[str, Any]:
+    async def like_moment(self, moment_id: int) -> dict[str, Any]:
         """Like a moment.
 
         Args:
@@ -684,7 +728,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.like_moment(moment_id)
 
-    async def unlike_moment(self, moment_id: int) -> Dict[str, Any]:
+    async def unlike_moment(self, moment_id: int) -> dict[str, Any]:
         """Unlike a moment.
 
         Args:
@@ -704,7 +748,7 @@ class BaseClient(IClient):
         user_id: Optional[int] = None,
         old_device_id: Optional[str] = None,
         tags: Optional[str] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Register device for push notifications.
 
         Args:
@@ -722,7 +766,7 @@ class BaseClient(IClient):
             device_id, device_type, user_id, old_device_id, tags
         )
 
-    async def unregister_device(self, device_id: str) -> Dict[str, Any]:
+    async def unregister_device(self, device_id: str) -> dict[str, Any]:
         """Unregister device from push notifications.
 
         Args:
@@ -739,7 +783,7 @@ class BaseClient(IClient):
         self,
         page: int = 1,
         language_tag: str = "eng"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get available themes.
 
         Args:
@@ -752,19 +796,39 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_themes(page, language_tag)
 
-    async def add_theme(self, theme_id: int) -> Dict[str, Any]:
+    async def add_theme(
+        self,
+        theme_id: int,
+        available_locales: list[str],
+        colors: dict[str, Any],
+        cta_urls: dict[str, Any],
+        msgid_suffix: str,
+        version_ids: dict[str, int]
+    ) -> dict[str, Any]:
         """Add a theme to user's collection.
 
         Args:
             theme_id: Theme ID
+            available_locales: List of available locale codes
+            colors: Theme colors dictionary
+            cta_urls: Call-to-action URLs dictionary
+            msgid_suffix: Message ID suffix
+            version_ids: Dictionary of version IDs by locale code
 
         Returns:
             Add result data
         """
         await self._ensure_authenticated()
-        return await self._http_client.add_theme(theme_id)
+        return await self._http_client.add_theme(
+            theme_id,
+            available_locales,
+            colors,
+            cta_urls,
+            msgid_suffix,
+            version_ids
+        )
 
-    async def remove_theme(self, theme_id: int) -> Dict[str, Any]:
+    async def remove_theme(self, theme_id: int) -> dict[str, Any]:
         """Remove a theme from user's collection.
 
         Args:
@@ -780,7 +844,7 @@ class BaseClient(IClient):
         self,
         theme_id: int,
         previous_theme_id: Optional[int] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Set active theme.
 
         Args:
@@ -797,7 +861,7 @@ class BaseClient(IClient):
         self,
         theme_id: int,
         language_tag: str = "eng"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get theme description.
 
         Args:
@@ -809,6 +873,21 @@ class BaseClient(IClient):
         """
         await self._ensure_authenticated()
         return await self._http_client.get_theme_description(theme_id, language_tag)
+
+    # Friendships API methods
+    async def send_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Send a friend request to a user.
+
+        Args:
+            user_id: User ID to send friend request to
+
+        Returns:
+            Friend request response data with incoming and outgoing lists
+        """
+        await self._ensure_authenticated()
+        raw_data = await self._http_client.send_friend_request(user_id)
+        return self._data_processor.process_send_friend_request(raw_data)
+
 
     # Localization API methods
     async def get_localization_items(self, language_tag: str = "eng") -> str:

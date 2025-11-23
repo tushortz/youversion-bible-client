@@ -1,12 +1,13 @@
 from enum import Enum
 
 
-class StatusEnum(Enum):
-    PRIVATE = "Private"
-    PUBLIC = "Public"
+class StatusEnum(str, Enum):
+    PRIVATE = "private"
+    DRAFT = "draft"
+    PUBLIC = "public"
 
 
-class MomentKinds(Enum):
+class MomentKinds(str, Enum):
     """Enum for different types of moments in YouVersion API"""
 
     FRIENDSHIP = "friendship"
@@ -17,3 +18,4 @@ class MomentKinds(Enum):
     PLAN_SEGMENT_COMPLETION = "plan_segment_completion"
     PLAN_SUBSCRIPTION = "plan_subscription"
     BOOKMARK = "bookmark"
+    BADGE = "badge"

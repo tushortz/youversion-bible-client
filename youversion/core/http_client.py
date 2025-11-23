@@ -1,6 +1,6 @@
 """HTTP client for YouVersion API operations."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import httpx
 
@@ -31,7 +31,7 @@ class HttpClient(IHttpClient):
         Returns:
             JSON response as dictionary
         """
-        # Merge DEFAULT_HEADERS with any headers passed in kwargs
+        # Always merge DEFAULT_HEADERS with any headers passed in kwargs
         headers = {**Config.DEFAULT_HEADERS, **kwargs.get("headers", {})}
         kwargs["headers"] = headers
         response = await self._client.get(url, **kwargs)
@@ -40,6 +40,8 @@ class HttpClient(IHttpClient):
             # Support mocked AsyncMock json() returning a coroutine
             if hasattr(data, "__await__"):
                 data = await data
+            if "response" in data:
+                return data.get("response", {}).get("data", {})
             return data
         except ValueError:
             # Re-raise to allow callers/tests to handle JSON parse errors
@@ -55,7 +57,7 @@ class HttpClient(IHttpClient):
         Returns:
             JSON response as dictionary
         """
-        # Merge DEFAULT_HEADERS with any headers passed in kwargs
+        # Always merge DEFAULT_HEADERS with any headers passed in kwargs
         headers = {**Config.DEFAULT_HEADERS, **kwargs.get("headers", {})}
         kwargs["headers"] = headers
         response = await self._client.post(url, **kwargs)
@@ -63,7 +65,7 @@ class HttpClient(IHttpClient):
             data = response.json()
             if hasattr(data, "__await__"):
                 data = await data
-            return data
+            return data.get("response", {}).get("data", {})
         except ValueError:
             # Re-raise to allow callers/tests to handle JSON parse errors
             raise
@@ -74,9 +76,7 @@ class HttpClient(IHttpClient):
             await self._client.aclose()
 
     # Legacy methods for backward compatibility
-    async def get_cards(
-        self, page: int = 1, kind: str = ""
-    ) -> dict[str, Any]:
+    async def get_cards(self, page: int = 1, kind: str = "") -> dict[str, Any]:
         """Get cards data from moments endpoint.
 
         Args:
@@ -86,10 +86,7 @@ class HttpClient(IHttpClient):
         Returns:
             Cards data as dictionary
         """
-        url = (
-            f"{Config.MOMENTS_API_BASE}"
-            f"{Config.MOMENTS_ITEMS_URL}"
-        )
+        url = f"{Config.MOMENTS_API_BASE}" f"{Config.MOMENTS_ITEMS_URL}"
         # Build params dict, omitting falsy values (False, None, empty strings)
         params = {}
         if page is not None and page is not False:
@@ -107,6 +104,7 @@ class HttpClient(IHttpClient):
         Returns:
             Verse of the day data as dictionary
         """
+
         return await self.get(Config.VOTD_URL)
 
     # Bible API methods
@@ -117,12 +115,10 @@ class HttpClient(IHttpClient):
             Bible configuration data
         """
         url = f"{Config.BIBLE_API_BASE}{Config.BIBLE_CONFIGURATION_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
     async def get_bible_versions(
-        self,
-        language_tag: str = "eng",
-        version_type: str = "all"
+        self, language_tag: str = "eng", version_type: str = "all"
     ) -> dict[str, Any]:
         """Get Bible versions for a language.
 
@@ -135,7 +131,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.BIBLE_API_BASE}{Config.BIBLE_VERSIONS_URL}"
         params = {"language_tag": language_tag, "type": version_type}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_bible_version(self, version_id: int) -> dict[str, Any]:
         """Get specific Bible version details.
@@ -148,12 +144,10 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.BIBLE_API_BASE}{Config.BIBLE_VERSION_URL}"
         params = {"id": version_id}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_bible_chapter(
-        self,
-        version_id: int,
-        reference: str
+        self, version_id: int, reference: str
     ) -> dict[str, Any]:
         """Get Bible chapter content.
 
@@ -166,7 +160,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.BIBLE_API_BASE}{Config.BIBLE_CHAPTER_URL}"
         params = {"id": version_id, "reference": reference}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_recommended_languages(self, country: str = "US") -> dict[str, Any]:
         """Get recommended languages for a country.
@@ -179,13 +173,11 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.BIBLE_API_BASE}{Config.BIBLE_RECOMMENDED_LANGUAGES_URL}"
         params = {"country": country}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     # Audio Bible API methods
     async def get_audio_chapter(
-        self,
-        version_id: int,
-        reference: str
+        self, version_id: int, reference: str
     ) -> dict[str, Any]:
         """Get audio chapter information.
 
@@ -198,7 +190,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.AUDIO_BIBLE_API_BASE}{Config.AUDIO_CHAPTER_URL}"
         params = {"version_id": version_id, "reference": reference}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_audio_version(self, audio_id: int) -> dict[str, Any]:
         """Get audio version details.
@@ -211,7 +203,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.AUDIO_BIBLE_API_BASE}{Config.AUDIO_VIEW_URL}"
         params = {"id": audio_id}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     # Search API methods
     async def search_bible(
@@ -219,7 +211,7 @@ class HttpClient(IHttpClient):
         query: str,
         version_id: Optional[int] = None,
         book: Optional[str] = None,
-        page: int = 1
+        page: int = 1,
     ) -> dict[str, Any]:
         """Search Bible text.
 
@@ -238,13 +230,10 @@ class HttpClient(IHttpClient):
             params["version_id"] = version_id
         if book:
             params["book"] = book
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def search_plans(
-        self,
-        query: str,
-        language_tag: str = "eng",
-        page: int = 1
+        self, query: str, language_tag: str = "eng", page: int = 1
     ) -> dict[str, Any]:
         """Search reading plans.
 
@@ -258,13 +247,10 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.SEARCH_API_BASE}{Config.SEARCH_PLANS_URL}"
         params = {"query": query, "language_tag": language_tag, "page": page}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def search_users(
-        self,
-        query: str,
-        language_tag: str = "eng",
-        page: int = 1
+        self, query: str, language_tag: str = "eng", page: int = 1
     ) -> dict[str, Any]:
         """Search users.
 
@@ -278,7 +264,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.SEARCH_API_BASE}{Config.SEARCH_USERS_URL}"
         params = {"query": query, "language_tag": language_tag, "page": page}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     # Videos API methods
     async def get_videos(self, language_tag: str = "eng") -> dict[str, Any]:
@@ -292,7 +278,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.SEARCH_API_BASE}{Config.SEARCH_VIDEOS_URL}"
         params = {"language_tag": language_tag}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_video_details(self, video_id: int) -> dict[str, Any]:
         """Get video details.
@@ -305,29 +291,11 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.VIDEOS_API_BASE}{Config.VIDEOS_VIEW_URL}"
         params = {"id": video_id}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
-
-    # Badges API methods
-    async def get_badges(self, user_id: int, page: int = 1) -> dict[str, Any]:
-        """Get user badges.
-
-        Args:
-            user_id: User ID
-            page: Page number
-
-        Returns:
-            Badges data
-        """
-        url = f"{Config.BADGES_API_BASE}{Config.BADGES_ITEMS_URL}"
-        params = {"user_id": user_id, "page": page}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     # Images API methods
     async def get_images(
-        self,
-        reference: str,
-        language_tag: str = "eng",
-        page: int = 1
+        self, reference: str, language_tag: str = "eng", page: int = 1
     ) -> dict[str, Any]:
         """Get images for a reference.
 
@@ -340,9 +308,8 @@ class HttpClient(IHttpClient):
             Images data
         """
         url = f"{Config.IMAGES_API_BASE}{Config.IMAGES_ITEMS_URL}"
-        params = {"reference": reference,
-                  "language_tag": language_tag, "page": page}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        params = {"reference": reference, "language_tag": language_tag, "page": page}
+        return await self.get(url, params=params)
 
     async def get_image_upload_url(self) -> dict[str, Any]:
         """Get image upload URL and parameters.
@@ -351,7 +318,7 @@ class HttpClient(IHttpClient):
             Upload URL data
         """
         url = f"{Config.IMAGES_API_BASE}{Config.IMAGES_UPLOAD_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
     # Events API methods
     async def search_events(
@@ -359,7 +326,7 @@ class HttpClient(IHttpClient):
         query: str,
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
-        page: int = 1
+        page: int = 1,
     ) -> dict[str, Any]:
         """Search events.
 
@@ -378,7 +345,7 @@ class HttpClient(IHttpClient):
             params["latitude"] = latitude
         if longitude:
             params["longitude"] = longitude
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_event_details(self, event_id: int) -> dict[str, Any]:
         """Get event details.
@@ -391,7 +358,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.EVENTS_API_BASE}{Config.EVENTS_VIEW_URL}"
         params = {"id": event_id}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_saved_events(self, page: int = 1) -> dict[str, Any]:
         """Get saved events.
@@ -404,12 +371,10 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.EVENTS_API_BASE}{Config.EVENTS_SAVED_ITEMS_URL}"
         params = {"page": page}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def save_event(
-        self,
-        event_id: int,
-        comments: Optional[Dict[str, Any]] = None
+        self, event_id: int, comments: Optional[dict[str, Any]] = None
     ) -> dict[str, Any]:
         """Save event.
 
@@ -424,9 +389,7 @@ class HttpClient(IHttpClient):
         data = {"id": event_id}
         if comments:
             data["comments"] = comments
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def delete_saved_event(self, event_id: int) -> dict[str, Any]:
         """Delete saved event.
@@ -439,8 +402,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.EVENTS_API_BASE}{Config.EVENTS_DELETE_SAVED_URL}"
         params = {"id": event_id}
-        headers = {**Config.DEFAULT_HEADERS, "Content-Type": "text/plain"}
-        return await self.post(url, headers=headers, params=params)
+        return await self.post(url, params=params)
 
     async def get_all_saved_event_ids(self) -> dict[str, Any]:
         """Get all saved event IDs.
@@ -449,7 +411,7 @@ class HttpClient(IHttpClient):
             All saved event IDs data
         """
         url = f"{Config.EVENTS_API_BASE}{Config.EVENTS_SAVED_ALL_ITEMS_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
     async def get_event_configuration(self) -> dict[str, Any]:
         """Get event configuration.
@@ -458,7 +420,7 @@ class HttpClient(IHttpClient):
             Event configuration data
         """
         url = f"{Config.EVENTS_API_BASE}{Config.EVENTS_CONFIGURATION_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
     # Moments API methods
     async def get_moments(
@@ -467,7 +429,7 @@ class HttpClient(IHttpClient):
         user_id: Optional[int] = None,
         kind: Optional[str] = None,
         version_id: Optional[int] = None,
-        usfm: Optional[str] = None
+        usfm: Optional[str] = None,
     ) -> dict[str, Any]:
         """Get moments list.
 
@@ -491,7 +453,7 @@ class HttpClient(IHttpClient):
             params["version_id"] = version_id
         if usfm:
             params["usfm"] = usfm
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
     async def get_moment_details(self, moment_id: int) -> dict[str, Any]:
         """Get moment details.
@@ -504,9 +466,9 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_VIEW_URL}"
         params = {"id": moment_id}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
-    async def create_moment(self, data: Dict[str, Any]) -> dict[str, Any]:
+    async def create_moment(self, data: dict[str, Any]) -> dict[str, Any]:
         """Create a new moment.
 
         Args:
@@ -516,11 +478,9 @@ class HttpClient(IHttpClient):
             Created moment data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_CREATE_URL}"
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
-    async def update_moment(self, data: Dict[str, Any]) -> dict[str, Any]:
+    async def update_moment(self, data: dict[str, Any]) -> dict[str, Any]:
         """Update an existing moment.
 
         Args:
@@ -530,9 +490,7 @@ class HttpClient(IHttpClient):
             Updated moment data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_UPDATE_URL}"
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def delete_moment(self, moment_id: int) -> dict[str, Any]:
         """Delete a moment.
@@ -545,9 +503,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_DELETE_URL}"
         data = {"id": moment_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def get_moment_colors(self) -> dict[str, Any]:
         """Get available highlight colors.
@@ -556,7 +512,7 @@ class HttpClient(IHttpClient):
             Colors data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_COLORS_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
     async def get_moment_labels(self) -> dict[str, Any]:
         """Get moment labels.
@@ -565,13 +521,9 @@ class HttpClient(IHttpClient):
             Labels data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_LABELS_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
-    async def get_verse_colors(
-        self,
-        usfm: str,
-        version_id: int
-    ) -> dict[str, Any]:
+    async def get_verse_colors(self, usfm: str, version_id: int) -> dict[str, Any]:
         """Get verse highlight colors.
 
         Args:
@@ -583,9 +535,9 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_VERSE_COLORS_URL}"
         params = {"usfm": usfm, "version_id": version_id}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
-    async def hide_verse_colors(self, data: Dict[str, Any]) -> dict[str, Any]:
+    async def hide_verse_colors(self, data: dict[str, Any]) -> dict[str, Any]:
         """Hide verse highlight colors.
 
         Args:
@@ -595,25 +547,7 @@ class HttpClient(IHttpClient):
             Hide result data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_HIDE_VERSE_COLORS_URL}"
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
-
-    async def get_verse_of_the_day_new(
-        self,
-        language_tag: str = "eng"
-    ) -> dict[str, Any]:
-        """Get verse of the day (new API).
-
-        Args:
-            language_tag: Language tag
-
-        Returns:
-            Verse of the day data
-        """
-        url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_VOTD_URL}"
-        params = {"language_tag": language_tag}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.post(url, json=data)
 
     async def get_moments_configuration(self) -> dict[str, Any]:
         """Get moments configuration.
@@ -622,14 +556,10 @@ class HttpClient(IHttpClient):
             Moments configuration data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_CONFIGURATION_URL}"
-        return await self.get(url, headers=Config.DEFAULT_HEADERS)
+        return await self.get(url)
 
     # Comments API methods
-    async def create_comment(
-        self,
-        moment_id: int,
-        comment: str
-    ) -> dict[str, Any]:
+    async def create_comment(self, moment_id: int, comment: str) -> dict[str, Any]:
         """Create a comment on a moment.
 
         Args:
@@ -641,9 +571,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.COMMENTS_CREATE_URL}"
         data = {"moment_id": moment_id, "comment": comment}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def delete_comment(self, comment_id: int) -> dict[str, Any]:
         """Delete a comment.
@@ -656,9 +584,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.COMMENTS_DELETE_URL}"
         data = {"id": comment_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     # Likes API methods
     async def like_moment(self, moment_id: int) -> dict[str, Any]:
@@ -672,9 +598,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.LIKES_CREATE_URL}"
         data = {"moment_id": moment_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def unlike_moment(self, moment_id: int) -> dict[str, Any]:
         """Unlike a moment.
@@ -687,9 +611,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.LIKES_DELETE_URL}"
         data = {"moment_id": moment_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     # Messaging API methods
     async def register_device(
@@ -698,7 +620,7 @@ class HttpClient(IHttpClient):
         device_type: str = "android",
         user_id: Optional[int] = None,
         old_device_id: Optional[str] = None,
-        tags: Optional[str] = None
+        tags: Optional[str] = None,
     ) -> dict[str, Any]:
         """Register device for push notifications.
 
@@ -713,19 +635,14 @@ class HttpClient(IHttpClient):
             Registration result data
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MESSAGING_REGISTER_URL}"
-        data = {
-            "id": device_id,
-            "type": device_type
-        }
+        data = {"id": device_id, "type": device_type}
         if user_id:
             data["user_id"] = user_id
         if old_device_id:
             data["old_id"] = old_device_id
         if tags:
             data["tags"] = tags
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/x-www-form-urlencoded"}
-        return await self.post(url, headers=headers, data=data)
+        return await self.post(url, data=data)
 
     async def unregister_device(self, device_id: str) -> dict[str, Any]:
         """Unregister device from push notifications.
@@ -738,15 +655,11 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.MESSAGING_UNREGISTER_URL}"
         data = {"id": device_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     # Themes API methods
     async def get_themes(
-        self,
-        page: int = 1,
-        language_tag: str = "eng"
+        self, page: int = 1, language_tag: str = "eng"
     ) -> dict[str, Any]:
         """Get available themes.
 
@@ -757,24 +670,43 @@ class HttpClient(IHttpClient):
         Returns:
             Themes data
         """
-        url = f"{Config.MOMENTS_API_BASE}{Config.THEMES_ITEMS_URL}"
+        url = f"{Config.THEMES_API_BASE}{Config.THEMES_ITEMS_URL}"
         params = {"page": page, "language_tag": language_tag}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
 
-    async def add_theme(self, theme_id: int) -> dict[str, Any]:
+    async def add_theme(
+        self,
+        theme_id: int,
+        available_locales: list[str],
+        colors: dict[str, Any],
+        cta_urls: dict[str, Any],
+        msgid_suffix: str,
+        version_ids: dict[str, int],
+    ) -> dict[str, Any]:
         """Add a theme to user's collection.
 
         Args:
             theme_id: Theme ID
+            available_locales: List of available locale codes
+            colors: Theme colors dictionary
+            cta_urls: Call-to-action URLs dictionary
+            msgid_suffix: Message ID suffix
+            version_ids: List of version IDs
 
         Returns:
             Add result data
         """
-        url = f"{Config.MOMENTS_API_BASE}{Config.THEMES_ADD_URL}"
-        data = {"id": theme_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        url = f"{Config.THEMES_API_BASE}{Config.THEMES_ADD_URL}"
+        data = {
+            "id": theme_id,
+            "available_locales": available_locales,
+            "colors": colors,
+            "cta_urls": cta_urls,
+            "msgid_suffix": msgid_suffix,
+            "version_ids": version_ids,
+        }
+
+        return await self.post(url, json=data)
 
     async def remove_theme(self, theme_id: int) -> dict[str, Any]:
         """Remove a theme from user's collection.
@@ -785,16 +717,12 @@ class HttpClient(IHttpClient):
         Returns:
             Remove result data
         """
-        url = f"{Config.MOMENTS_API_BASE}{Config.THEMES_REMOVE_URL}"
+        url = f"{Config.THEMES_API_BASE}{Config.THEMES_REMOVE_URL}"
         data = {"id": theme_id}
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def set_theme(
-        self,
-        theme_id: int,
-        previous_theme_id: Optional[int] = None
+        self, theme_id: int, previous_theme_id: Optional[int] = None
     ) -> dict[str, Any]:
         """Set active theme.
 
@@ -805,18 +733,14 @@ class HttpClient(IHttpClient):
         Returns:
             Set result data
         """
-        url = f"{Config.MOMENTS_API_BASE}{Config.THEMES_SET_URL}"
+        url = f"{Config.THEMES_API_BASE}{Config.THEMES_SET_URL}"
         data = {"id": theme_id}
         if previous_theme_id:
             data["previous_id"] = previous_theme_id
-        headers = {**Config.DEFAULT_HEADERS,
-                   "Content-Type": "application/json"}
-        return await self.post(url, headers=headers, json=data)
+        return await self.post(url, json=data)
 
     async def get_theme_description(
-        self,
-        theme_id: int,
-        language_tag: str = "eng"
+        self, theme_id: int, language_tag: str = "eng"
     ) -> dict[str, Any]:
         """Get theme description.
 
@@ -827,9 +751,23 @@ class HttpClient(IHttpClient):
         Returns:
             Theme description data
         """
-        url = f"{Config.MOMENTS_API_BASE}{Config.THEMES_DESCRIPTION_URL}"
+        url = f"{Config.THEMES_API_BASE}{Config.THEMES_DESCRIPTION_URL}"
         params = {"id": theme_id, "language_tag": language_tag}
-        return await self.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        return await self.get(url, params=params)
+
+    # Friendships API methods
+    async def send_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Send a friend request to a user.
+
+        Args:
+            user_id: User ID to send friend request to
+
+        Returns:
+            Friend request response data
+        """
+        url = f"{Config.FRIENDSHIPS_API_BASE}{Config.FRIENDSHIPS_OFFER_URL}"
+        data = {"user_id": user_id}
+        return await self.post(url, json=data)
 
     # Localization API methods
     async def get_localization_items(self, language_tag: str = "eng") -> str:
@@ -843,5 +781,7 @@ class HttpClient(IHttpClient):
         """
         url = f"{Config.MOMENTS_API_BASE}{Config.LOCALIZATION_ITEMS_URL}"
         params = {"language_tag": language_tag}
-        response = await self._client.get(url, headers=Config.DEFAULT_HEADERS, params=params)
+        # Use _client directly since we need response.text, not JSON
+        headers = {**Config.DEFAULT_HEADERS}
+        response = await self._client.get(url, headers=headers, params=params)
         return response.text

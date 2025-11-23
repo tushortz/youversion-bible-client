@@ -41,7 +41,9 @@ bookmarks = "youversion.cli:poetry_cmd_bookmarks"
 images = "youversion.cli:poetry_cmd_images"
 plan-progress = "youversion.cli:poetry_cmd_plan_progress"
 plan-subscriptions = "youversion.cli:poetry_cmd_plan_subscriptions"
+plan-completions = "youversion.cli:poetry_cmd_plan_completions"
 convert-notes = "youversion.cli:poetry_cmd_convert_notes"
+create-moment = "youversion.cli:poetry_cmd_create_moment"
 discover-endpoints = "youversion.cli:poetry_cmd_discover_endpoints"
 
 [tool.black]

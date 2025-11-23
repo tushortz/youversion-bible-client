@@ -1,8 +1,6 @@
 """Unit tests for Config class."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 
 from youversion.config import Config
 

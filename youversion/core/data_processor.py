@@ -1,15 +1,10 @@
 """Data processor for YouVersion API responses."""
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
-from ..enums import MomentKinds
-from ..models import (
-    Friendship, Highlight, Image, Note, PlanCompletion, PlanSegmentCompletion,
-    PlanSubscription, Reference, Votd,
-)
-from ..models.base import Moment, PlanCompletionAction, PlanSegmentAction
-from ..models.commons import Action, Comment, Like, User
+from ..models import Moment, Reference, Votd
+from ..utils import create_instance_from_response
 from .interfaces import IDataProcessor
 
 
@@ -17,25 +12,18 @@ class DataProcessor(IDataProcessor):
     """Processes raw API responses into structured objects."""
 
     def __init__(self):
-        """Initialize data processor with moment type mappings."""
-        self._moment_mapper = {
-            MomentKinds.FRIENDSHIP.value: Friendship,
-            MomentKinds.HIGHLIGHT.value: Highlight,
-            MomentKinds.IMAGE.value: Image,
-            MomentKinds.NOTE.value: Note,
-            MomentKinds.PLAN_COMPLETION.value: PlanCompletion,
-            MomentKinds.PLAN_SEGMENT_COMPLETION.value: PlanSegmentCompletion,
-            MomentKinds.PLAN_SUBSCRIPTION.value: PlanSubscription,
-        }
+        """Initialize data processor."""
 
-    def _create_references(self, references: list[dict[str, Any]]) -> list[Reference]:
-        """Create Reference objects from raw data.
+    def _create_references(
+        self, references: list[dict[str, Any]]
+    ) -> list[Reference]:
+        """Create Reference objects from raw data using dynamic creation.
 
         Args:
             references: List of reference dictionaries
 
         Returns:
-            List of Reference objects
+            List of dynamically created Reference objects
         """
         normalized: list[Reference] = []
         for ref in references:
@@ -43,17 +31,17 @@ class DataProcessor(IDataProcessor):
             # Normalize usfm to a string when a single-item list is provided
             if isinstance(usfm_value, list) and len(usfm_value) == 1:
                 usfm_value = usfm_value[0]
-            normalized.append(
-                Reference(
-                    version_id=ref["version_id"],
-                    human=ref["human"],
-                    usfm=usfm_value,
-                )
-            )
+            ref_data = {
+                "version_id": ref["version_id"],
+                "human": ref["human"],
+                "usfm": usfm_value,
+            }
+            reference = create_instance_from_response("Reference", ref_data)
+            normalized.append(reference)
         return normalized
 
     def _process_common_fields(self, obj: dict[str, Any]) -> dict[str, Any]:
-        """Process common fields in moment objects.
+        """Process common fields in moment objects using dynamic creation.
 
         Args:
             obj: Raw object data
@@ -64,179 +52,67 @@ class DataProcessor(IDataProcessor):
         # Process comments
         comments = obj.get("comments", {})
         if comments:
-            obj["comments"] = Comment(**comments)
+            obj["comments"] = create_instance_from_response(
+                "Comment", comments
+            )
 
         # Process likes
         likes = obj.get("likes", {})
         if likes:
-            obj["likes"] = Like(**likes)
+            obj["likes"] = create_instance_from_response("Like", likes)
 
         # Process user
         user = obj.get("user", {})
         if user:
-            obj["user"] = User(**user)
+            obj["user"] = create_instance_from_response("User", user)
 
         return obj
 
-    def _process_actions(self, obj: dict[str, Any], kind: str) -> dict[str, Any]:
-        """Process actions based on moment kind.
-
-        Args:
-            obj: Raw object data
-            kind: Moment kind
-
-        Returns:
-            Processed object data
-        """
-        actions = obj.get("actions", {})
-
-        if kind == MomentKinds.PLAN_SEGMENT_COMPLETION.value:
-            obj["actions"] = PlanSegmentAction(**actions)
-        elif kind == MomentKinds.PLAN_COMPLETION.value:
-            obj["actions"] = PlanCompletionAction(**actions)
-        elif kind == MomentKinds.FRIENDSHIP.value:
-            # Friendship doesn't have rich actions; provide minimal marker
-            obj["actions"] = {"can_follow": True}
-        else:
-            obj["actions"] = Action(**actions)
-
-        return obj
-
-    def _normalize_kind_id(self, kind_id: str) -> str:
-        """Normalize kind_id (e.g., 'note.v1') to kind (e.g., 'note').
-
-        Args:
-            kind_id: Kind ID from API (e.g., 'note.v1', 'highlight.v1')
-
-        Returns:
-            Normalized kind string (e.g., 'note', 'highlight')
-        """
-        if not kind_id:
-            return ""
-        # Remove version suffix (e.g., 'note.v1' -> 'note')
-        return kind_id.split(".")[0]
-
-    def process_moments(self, raw_data: list[dict[str, Any]]) -> list[Moment]:
-        """Process raw moments data.
+    def process_moments(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Moment]:
+        """Process raw moments data using dynamic Pydantic models.
 
         Args:
             raw_data: Raw moments data from API
 
         Returns:
-            List of processed Moment objects
+            List of dynamically created Moment objects conforming to
+            MomentProtocol
         """
         moments = []
 
         for item in raw_data:
-            # Extract kind from kind_id (e.g., 'note.v1' -> 'note')
-            kind_id = item.get("kind_id", "")
-            kind = self._normalize_kind_id(kind_id)
-            model = self._moment_mapper.get(kind)
-
-            if not model:
-                continue
-
-            # Start with base moment data
-            obj = {
-                "id": item.get("id"),
-                "created_dt": item.get("created_dt"),
-                "updated_dt": item.get("updated_dt"),
-            }
-
-            # Merge extras data if present
-            extras = item.get("extras", {})
-            if extras:
-                # Extract user from extras
-                user = extras.get("user")
-                if user:
-                    obj["user"] = user
-                # Copy other extras fields
-                for key in ["title", "content", "color", "references"]:
-                    if key in extras:
-                        obj[key] = extras[key]
-
-            # Map commenting to comments format
-            commenting = item.get("commenting", {})
-            if commenting:
-                # Convert commenting structure to comments format
-                comments_data = {
-                    "enabled": commenting.get("enabled", True),
-                    "count": commenting.get("total", 0),
-                    "strings": {},
-                    "all": commenting.get("comments") or [],
-                }
-                obj["comments"] = comments_data
-
-            # Map liking to likes format
-            liking = item.get("liking", {})
-            if liking:
-                # Convert liking structure to likes format
-                likes_data = {
-                    "enabled": liking.get("enabled", True),
-                    "count": liking.get("total", 0),
-                    "strings": {},
-                    "all": liking.get("likes") or [],
-                    "is_liked": False,  # Default, can be set from all_users if needed
-                    "user_ids": None,
-                }
-                # Extract user_ids from all_users if present
-                all_users = liking.get("all_users")
-                if all_users:
-                    user_ids = [
-                        u.get("id") for u in all_users if u.get("id")
-                    ]
-                    likes_data["user_ids"] = user_ids
-                obj["likes"] = likes_data
-
-            # Process common fields (user, comments, likes)
-            obj = self._process_common_fields(obj)
-
-            # Process actions (if present in base or elsewhere)
-            base = item.get("base", {})
-            if base:
-                # Extract action_url or other action-related data
-                action_url = base.get("action_url")
-                if action_url or "actions" in obj:
-                    obj = self._process_actions(obj, kind)
-
-            # Process references for non-friendship moments
-            if kind != MomentKinds.FRIENDSHIP.value:
-                references = obj.get("references", [])
-                if references:
-                    obj["references"] = self._create_references(references)
-                else:
-                    obj["references"] = []
-
-            # Create moment object
-            moment = model(kind=kind, **obj)
+            # Create a dynamic dataclass instance from the moment item
+            # Use kind_id to create a unique class name
+            kind_id = item.get("kind_id", "moment")
+            # Sanitize kind_id for class name
+            kind_base = kind_id.split('.')[0]
+            class_name = (
+                f"{kind_base.replace('.', '').replace('_', '').title()}"
+            )
+            moment = create_instance_from_response(class_name, item)
             moments.append(moment)
 
         return moments
 
-    def process_highlights(self, raw_data: list[dict[str, Any]]) -> list[Highlight]:
-        """Process raw highlights data.
+    def process_highlights(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw highlights data using dynamic Pydantic models.
 
         Args:
             raw_data: Raw highlights data from API
 
         Returns:
-            List of processed Highlight objects
+            List of dynamically created Highlight objects
         """
         highlights = []
 
         for item in raw_data:
-            kind = item["kind"]
-            card = item["object"]
-
-            # Process actions
-            actions = card.get("actions", {})
-            card["actions"] = Action(**actions)
-
-            # Process references
-            references = card.get("references", [])
-            card["references"] = self._create_references(references)
-
-            highlight = Highlight(kind=kind, **card)
+            # Create a dynamic dataclass instance from the highlight item
+            class_name = "Highlight"
+            highlight = create_instance_from_response(class_name, item)
             highlights.append(highlight)
 
         return highlights
@@ -244,14 +120,14 @@ class DataProcessor(IDataProcessor):
     def process_verse_of_the_day(
         self, raw_data: dict[str, Any], day: Optional[int] = None
     ) -> Votd:
-        """Process verse of the day data.
+        """Process verse of the day data using dynamic creation.
 
         Args:
             raw_data: Raw verse of the day data
             day: Specific day number (optional)
 
         Returns:
-            Processed Votd object
+            Dynamically created Votd object
         """
         requested_day: Optional[int] = day
         if day is None:
@@ -260,11 +136,244 @@ class DataProcessor(IDataProcessor):
         votd_data = raw_data.get("votd", [])
         for ref in votd_data:
             if ref["day"] == day:
-                return Votd(**ref)
+                return create_instance_from_response("Votd", ref)
 
         # Always fallback to first when available
         if votd_data:
-            return Votd(**votd_data[0])
+            return create_instance_from_response("Votd", votd_data[0])
         # No data at all
         day_value = requested_day if requested_day is not None else day
         raise ValueError(f"No verse of the day found for day {day_value}")
+
+    def process_notes(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw notes data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw notes data from API
+
+        Returns:
+            List of dynamically created Note objects
+        """
+        notes = []
+        for item in raw_data:
+            note = create_instance_from_response("Note", item)
+            notes.append(note)
+        return notes
+
+    def process_bookmarks(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw bookmarks data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw bookmarks data from API
+
+        Returns:
+            List of dynamically created Bookmark objects
+        """
+        bookmarks = []
+        for item in raw_data:
+            bookmark = create_instance_from_response("Bookmark", item)
+            bookmarks.append(bookmark)
+        return bookmarks
+
+    def process_images(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw images data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw images data from API
+
+        Returns:
+            List of dynamically created Image objects
+        """
+        images = []
+        for item in raw_data:
+            image = create_instance_from_response("Image", item)
+            images.append(image)
+        return images
+
+    def process_plan_progress(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw plan progress data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw plan progress data from API
+
+        Returns:
+            List of dynamically created PlanProgress objects
+        """
+        plan_progress = []
+        for item in raw_data:
+            progress = create_instance_from_response("PlanProgress", item)
+            plan_progress.append(progress)
+        return plan_progress
+
+    def process_plan_subscriptions(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw plan subscriptions data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw plan subscriptions data from API
+
+        Returns:
+            List of dynamically created PlanSubscription objects
+        """
+        plan_subscriptions = []
+        for item in raw_data:
+            subscription = create_instance_from_response(
+                "PlanSubscription", item
+            )
+            plan_subscriptions.append(subscription)
+        return plan_subscriptions
+
+    def process_badges(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw badges data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw badges data from API
+
+        Returns:
+            List of dynamically created Badge objects
+        """
+        badges = []
+        for item in raw_data:
+            badge = create_instance_from_response("Badge", item)
+            badges.append(badge)
+        return badges
+
+    def process_plan_completions(
+        self, raw_data: list[dict[str, Any]]
+    ) -> list[Any]:
+        """Process raw plan completions data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw plan completions data from API
+
+        Returns:
+            List of dynamically created PlanCompletion objects
+        """
+        plan_completions = []
+        for item in raw_data:
+            completion = create_instance_from_response(
+                "PlanCompletion", item
+            )
+            plan_completions.append(completion)
+        return plan_completions
+
+    def process_search_bible(
+        self, raw_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Process raw Bible search results using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw Bible search results data from API
+
+        Returns:
+            Processed search results with dynamically created objects
+        """
+        return create_instance_from_response("BibleSearch", raw_data)
+
+    def process_bible_chapter(
+        self, raw_data: dict[str, Any]
+    ) -> Any:
+        """Process raw Bible chapter data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw Bible chapter data from API
+
+        Returns:
+            Dynamically created BibleChapter object
+        """
+        return create_instance_from_response("BibleChapter", raw_data)
+
+    def process_bible_version(
+        self, raw_data: dict[str, Any]
+    ) -> Any:
+        """Process raw Bible version data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw Bible version data from API
+
+        Returns:
+            Dynamically created Version object
+        """
+        return create_instance_from_response("Version", raw_data)
+
+    def process_bible_versions(
+        self, raw_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Process raw Bible versions data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw Bible versions data from API
+
+        Returns:
+            Processed versions data with dynamically created objects
+        """
+        processed_data = raw_data.copy()
+
+        # Process versions list if it exists
+        if "versions" in processed_data:
+            versions = []
+            for item in processed_data["versions"]:
+                version = create_instance_from_response("Version", item)
+                versions.append(version)
+            processed_data["versions"] = versions
+
+        # Create the main BibleVersions model
+        return create_instance_from_response("BibleVersions", processed_data)
+
+    def process_audio_chapter(
+        self, raw_data: Union[dict[str, Any], list[dict[str, Any]]]
+    ) -> Any:
+        """Process raw audio chapter data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw audio chapter data from API (dict or list of dicts)
+
+        Returns:
+            AudioChapter object or list of AudioChapter objects
+        """
+        # Handle list input
+        if isinstance(raw_data, list):
+            chapters = []
+            for item in raw_data:
+                chapter = create_instance_from_response("AudioChapter", item)
+                chapters.append(chapter)
+            return chapters
+        # Handle dict input
+        return create_instance_from_response("AudioChapter", raw_data)
+
+    def process_audio_version(
+        self, raw_data: dict[str, Any]
+    ) -> Any:
+        """Process raw audio version data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw audio version data from API
+
+        Returns:
+            Dynamically created AudioVersion object
+        """
+        return create_instance_from_response("AudioVersion", raw_data)
+
+    def process_send_friend_request(
+        self, raw_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Process raw friend request data using dynamic Pydantic models.
+
+        Args:
+            raw_data: Raw friend request data from API
+
+        Returns:
+            Processed friend request data with dynamically created objects
+        """
+        return create_instance_from_response("FriendshipRequest", raw_data)

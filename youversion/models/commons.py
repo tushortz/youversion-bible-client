@@ -1,65 +1,117 @@
-from dataclasses import dataclass
-from typing import Any, Optional, Union
+"""Common models for YouVersion API responses."""
 
-from youversion.config import Config
+from typing import Any, Optional, Protocol
+
+try:
+    from typing import TypeAlias
+except ImportError:
+    # Python < 3.10 compatibility
+    from typing_extensions import TypeAlias
 
 
-@dataclass
-class ReactionModel:
-    """Base model for several actions"""
+class ReactionModelProtocol(Protocol):
+    """Protocol for reaction-based models (comments, likes)."""
 
     enabled: bool
     count: int
     strings: dict[str, Any]
     all: list[Any]
 
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
-@dataclass
-class BodyImage:
-    """Image class for Youversion moment objects"""
+
+# Type alias for convenience
+ReactionModel: TypeAlias = ReactionModelProtocol
+
+
+class BodyImageProtocol(Protocol):
+    """Protocol for body image objects."""
 
     height: int
     width: int
     url: str
 
-    def __post_init__(self) -> None:
-        """Normalize URL after initialization."""
-        if self.url and self.url.startswith("//"):
-            self.url = "https:" + self.url
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
 
-@dataclass
-class Action:
-    """Action class for the Youversion moment object"""
-
-    deletable: bool = True
-    editable: bool = False
-    read: bool = True
-    show: bool = False
+# Type alias for convenience
+BodyImage: TypeAlias = BodyImageProtocol
 
 
-@dataclass
-class User:
-    """User model for the YouVersion object"""
+class ActionProtocol(Protocol):
+    """Protocol for action objects."""
 
-    id: Optional[Union[str, int]]
+    deletable: bool
+    editable: bool
+    read: bool
+    show: bool
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
+
+
+# Type alias for convenience
+Action: TypeAlias = ActionProtocol
+
+
+class UserProtocol(Protocol):
+    """Protocol for user objects."""
+
+    id: Optional[Any]  # Can be str or int
     path: str
-    user_name: Optional[str] = None
+    user_name: Optional[str]
 
-    def __post_init__(self) -> None:
-        """Normalize path after initialization."""
-        if self.path:
-            self.path = f"{Config.BASE_URL}{self.path}"
-
-
-@dataclass
-class Comment(ReactionModel):
-    """Comment class inheriting from ReactionModel"""
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
 
-@dataclass
-class Like(ReactionModel):
-    """Comment class inheriting fields from ReactionModel"""
+# Type alias for convenience
+User: TypeAlias = UserProtocol
 
+
+class CommentProtocol(Protocol):
+    """Protocol for comment objects."""
+
+    enabled: bool
+    count: int
+    strings: dict[str, Any]
+    all: list[Any]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
+
+
+# Type alias for convenience
+Comment: TypeAlias = CommentProtocol
+
+
+class LikeProtocol(Protocol):
+    """Protocol for like objects."""
+
+    enabled: bool
+    count: int
+    strings: dict[str, Any]
+    all: list[Any]
     is_liked: bool
-    user_ids: Optional[list[int]] = None
+    user_ids: Optional[list[int]]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
+
+
+# Type alias for convenience
+Like: TypeAlias = LikeProtocol

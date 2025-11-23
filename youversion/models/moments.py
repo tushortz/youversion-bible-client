@@ -1,101 +1,87 @@
-"""Moments-related data models."""
+"""Pydantic models for moment creation and updates."""
 
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
+from pydantic import BaseModel, Field
 
-@dataclass
-class Base:
-    """Base moment information."""
-    title: Optional[str] = None
-    body: Optional[str] = None
-    color: Optional[str] = None
-    action_url: Optional[str] = None
-    share_url: Optional[str] = None
-    images: Optional[Dict[str, Any]] = None
+from ..enums import MomentKinds, StatusEnum
 
 
-@dataclass
-class MomentExtras:
-    """Moment extras information."""
-    reference: Optional[str] = None
-    version_id: Optional[int] = None
-    usfm: Optional[str] = None
-    verse_text: Optional[str] = None
-    verse_range: Optional[str] = None
+class ReferenceCreate(BaseModel):
+    """Reference data for moment creation.
 
+    Args:
+        human: Human-readable reference (e.g., "Genesis 1:1")
+        version_id: Bible version ID
+        usfm: USFM reference as list of strings
+    """
 
-@dataclass
-class MomentCommenting:
-    """Moment commenting information."""
-    enabled: bool = True
-    count: int = 0
-
-
-@dataclass
-class MomentLiking:
-    """Moment liking information."""
-    enabled: bool = True
-    count: int = 0
-    user_liked: bool = False
-
-
-@dataclass
-class Moment:
-    """Moment (note, highlight, bookmark) information."""
-    id: int
-    kind: str
-    kind_color: Optional[str] = None
-    base: Optional[Base] = None
-    extras: Optional[MomentExtras] = None
-    commenting: Optional[MomentCommenting] = None
-    liking: Optional[MomentLiking] = None
-    created_dt: Optional[datetime] = None
-    updated_dt: Optional[datetime] = None
-
-
-@dataclass
-class MomentComment:
-    """Moment comment information."""
-    id: int
-    moment_id: int
-    comment: str
-    user_id: int
-    created_dt: Optional[datetime] = None
-
-
-@dataclass
-class MomentLike:
-    """Moment like information."""
-    id: int
-    moment_id: int
-    user_id: int
-    created_dt: Optional[datetime] = None
-
-
-@dataclass
-class MomentLabel:
-    """Moment label information."""
-    id: int
-    name: str
-    color: Optional[str] = None
-
-
-@dataclass
-class VerseOfTheDay:
-    """Verse of the day information."""
-    id: int
-    reference: str
-    verse_text: str
+    human: str
     version_id: int
-    language_tag: str
-    date: Optional[datetime] = None
+    usfm: list[str]
 
 
-@dataclass
-class MomentConfiguration:
-    """Moment configuration information."""
-    colors: List[Dict[str, Any]]
-    labels: List[MomentLabel]
-    kinds: List[Dict[str, Any]]
+class CreateMoment(BaseModel):
+    """Pydantic model for creating a moment.
+
+    Args:
+        kind: Type of moment (e.g., "note", "highlight", "bookmark")
+        content: Content text (optional)
+        references: List of Bible references (optional)
+        title: Moment title (optional)
+        status: Status (private, draft or public, optional)
+        body: Body text (optional)
+        color: Color hex code (optional)
+        labels: List of label strings (optional)
+        language_tag: Language tag (optional, e.g., "en")
+    """
+
+    kind: MomentKinds = Field(..., description="Type of moment")
+    content: str = Field(..., description="Content text")
+    references: list[ReferenceCreate] = Field(
+        ..., description="List of Bible references"
+    )
+    title: str = Field(..., description="Moment title")
+    status: StatusEnum = Field(
+        ..., description="Status (private, draft or public)"
+    )
+    body: str = Field(..., description="Body text")
+    color: str = Field(
+        ..., description="Color hex code", min_length=6, max_length=6
+    )
+    labels: list[str] = Field(
+        ..., description="List of labels", min_items=1, max_length=10
+    )
+    language_tag: str = Field(
+        ...,
+        description="Language tag (e.g., 'en')",
+        min_length=2,
+        max_length=2,
+    )
+
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
+        """Convert model to dictionary for API request.
+
+        Args:
+            **kwargs: Additional arguments for model_dump
+
+        Returns:
+            Dictionary representation of the model
+        """
+        # Use mode='python' to get enum values as strings
+        data = super().model_dump(
+            mode="python", **kwargs
+        )
+        # Convert enum values to their string values
+        if "kind" in data and hasattr(data["kind"], "value"):
+            data["kind"] = data["kind"].value
+        if "status" in data and hasattr(data["status"], "value"):
+            data["status"] = data["status"].value
+        # Convert references to dict format if present
+        if "references" in data and data["references"]:
+            data["references"] = [
+                ref.model_dump() if isinstance(ref, ReferenceCreate) else ref
+                for ref in data["references"]
+            ]
+        # Remove None values to keep payload clean
+        return {k: v for k, v in data.items() if v is not None}

@@ -1,9 +1,11 @@
 """Interfaces for YouVersion Bible API client components."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import httpx
+
+from ..models.base import Moment
 
 
 class IAuthenticator(ABC):
@@ -20,12 +22,22 @@ class IHttpClient(ABC):
 
     @abstractmethod
     async def get(self, url: str, **kwargs) -> dict[str, Any]:
-        """Perform GET request."""
+        """Perform GET request.
+
+        Args:
+            url: URL to request
+            **kwargs: Additional arguments for the request
+        """
         pass
 
     @abstractmethod
     async def post(self, url: str, **kwargs) -> dict[str, Any]:
-        """Perform POST request."""
+        """Perform POST request.
+
+        Args:
+            url: URL to request
+            **kwargs: Additional arguments for the request
+        """
         pass
 
     @abstractmethod
@@ -38,7 +50,7 @@ class IDataProcessor(ABC):
     """Interface for data processing operations."""
 
     @abstractmethod
-    def process_moments(self, raw_data: list[dict[str, Any]]) -> list[Any]:
+    def process_moments(self, raw_data: list[dict[str, Any]]) -> list[Moment]:
         """Process raw moments data."""
         pass
 
@@ -54,6 +66,33 @@ class IDataProcessor(ABC):
         """Process verse of the day data."""
         pass
 
+    @abstractmethod
+    def process_bible_version(self, raw_data: dict[str, Any]) -> Any:
+        """Process raw Bible version data."""
+        pass
+
+    @abstractmethod
+    def process_bible_versions(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        """Process raw Bible versions data."""
+        pass
+
+    @abstractmethod
+    def process_bible_chapter(self, raw_data: dict[str, Any]) -> Any:
+        """Process raw Bible chapter data."""
+        pass
+
+    @abstractmethod
+    def process_audio_chapter(
+        self, raw_data: Union[dict[str, Any], list[dict[str, Any]]]
+    ) -> Any:
+        """Process raw audio chapter data."""
+        pass
+
+    @abstractmethod
+    def process_audio_version(self, raw_data: dict[str, Any]) -> Any:
+        """Process raw audio version data."""
+        pass
+
 
 class IClient(ABC):
     """Interface for YouVersion API client."""
@@ -65,7 +104,7 @@ class IClient(ABC):
         pass
 
     @abstractmethod
-    async def moments(self, page: int = 1) -> list[Any]:
+    async def moments(self, page: int = 1) -> list[Moment]:
         """Get moments."""
         pass
 
@@ -105,6 +144,16 @@ class IClient(ABC):
         pass
 
     @abstractmethod
+    async def plan_completions(self, page: int = 1) -> list[Any]:
+        """Get plan completions."""
+        pass
+
+    @abstractmethod
     async def convert_note_to_md(self) -> list[Any]:
         """Convert notes to markdown."""
+        pass
+
+    @abstractmethod
+    async def send_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Send a friend request to a user."""
         pass

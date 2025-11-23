@@ -1,6 +1,5 @@
 """URL discovery utilities for YouVersion API endpoints."""
 
-import re
 from typing import Optional
 
 import httpx

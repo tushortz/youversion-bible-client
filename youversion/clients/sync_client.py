@@ -1,9 +1,10 @@
 """Synchronous client for YouVersion Bible API."""
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Optional, Union
 
 from ..core.base_client import BaseClient
+from ..models.moments import CreateMoment
 
 
 class SyncClient(BaseClient):
@@ -125,76 +126,193 @@ class SyncClient(BaseClient):
 
     # Synchronous wrapper methods
     def moments(self, page: int = 1) -> list[Any]:
-        """Get moments (synchronous)."""
+        """Get moments.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of dynamically created Moment objects conforming to
+            MomentProtocol
+        """
         return self._run_async(super().moments(page))
 
     def highlights(self, page: int = 1) -> list[Any]:
-        """Get highlights (synchronous)."""
+        """Get highlights.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of Highlight objects
+        """
         return self._run_async(super().highlights(page))
 
     def verse_of_the_day(self, day: Optional[int] = None) -> Any:
-        """Get verse of the day (synchronous)."""
+        """Get verse of the day.
+
+        Args:
+            day: Specific day number (optional)
+
+        Returns:
+            Votd object
+        """
         return self._run_async(super().verse_of_the_day(day))
 
     def notes(self, page: int = 1) -> list[Any]:
-        """Get notes (synchronous)."""
+        """Get notes.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of note data
+        """
         return self._run_async(super().notes(page))
 
     def bookmarks(self, page: int = 1) -> list[Any]:
-        """Get bookmarks (synchronous)."""
+        """Get bookmarks.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of bookmark data
+        """
         return self._run_async(super().bookmarks(page))
 
     def my_images(self, page: int = 1) -> list[Any]:
-        """Get images (synchronous)."""
+        """Get images.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of image data
+        """
         return self._run_async(super().my_images(page))
 
     def plan_progress(self, page: int = 1) -> list[Any]:
-        """Get plan progress (synchronous)."""
+        """Get plan progress.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of plan progress data
+        """
         return self._run_async(super().plan_progress(page))
 
     def plan_subscriptions(self, page: int = 1) -> list[Any]:
-        """Get plan subscriptions (synchronous)."""
+        """Get plan subscriptions.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of plan subscription data
+        """
         return self._run_async(super().plan_subscriptions(page))
 
+    def plan_completions(self, page: int = 1) -> list[Any]:
+        """Get plan completions.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of plan completion data
+        """
+        return self._run_async(super().plan_completions(page))
+
     def convert_note_to_md(self) -> list[Any]:
-        """Convert notes to markdown (synchronous)."""
+        """Convert notes to markdown.
+
+        Returns:
+            List of converted note data
+        """
         return self._run_async(super().convert_note_to_md())
 
+    def send_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Send a friend request to a user.
+
+        Args:
+            user_id: User ID to send friend request to
+
+        Returns:
+            Friend request response data with incoming and outgoing lists
+        """
+        return self._run_async(super().send_friend_request(user_id))
+
     # Bible API methods
-    def get_bible_configuration(self) -> Dict[str, Any]:
-        """Get Bible configuration (synchronous)."""
+    def get_bible_configuration(self) -> dict[str, Any]:
+        """Get Bible configuration.
+
+        Returns:
+            Bible configuration data
+        """
         return self._run_async(super().get_bible_configuration())
 
     def get_bible_versions(
         self,
         language_tag: str = "eng",
         version_type: str = "all"
-    ) -> Dict[str, Any]:
-        """Get Bible versions for a language (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get Bible versions for a language.
+
+        Args:
+            language_tag: Language tag (e.g., 'eng', 'spa')
+            version_type: Type of versions ('all', 'text', 'audio')
+
+        Returns:
+            Bible versions data
+        """
         return self._run_async(
             super().get_bible_versions(language_tag, version_type)
         )
 
-    def get_bible_version(self, version_id: int) -> Dict[str, Any]:
-        """Get specific Bible version details (synchronous)."""
+    def get_bible_version(self, version_id: int) -> dict[str, Any]:
+        """Get specific Bible version details.
+
+        Args:
+            version_id: Version ID
+
+        Returns:
+            Bible version data
+        """
         return self._run_async(
             super().get_bible_version(version_id)
         )
 
     def get_bible_chapter(
         self,
-        version_id: int,
-        reference: str
-    ) -> Dict[str, Any]:
-        """Get Bible chapter content (synchronous)."""
+        reference: str,
+        version_id: int = 1,
+    ) -> dict[str, Any]:
+        """Get Bible chapter content.
+
+        Args:
+            reference: USFM reference (e.g., 'GEN.1')
+            version_id: Version ID
+
+        Returns:
+            Chapter content data
+        """
         return self._run_async(
-            super().get_bible_chapter(version_id, reference)
+            super().get_bible_chapter(reference, version_id)
         )
 
     def get_recommended_languages(
         self, country: str = "US"
-    ) -> Dict[str, Any]:
-        """Get recommended languages for a country (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get recommended languages for a country.
+
+        Args:
+            country: Country code (e.g., 'US', 'CA')
+
+        Returns:
+            Recommended languages data
+        """
         return self._run_async(
             super().get_recommended_languages(country)
         )
@@ -202,16 +320,31 @@ class SyncClient(BaseClient):
     # Audio Bible API methods
     def get_audio_chapter(
         self,
-        version_id: int,
-        reference: str
-    ) -> Dict[str, Any]:
-        """Get audio chapter information (synchronous)."""
+        reference: str,
+        version_id: int = 1,
+    ) -> dict[str, Any]:
+        """Get audio chapter information.
+
+        Args:
+            reference: USFM reference (e.g., 'GEN.1')
+            version_id: Audio version ID
+
+        Returns:
+            Audio chapter data
+        """
         return self._run_async(
-            super().get_audio_chapter(version_id, reference)
+            super().get_audio_chapter(reference, version_id)
         )
 
-    def get_audio_version(self, audio_id: int) -> Dict[str, Any]:
-        """Get audio version details (synchronous)."""
+    def get_audio_version(self, audio_id: int) -> dict[str, Any]:
+        """Get audio version details.
+
+        Args:
+            audio_id: Audio version ID
+
+        Returns:
+            Audio version data
+        """
         return self._run_async(super().get_audio_version(audio_id))
 
     # Search API methods
@@ -221,8 +354,18 @@ class SyncClient(BaseClient):
         version_id: Optional[int] = None,
         book: Optional[str] = None,
         page: int = 1
-    ) -> Dict[str, Any]:
-        """Search Bible text (synchronous)."""
+    ) -> dict[str, Any]:
+        """Search Bible text.
+
+        Args:
+            query: Search query
+            version_id: Version ID (optional)
+            book: Book filter (optional)
+            page: Page number
+
+        Returns:
+            Search results data
+        """
         return self._run_async(
             super().search_bible(query, version_id, book, page)
         )
@@ -230,10 +373,19 @@ class SyncClient(BaseClient):
     def search_plans(
         self,
         query: str,
-        language_tag: str = "eng",
+        language_tag: str = "en",
         page: int = 1
-    ) -> Dict[str, Any]:
-        """Search reading plans (synchronous)."""
+    ) -> dict[str, Any]:
+        """Search reading plans.
+
+        Args:
+            query: Search query
+            language_tag: Language tag
+            page: Page number
+
+        Returns:
+            Plan search results data
+        """
         return self._run_async(super().search_plans(query, language_tag, page))
 
     def search_users(
@@ -241,23 +393,53 @@ class SyncClient(BaseClient):
         query: str,
         language_tag: str = "eng",
         page: int = 1
-    ) -> Dict[str, Any]:
-        """Search users (synchronous)."""
+    ) -> dict[str, Any]:
+        """Search users.
+
+        Args:
+            query: Search query
+            language_tag: Language tag
+            page: Page number
+
+        Returns:
+            User search results data
+        """
         return self._run_async(super().search_users(query, language_tag, page))
 
     # Videos API methods
-    def get_videos(self, language_tag: str = "eng") -> Dict[str, Any]:
-        """Get videos list (synchronous)."""
+    def get_videos(self, language_tag: str = "eng") -> dict[str, Any]:
+        """Get videos list.
+
+        Args:
+            language_tag: Language tag
+
+        Returns:
+            Videos data
+        """
         return self._run_async(super().get_videos(language_tag))
 
-    def get_video_details(self, video_id: int) -> Dict[str, Any]:
-        """Get video details (synchronous)."""
+    def get_video_details(self, video_id: int) -> dict[str, Any]:
+        """Get video details.
+
+        Args:
+            video_id: Video ID
+
+        Returns:
+            Video details data
+        """
         return self._run_async(super().get_video_details(video_id))
 
     # Badges API methods
-    def get_badges(self, user_id: int, page: int = 1) -> Dict[str, Any]:
-        """Get user badges (synchronous)."""
-        return self._run_async(super().get_badges(user_id, page))
+    def badges(self, page: int = 1) -> list[Any]:
+        """Get badges.
+
+        Args:
+            page: Page number
+
+        Returns:
+            List of badge data
+        """
+        return self._run_async(super().badges(page))
 
     # Images API methods
     def get_images(
@@ -265,14 +447,27 @@ class SyncClient(BaseClient):
         reference: str,
         language_tag: str = "eng",
         page: int = 1
-    ) -> Dict[str, Any]:
-        """Get images for a reference (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get images for a reference.
+
+        Args:
+            reference: USFM reference
+            language_tag: Language tag
+            page: Page number
+
+        Returns:
+            Images data
+        """
         return self._run_async(
             super().get_images(reference, language_tag, page)
         )
 
-    def get_image_upload_url(self) -> Dict[str, Any]:
-        """Get image upload URL and parameters (synchronous)."""
+    def get_image_upload_url(self) -> dict[str, Any]:
+        """Get image upload URL and parameters.
+
+        Returns:
+            Upload URL data
+        """
         return self._run_async(super().get_image_upload_url())
 
     # Events API methods
@@ -282,38 +477,85 @@ class SyncClient(BaseClient):
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
         page: int = 1
-    ) -> Dict[str, Any]:
-        """Search events (synchronous)."""
+    ) -> dict[str, Any]:
+        """Search events.
+
+        Args:
+            query: Search query
+            latitude: Latitude (optional)
+            longitude: Longitude (optional)
+            page: Page number
+
+        Returns:
+            Event search results data
+        """
         return self._run_async(
             super().search_events(query, latitude, longitude, page)
         )
 
-    def get_event_details(self, event_id: int) -> Dict[str, Any]:
-        """Get event details (synchronous)."""
+    def get_event_details(self, event_id: int) -> dict[str, Any]:
+        """Get event details.
+
+        Args:
+            event_id: Event ID
+
+        Returns:
+            Event details data
+        """
         return self._run_async(super().get_event_details(event_id))
 
-    def get_saved_events(self, page: int = 1) -> Dict[str, Any]:
-        """Get saved events (synchronous)."""
+    def get_saved_events(self, page: int = 1) -> dict[str, Any]:
+        """Get saved events.
+
+        Args:
+            page: Page number
+
+        Returns:
+            Saved events data
+        """
         return self._run_async(super().get_saved_events(page))
 
     def save_event(
         self,
         event_id: int,
-        comments: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Save event (synchronous)."""
+        comments: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
+        """Save event.
+
+        Args:
+            event_id: Event ID
+            comments: Comments (optional)
+
+        Returns:
+            Save result data
+        """
         return self._run_async(super().save_event(event_id, comments))
 
-    def delete_saved_event(self, event_id: int) -> Dict[str, Any]:
-        """Delete saved event (synchronous)."""
+    def delete_saved_event(self, event_id: int) -> dict[str, Any]:
+        """Delete saved event.
+
+        Args:
+            event_id: Event ID
+
+        Returns:
+            Delete result data
+        """
         return self._run_async(super().delete_saved_event(event_id))
 
-    def get_all_saved_event_ids(self) -> Dict[str, Any]:
-        """Get all saved event IDs (synchronous)."""
+    def get_all_saved_event_ids(self) -> dict[str, Any]:
+        """Get all saved event IDs.
+
+        Returns:
+            All saved event IDs data
+        """
         return self._run_async(super().get_all_saved_event_ids())
 
-    def get_event_configuration(self) -> Dict[str, Any]:
-        """Get event configuration (synchronous)."""
+    def get_event_configuration(self) -> dict[str, Any]:
+        """Get event configuration.
+
+        Returns:
+            Event configuration data
+        """
         return self._run_async(super().get_event_configuration())
 
     # Moments API methods
@@ -324,57 +566,118 @@ class SyncClient(BaseClient):
         kind: Optional[str] = None,
         version_id: Optional[int] = None,
         usfm: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """Get moments list (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get moments list.
+
+        Args:
+            page: Page number
+            user_id: User ID (optional)
+            kind: Kind of moment (optional)
+            version_id: Bible version ID (optional)
+            usfm: USFM reference (optional)
+
+        Returns:
+            Moments data
+        """
         return self._run_async(
             super().get_moments(page, user_id, kind, version_id, usfm)
         )
 
-    def get_moment_details(self, moment_id: int) -> Dict[str, Any]:
-        """Get moment details (synchronous)."""
+    def get_moment_details(self, moment_id: int) -> dict[str, Any]:
+        """Get moment details.
+
+        Args:
+            moment_id: Moment ID
+
+        Returns:
+            Moment details data
+        """
         return self._run_async(super().get_moment_details(moment_id))
 
-    def create_moment(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a new moment (synchronous)."""
+    def create_moment(
+        self, data: Union[CreateMoment, dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Create a new moment.
+
+        Args:
+            data: Moment data as CreateMoment model or dict
+
+        Returns:
+            Created moment data
+        """
         return self._run_async(super().create_moment(data))
 
-    def update_moment(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Update an existing moment (synchronous)."""
+    def update_moment(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Update an existing moment.
+
+        Args:
+            data: Moment data
+
+        Returns:
+            Updated moment data
+        """
         return self._run_async(super().update_moment(data))
 
-    def delete_moment(self, moment_id: int) -> Dict[str, Any]:
-        """Delete a moment (synchronous)."""
+    def delete_moment(self, moment_id: int) -> dict[str, Any]:
+        """Delete a moment.
+
+        Args:
+            moment_id: Moment ID
+
+        Returns:
+            Delete result data
+        """
         return self._run_async(super().delete_moment(moment_id))
 
-    def get_moment_colors(self) -> Dict[str, Any]:
-        """Get available highlight colors (synchronous)."""
+    def get_moment_colors(self) -> dict[str, Any]:
+        """Get available highlight colors.
+
+        Returns:
+            Colors data
+        """
         return self._run_async(super().get_moment_colors())
 
-    def get_moment_labels(self) -> Dict[str, Any]:
-        """Get moment labels (synchronous)."""
+    def get_moment_labels(self) -> dict[str, Any]:
+        """Get moment labels.
+
+        Returns:
+            Labels data
+        """
         return self._run_async(super().get_moment_labels())
 
     def get_verse_colors(
         self,
         usfm: str,
         version_id: int
-    ) -> Dict[str, Any]:
-        """Get verse highlight colors (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get verse highlight colors.
+
+        Args:
+            usfm: USFM reference
+            version_id: Bible version ID
+
+        Returns:
+            Verse colors data
+        """
         return self._run_async(super().get_verse_colors(usfm, version_id))
 
-    def hide_verse_colors(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Hide verse highlight colors (synchronous)."""
+    def hide_verse_colors(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Hide verse highlight colors.
+
+        Args:
+            data: Hide colors data
+
+        Returns:
+            Hide result data
+        """
         return self._run_async(super().hide_verse_colors(data))
 
-    def get_verse_of_the_day_new(
-        self,
-        language_tag: str = "eng"
-    ) -> Dict[str, Any]:
-        """Get verse of the day (new API) (synchronous)."""
-        return self._run_async(super().get_verse_of_the_day_new(language_tag))
+    def get_moments_configuration(self) -> dict[str, Any]:
+        """Get moments configuration.
 
-    def get_moments_configuration(self) -> Dict[str, Any]:
-        """Get moments configuration (synchronous)."""
+        Returns:
+            Moments configuration data
+        """
         return self._run_async(super().get_moments_configuration())
 
     # Comments API methods
@@ -382,21 +685,50 @@ class SyncClient(BaseClient):
         self,
         moment_id: int,
         comment: str
-    ) -> Dict[str, Any]:
-        """Create a comment on a moment (synchronous)."""
+    ) -> dict[str, Any]:
+        """Create a comment on a moment.
+
+        Args:
+            moment_id: Moment ID
+            comment: Comment text
+
+        Returns:
+            Created comment data
+        """
         return self._run_async(super().create_comment(moment_id, comment))
 
-    def delete_comment(self, comment_id: int) -> Dict[str, Any]:
-        """Delete a comment (synchronous)."""
+    def delete_comment(self, comment_id: int) -> dict[str, Any]:
+        """Delete a comment.
+
+        Args:
+            comment_id: Comment ID
+
+        Returns:
+            Delete result data
+        """
         return self._run_async(super().delete_comment(comment_id))
 
     # Likes API methods
-    def like_moment(self, moment_id: int) -> Dict[str, Any]:
-        """Like a moment (synchronous)."""
+    def like_moment(self, moment_id: int) -> dict[str, Any]:
+        """Like a moment.
+
+        Args:
+            moment_id: Moment ID
+
+        Returns:
+            Like result data
+        """
         return self._run_async(super().like_moment(moment_id))
 
-    def unlike_moment(self, moment_id: int) -> Dict[str, Any]:
-        """Unlike a moment (synchronous)."""
+    def unlike_moment(self, moment_id: int) -> dict[str, Any]:
+        """Unlike a moment.
+
+        Args:
+            moment_id: Moment ID
+
+        Returns:
+            Unlike result data
+        """
         return self._run_async(super().unlike_moment(moment_id))
 
     # Messaging API methods
@@ -407,16 +739,34 @@ class SyncClient(BaseClient):
         user_id: Optional[int] = None,
         old_device_id: Optional[str] = None,
         tags: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """Register device for push notifications (synchronous)."""
+    ) -> dict[str, Any]:
+        """Register device for push notifications.
+
+        Args:
+            device_id: Device ID
+            device_type: Device type
+            user_id: User ID (optional)
+            old_device_id: Previous device ID (optional)
+            tags: Device tags (optional)
+
+        Returns:
+            Registration result data
+        """
         return self._run_async(
             super().register_device(
                 device_id, device_type, user_id, old_device_id, tags
             )
         )
 
-    def unregister_device(self, device_id: str) -> Dict[str, Any]:
-        """Unregister device from push notifications (synchronous)."""
+    def unregister_device(self, device_id: str) -> dict[str, Any]:
+        """Unregister device from push notifications.
+
+        Args:
+            device_id: Device ID
+
+        Returns:
+            Unregistration result data
+        """
         return self._run_async(super().unregister_device(device_id))
 
     # Themes API methods
@@ -424,37 +774,104 @@ class SyncClient(BaseClient):
         self,
         page: int = 1,
         language_tag: str = "eng"
-    ) -> Dict[str, Any]:
-        """Get available themes (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get available themes.
+
+        Args:
+            page: Page number
+            language_tag: Language tag
+
+        Returns:
+            Themes data
+        """
         return self._run_async(super().get_themes(page, language_tag))
 
-    def add_theme(self, theme_id: int) -> Dict[str, Any]:
-        """Add a theme to user's collection (synchronous)."""
-        return self._run_async(super().add_theme(theme_id))
+    def add_theme(
+        self,
+        theme_id: int,
+        available_locales: list[str],
+        colors: dict[str, Any],
+        cta_urls: dict[str, Any],
+        msgid_suffix: str,
+        version_ids: dict[str, int]
+    ) -> dict[str, Any]:
+        """Add a theme to user's collection.
 
-    def remove_theme(self, theme_id: int) -> Dict[str, Any]:
-        """Remove a theme from user's collection (synchronous)."""
+        Args:
+            theme_id: Theme ID
+            available_locales: List of available locale codes
+            colors: Theme colors dictionary
+            cta_urls: Call-to-action URLs dictionary
+            msgid_suffix: Message ID suffix
+            version_ids: Dictionary of version IDs by locale code
+
+        Returns:
+            Add result data
+        """
+        return self._run_async(
+            super().add_theme(
+                theme_id,
+                available_locales,
+                colors,
+                cta_urls,
+                msgid_suffix,
+                version_ids
+            )
+        )
+
+    def remove_theme(self, theme_id: int) -> dict[str, Any]:
+        """Remove a theme from user's collection.
+
+        Args:
+            theme_id: Theme ID
+
+        Returns:
+            Remove result data
+        """
         return self._run_async(super().remove_theme(theme_id))
 
     def set_theme(
         self,
         theme_id: int,
         previous_theme_id: Optional[int] = None
-    ) -> Dict[str, Any]:
-        """Set active theme (synchronous)."""
+    ) -> dict[str, Any]:
+        """Set active theme.
+
+        Args:
+            theme_id: Theme ID
+            previous_theme_id: Previous theme ID (optional)
+
+        Returns:
+            Set result data
+        """
         return self._run_async(super().set_theme(theme_id, previous_theme_id))
 
     def get_theme_description(
         self,
         theme_id: int,
         language_tag: str = "eng"
-    ) -> Dict[str, Any]:
-        """Get theme description (synchronous)."""
+    ) -> dict[str, Any]:
+        """Get theme description.
+
+        Args:
+            theme_id: Theme ID
+            language_tag: Language tag
+
+        Returns:
+            Theme description data
+        """
         return self._run_async(
             super().get_theme_description(theme_id, language_tag)
         )
 
     # Localization API methods
     def get_localization_items(self, language_tag: str = "eng") -> str:
-        """Get localization strings for a language (synchronous)."""
+        """Get localization strings for a language.
+
+        Args:
+            language_tag: Language tag
+
+        Returns:
+            Localization strings (PO file format)
+        """
         return self._run_async(super().get_localization_items(language_tag))

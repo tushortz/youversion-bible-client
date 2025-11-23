@@ -1,68 +1,145 @@
 """Friends and social features data models."""
 
-from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Optional, Protocol
+
+try:
+    from typing import TypeAlias
+except ImportError:
+    # Python < 3.10 compatibility
+    from typing_extensions import TypeAlias
 
 from .common import UserBase
 
 
-@dataclass
-class Contact:
-    """Contact information."""
+class ContactProtocol(Protocol):
+    """Protocol for contact information."""
+
     email: str
-    name: Optional[str] = None
-    phone: Optional[str] = None
+    name: Optional[str]
+    phone: Optional[str]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
 
-@dataclass
-class Contacts:
-    """Contacts list."""
-    contacts: List[Contact]
+# Type alias for convenience
+Contact: TypeAlias = ContactProtocol
 
 
-@dataclass
-class Friend:
-    """Friend information."""
+class ContactsProtocol(Protocol):
+    """Protocol for contacts list."""
+
+    contacts: list[Contact]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
+
+
+# Type alias for convenience
+Contacts: TypeAlias = ContactsProtocol
+
+
+class FriendProtocol(Protocol):
+    """Protocol for friend information."""
+
     user: UserBase
-    friendship_id: Optional[int] = None
-    created_dt: Optional[datetime] = None
+    friendship_id: Optional[int]
+    created_dt: Optional[datetime]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
 
-@dataclass
-class Friends:
-    """Friends list."""
-    friends: List[Friend]
+# Type alias for convenience
+Friend: TypeAlias = FriendProtocol
+
+
+class FriendsProtocol(Protocol):
+    """Protocol for friends list."""
+
+    friends: list[Friend]
     total: int
 
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
-@dataclass
-class FriendOffer:
-    """Friend offer/request information."""
+
+# Type alias for convenience
+Friends: TypeAlias = FriendsProtocol
+
+
+class FriendOfferProtocol(Protocol):
+    """Protocol for friend offer/request information."""
+
     id: int
     from_user: UserBase
     to_user: UserBase
     status: str
-    created_dt: Optional[datetime] = None
+    created_dt: Optional[datetime]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
 
-@dataclass
-class Offers:
-    """Friend offers list."""
-    offers: List[FriendOffer]
+# Type alias for convenience
+FriendOffer: TypeAlias = FriendOfferProtocol
+
+
+class OffersProtocol(Protocol):
+    """Protocol for friend offers list."""
+
+    offers: list[FriendOffer]
     total: int
 
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
-@dataclass
-class Friendable:
-    """Friendable user (suggestion)."""
+
+# Type alias for convenience
+Offers: TypeAlias = OffersProtocol
+
+
+class FriendableProtocol(Protocol):
+    """Protocol for friendable user (suggestion)."""
+
     user: UserBase
-    reason: Optional[str] = None
-    mutual_friends: Optional[int] = None
+    reason: Optional[str]
+    mutual_friends: Optional[int]
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
 
 
-@dataclass
-class Friendables:
-    """Friendable users list."""
-    users: List[Friendable]
+# Type alias for convenience
+Friendable: TypeAlias = FriendableProtocol
+
+
+class FriendablesProtocol(Protocol):
+    """Protocol for friendable users list."""
+
+    users: list[Friendable]
     total: int
+
+    def __getattr__(self, name: str) -> Any:
+        """Allow access to dynamically added fields."""
+        class_name = self.__class__.__name__
+        raise AttributeError(f"'{class_name}' has no attribute '{name}'")
+
+
+# Type alias for convenience
+Friendables: TypeAlias = FriendablesProtocol

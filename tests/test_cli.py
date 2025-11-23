@@ -5,9 +5,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from youversion.cli import (
-    cmd_bookmarks, cmd_convert_notes, cmd_discover_endpoints, cmd_highlights,
-    cmd_images, cmd_moments, cmd_notes, cmd_plan_progress,
-    cmd_plan_subscriptions, cmd_votd, create_parser, main,
+    cmd_bookmarks,
+    cmd_convert_notes,
+    cmd_discover_endpoints,
+    cmd_highlights,
+    cmd_images,
+    cmd_moments,
+    cmd_notes,
+    cmd_plan_progress,
+    cmd_plan_subscriptions,
+    cmd_votd,
+    create_parser,
+    main,
 )
 
 
@@ -423,10 +432,15 @@ class TestCLI:
     async def test_poetry_cmd_wrappers(self):
         """Test Poetry command wrapper functions."""
         from youversion.cli import (
-            poetry_cmd_bookmarks, poetry_cmd_convert_notes,
-            poetry_cmd_discover_endpoints, poetry_cmd_highlights,
-            poetry_cmd_images, poetry_cmd_moments, poetry_cmd_notes,
-            poetry_cmd_plan_progress, poetry_cmd_plan_subscriptions,
+            poetry_cmd_bookmarks,
+            poetry_cmd_convert_notes,
+            poetry_cmd_discover_endpoints,
+            poetry_cmd_highlights,
+            poetry_cmd_images,
+            poetry_cmd_moments,
+            poetry_cmd_notes,
+            poetry_cmd_plan_progress,
+            poetry_cmd_plan_subscriptions,
             poetry_cmd_votd,
         )
 
