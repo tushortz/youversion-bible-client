@@ -121,7 +121,7 @@ class DataProcessor(IDataProcessor):
         """
         requested_day: Optional[int] = day
         if day is None:
-            day = datetime.now().day
+            day = datetime.now().timetuple().tm_yday
 
         votd_data = raw_data.get("votd", [])
         for ref in votd_data:
