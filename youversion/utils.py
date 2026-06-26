@@ -1,9 +1,10 @@
 """Utility functions for YouVersion API client."""
 
+import hashlib
 import re
 from typing import Any
 
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, create_model
 
 
 class DynamicPydanticFactory:
@@ -51,7 +52,8 @@ class DynamicPydanticFactory:
         elif isinstance(value, float):
             return (float, 0.0)
         elif isinstance(value, str):
-            return (str, "")
+            # ponytail: API often sends null for optional string fields
+            return (str | None, None)
         elif isinstance(value, list):
             if not value:
                 # Empty list - can't infer element type
@@ -61,8 +63,8 @@ class DynamicPydanticFactory:
                     # Singularize and PascalCase: "verses" -> "Verse"
                     element_class_name = self._get_element_class_name(field_name)
                     element_class = self.create_model(element_class_name, {})
-                    return (list[element_class], Field(default_factory=list))
-                return (list[Any], Field(default_factory=list))
+                    return (list[element_class] | None, None)
+                return (list[Any] | None, None)
             # Infer type from first element
             # Use field_name to create model name for dict elements
             if isinstance(value[0], dict) and field_name:
@@ -70,7 +72,7 @@ class DynamicPydanticFactory:
                 element_type, _ = self._infer_type(value[0], element_class_name)
             else:
                 element_type, _ = self._infer_type(value[0], field_name)
-            return (list[element_type], Field(default_factory=list))
+            return (list[element_type] | None, None)
         elif isinstance(value, dict):
             # Nested dict - create a nested Pydantic model
             nested_class_name = (
@@ -123,6 +125,38 @@ class DynamicPydanticFactory:
             return pascal_case
         return "Item"
 
+    def _value_signature(self, value: Any) -> str:
+        """Build a stable shape signature for cache keys."""
+        if value is None:
+            return "none"
+        if isinstance(value, bool):
+            return "bool"
+        if isinstance(value, int):
+            return "int"
+        if isinstance(value, float):
+            return "float"
+        if isinstance(value, str):
+            return "str"
+        if isinstance(value, list):
+            if not value:
+                return "list"
+            return f"list[{self._value_signature(value[0])}]"
+        if isinstance(value, dict):
+            parts = [
+                f"{k}:{self._value_signature(v)}" for k, v in sorted(value.items())
+            ]
+            return "{" + ",".join(parts) + "}"
+        return type(value).__name__
+
+    def _cache_key(self, class_name: str, data: dict[str, Any]) -> str:
+        """Cache key from model name and data shape (not object id).
+
+        ponytail: id(data) is reused after GC and caused stale schemas
+        when paging moments (page-1 Extra model applied to page-2 data).
+        """
+        digest = hashlib.sha256(self._value_signature(data).encode()).hexdigest()[:16]
+        return f"{class_name}_{digest}"
+
     def create_model(self, class_name: str, data: dict[str, Any]) -> type[BaseModel]:
         """Create a Pydantic model dynamically from a dictionary.
 
@@ -152,8 +186,8 @@ class DynamicPydanticFactory:
         else:
             final_class_name = sanitized
 
-        # Check cache with sanitized class name
-        cache_key = f"{final_class_name}_{id(data)}"
+        # Check cache with sanitized class name and data shape
+        cache_key = self._cache_key(final_class_name, data)
         if cache_key in self._class_cache:
             return self._class_cache[cache_key]
 

@@ -123,12 +123,15 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  | docs
+  | scripts
 )/
 '''
 
 [tool.ruff]
 target-version = "py310"
 line-length = 88
+extend-exclude = ["docs", "scripts"]
 
 [tool.ruff.lint]
 select = [

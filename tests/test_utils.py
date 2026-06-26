@@ -61,15 +61,15 @@ class TestDynamicPydanticFactory:
         """Test type inference for str."""
         factory = DynamicPydanticFactory()
         type_hint, default = factory._infer_type("test")
-        assert default == ""
-        assert type_hint is str
+        assert default is None
+        assert type_hint == str | None
 
     def test_infer_type_empty_list(self):
         """Test type inference for empty list."""
         factory = DynamicPydanticFactory()
         type_hint, default = factory._infer_type([], "items")
-        # Should create a model for the field name
-        assert hasattr(default, "default_factory") or default == []
+        assert default is None
+        assert "list" in str(type_hint) and "None" in str(type_hint)
 
     def test_infer_type_list_with_items(self):
         """Test type inference for list with items."""
@@ -165,12 +165,11 @@ class TestDynamicPydanticFactory:
         assert isinstance(instance.items, list)
 
     def test_infer_type_empty_list_without_field_name(self):
-        """Empty list without field name falls back to list[Any]."""
+        """Empty list without field name falls back to list[Any] | None."""
         factory = DynamicPydanticFactory()
-        _type_hint, default = factory._infer_type([])
-        from pydantic.fields import FieldInfo
-
-        assert isinstance(default, FieldInfo)
+        type_hint, default = factory._infer_type([])
+        assert default is None
+        assert type_hint == list[Any] | None
 
     def test_create_model_pascal_case_with_underscore(self):
         """Class names with underscores are converted to PascalCase."""
@@ -245,6 +244,23 @@ class TestDynamicPydanticFactory:
         with patch.object(factory, "_infer_type", return_value=(int | None, None)):
             model_class = factory.create_model("AlreadyOptional", {"count": 1})
         assert "count" in model_class.model_fields
+
+    def test_create_model_fieldinfo_default(self):
+        """FieldInfo defaults from inference are passed through."""
+        from pydantic import Field
+
+        factory = DynamicPydanticFactory()
+        field_default = Field(default_factory=list)
+        with patch.object(
+            factory, "_infer_type", return_value=(list[str], field_default)
+        ):
+            model_class = factory.create_model("FieldInfoModel", {"items": []})
+        assert "items" in model_class.model_fields
+
+    def test_value_signature_float(self):
+        """Float values produce a float signature token."""
+        factory = DynamicPydanticFactory()
+        assert factory._value_signature(3.14) == "float"
 
     def test_create_instance_validate_double_fallback(self):
         """Validation failures fall back to direct constructor."""
@@ -336,6 +352,24 @@ class TestDynamicPydanticFactory:
             Parent, {"id": 1, "extra": {"k": "v"}}
         )
         assert instance.id == 1
+
+    def test_extra_accepts_null_after_list_schema_cached(self):
+        """Cached list/str schemas must still accept null API fields."""
+        factory = DynamicPydanticFactory()
+        with_refs = {
+            "references": [{"human": "John 3:16", "version_id": 1, "usfm": "JHN.3.16"}],
+            "language_tag": "en",
+            "user": {"id": 1},
+        }
+        with_nulls = {
+            "references": None,
+            "language_tag": None,
+            "user": {"id": 2},
+        }
+        factory.create_instance("Extra", with_refs)
+        instance = factory.create_instance("Extra", with_nulls)
+        assert instance.references is None
+        assert instance.language_tag is None
 
 
 class TestUtilityFunctions:

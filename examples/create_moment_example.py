@@ -184,17 +184,6 @@ async def main():
     print("YouVersion Bible Client - Create Moment Examples")
     print("=" * 80)
 
-    # Check if credentials are available
-    username = os.getenv("YOUVERSION_USERNAME")
-    password = os.getenv("YOUVERSION_PASSWORD")
-
-    if not username or not password:
-        print(
-            "Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
-        )
-        print("   Or create a .env file with your credentials")
-        return
-
     try:
         async with AsyncClient() as client:
             print(f"Connected as: {client.username}")

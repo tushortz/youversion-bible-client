@@ -48,7 +48,7 @@ async def demonstrate_cli_commands():
 
             print("Demo completed. Try from the shell:")
             print("  uv run votd")
-            print("  uv run youversion highlights --json")
+            print("  uv run youversion --json highlights")
 
     except Exception as e:
         print(f"Error: {e}")

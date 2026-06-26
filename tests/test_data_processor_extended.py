@@ -239,6 +239,9 @@ class TestDataProcessorExtended:
         result = processor.process_moment_colors(raw_data)
         assert result is not None
 
+        result = processor.process_moment_colors(["00ff00", "ffff00"])
+        assert result is not None
+
     def test_process_moment_labels(self):
         """Test processing moment labels."""
         processor = DataProcessor()
@@ -247,6 +250,9 @@ class TestDataProcessorExtended:
         }
 
         result = processor.process_moment_labels(raw_data)
+        assert result is not None
+
+        result = processor.process_moment_labels([{"count": 1, "label": "favorite"}])
         assert result is not None
 
     def test_process_verse_colors(self):

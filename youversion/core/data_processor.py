@@ -479,6 +479,8 @@ class DataProcessor(IDataProcessor):
         Returns:
             Processed colors data with dynamically created objects
         """
+        if isinstance(raw_data, list):
+            raw_data = {"colors": raw_data}
         return create_instance_from_response("MomentColors", raw_data)
 
     def process_moment_labels(self, raw_data: dict[str, Any]) -> dict[str, Any]:
@@ -490,6 +492,8 @@ class DataProcessor(IDataProcessor):
         Returns:
             Processed labels data with dynamically created objects
         """
+        if isinstance(raw_data, list):
+            raw_data = {"labels": raw_data}
         return create_instance_from_response("MomentLabels", raw_data)
 
     def process_verse_colors(self, raw_data: dict[str, Any]) -> dict[str, Any]:

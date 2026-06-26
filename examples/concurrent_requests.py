@@ -13,7 +13,6 @@ Make sure to set up your .env file with YOUVERSION_USERNAME and YOUVERSION_PASSW
 """
 
 import asyncio
-import os
 import time
 
 from youversion.clients import AsyncClient
@@ -296,18 +295,6 @@ async def demonstrate_error_handling_in_concurrent():
 
 async def main():
     """Main function demonstrating concurrent patterns"""
-
-    # Check if credentials are available
-    username = os.getenv("YOUVERSION_USERNAME")
-    password = os.getenv("YOUVERSION_PASSWORD")
-
-    if not username or not password:
-        print(
-            "Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
-        )
-        print("   Or create a .env file with your credentials")
-        return
-
     print("Starting YouVersion Bible Client Concurrent Requests Example")
     print("=" * 75)
 

@@ -8,7 +8,6 @@ or pass credentials directly to the Client constructor.
 """
 
 import asyncio
-import os
 
 from youversion.clients import AsyncClient, SyncClient
 
@@ -390,21 +389,6 @@ async def demonstrate_concurrent_usage(client: AsyncClient):
 
 async def main():
     """Main function demonstrating all API methods"""
-
-    # Check if credentials are available
-    username = os.getenv("YOUVERSION_USERNAME")
-    password = os.getenv("YOUVERSION_PASSWORD")
-
-    if not username or not password:
-        print(
-            "Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
-        )
-        print("   Or create a .env file with your credentials")
-        print("   Example:")
-        print("   YOUVERSION_USERNAME=your_username")
-        print("   YOUVERSION_PASSWORD=your_password")
-        return
-
     print("Starting YouVersion Bible Client - Complete API Methods Example")
     print("=" * 80)
 
