@@ -184,16 +184,16 @@ test-integration:
 
 # Code Quality
 lint:
-	uv run ruff check youversion tests
+	uv run ruff check .
 
 lint-fix:
-	uv run ruff check --fix youversion tests
+	uv run ruff check --fix .
 
 format:
-	uv run black youversion tests
+	uv run black .
 
 format-check:
-	uv run black --check youversion tests
+	uv run black --check .
 
 check: lint format-check
 	@echo "✓ All checks passed"

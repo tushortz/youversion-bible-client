@@ -32,7 +32,7 @@ b = Client(USERNAME, PASSWORD)
 while has_data:
     notes = b.notes(index)
 
-    if type(notes) == dict and notes.get("error"):
+    if isinstance(notes, dict) and notes.get("error"):
         has_data = False
 
     for note in notes:
