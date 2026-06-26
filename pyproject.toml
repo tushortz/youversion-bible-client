@@ -11,10 +11,10 @@ maintainers = [
 license = "MIT"
 readme = "README.md"
 keywords = ["YouVersion Bible", "Bible", "Youversion", "Lifechurch"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.25.0",
-    "python-dotenv>=0.19.0",
+    "python-dotenv>=1.2.2",
     "pydantic>=2.5.0",
     "pyjwt>=2.10.1",
     "typing-extensions>=4.0.0",
@@ -83,25 +83,34 @@ votd = "youversion.cli:poetry_cmd_votd"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.2.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
+    "black>=26.3.1",
     "ruff>=0.1.2",
     "sphinx>=7.4.0",
     "sphinx-rtd-theme>=3.0.0",
+    "urllib3>=2.7.0",
+    "requests>=2.33.0",
+    "pysentry-rs>=0.4.7",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = [
+  "/docs",
+  "/tests",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["youversion"]
 
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ['py310']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -118,7 +127,7 @@ extend-exclude = '''
 '''
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 
 [tool.ruff.lint]

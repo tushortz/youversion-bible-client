@@ -1,6 +1,6 @@
 """HTTP client for YouVersion API operations."""
 
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 
@@ -11,7 +11,7 @@ from .interfaces import IHttpClient
 class HttpClient(IHttpClient):
     """Handles HTTP operations for YouVersion API."""
 
-    def __init__(self, client: httpx.AsyncClient, user_id: Optional[int] = None):
+    def __init__(self, client: httpx.AsyncClient, user_id: int | None = None):
         """Initialize HTTP client.
 
         Args:
@@ -20,7 +20,7 @@ class HttpClient(IHttpClient):
         """
         self._client = client
         self._user_id = user_id
-        self._public_client: Optional[httpx.AsyncClient] = None
+        self._public_client: httpx.AsyncClient | None = None
 
     def _ensure_public_client(self) -> httpx.AsyncClient:
         """Return an httpx client without Authorization (public endpoints)."""
@@ -248,8 +248,8 @@ class HttpClient(IHttpClient):
     async def search_bible(
         self,
         query: str,
-        version_id: Optional[int] = None,
-        book: Optional[str] = None,
+        version_id: int | None = None,
+        book: str | None = None,
         page: int = 1,
     ) -> dict[str, Any]:
         """Search Bible text.
@@ -363,8 +363,8 @@ class HttpClient(IHttpClient):
     async def search_events(
         self,
         query: str,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
+        latitude: float | None = None,
+        longitude: float | None = None,
         page: int = 1,
     ) -> dict[str, Any]:
         """Search events.
@@ -413,7 +413,7 @@ class HttpClient(IHttpClient):
         return await self.get(url, params=params)
 
     async def save_event(
-        self, event_id: int, comments: Optional[dict[str, Any]] = None
+        self, event_id: int, comments: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Save event.
 
@@ -464,10 +464,10 @@ class HttpClient(IHttpClient):
     async def get_moments(
         self,
         page: int = 1,
-        user_id: Optional[int] = None,
-        kind: Optional[str] = None,
-        version_id: Optional[int] = None,
-        usfm: Optional[str] = None,
+        user_id: int | None = None,
+        kind: str | None = None,
+        version_id: int | None = None,
+        usfm: str | None = None,
     ) -> dict[str, Any]:
         """Get moments list.
 
@@ -656,9 +656,9 @@ class HttpClient(IHttpClient):
         self,
         device_id: str,
         device_type: str = "android",
-        user_id: Optional[int] = None,
-        old_device_id: Optional[str] = None,
-        tags: Optional[str] = None,
+        user_id: int | None = None,
+        old_device_id: str | None = None,
+        tags: str | None = None,
     ) -> dict[str, Any]:
         """Register device for push notifications.
 
@@ -760,7 +760,7 @@ class HttpClient(IHttpClient):
         return await self.post(url, json=data)
 
     async def set_theme(
-        self, theme_id: int, previous_theme_id: Optional[int] = None
+        self, theme_id: int, previous_theme_id: int | None = None
     ) -> dict[str, Any]:
         """Set active theme.
 
@@ -1050,9 +1050,7 @@ class HttpClient(IHttpClient):
         url = f"{Config.MOMENTS_API_BASE}{Config.MOMENTS_CLIENT_SIDE_ITEMS_URL}"
         return await self.get(url, params={"page": page})
 
-    async def get_moments_votd(
-        self, language_tag: Optional[str] = None
-    ) -> dict[str, Any]:
+    async def get_moments_votd(self, language_tag: str | None = None) -> dict[str, Any]:
         """Get verse of the day from the moments API.
 
         Args:

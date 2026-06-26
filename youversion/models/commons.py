@@ -1,12 +1,12 @@
 """Common models for YouVersion API responses."""
 
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 
 class ReactionModelProtocol(Protocol):
@@ -65,9 +65,9 @@ Action: TypeAlias = ActionProtocol
 class UserProtocol(Protocol):
     """Protocol for user objects."""
 
-    id: Optional[Any]  # Can be str or int
+    id: Any | None  # Can be str or int
     path: str
-    user_name: Optional[str]
+    user_name: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -105,7 +105,7 @@ class LikeProtocol(Protocol):
     strings: dict[str, Any]
     all: list[Any]
     is_liked: bool
-    user_ids: Optional[list[int]]
+    user_ids: list[int] | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""

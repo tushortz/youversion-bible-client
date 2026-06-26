@@ -1,7 +1,7 @@
 """Interfaces for YouVersion Bible API client components."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -61,7 +61,7 @@ class IDataProcessor(ABC):
 
     @abstractmethod
     def process_verse_of_the_day(
-        self, raw_data: dict[str, Any], day: Optional[int] = None
+        self, raw_data: dict[str, Any], day: int | None = None
     ) -> Any:
         """Process verse of the day data."""
         pass
@@ -83,7 +83,7 @@ class IDataProcessor(ABC):
 
     @abstractmethod
     def process_audio_chapter(
-        self, raw_data: Union[dict[str, Any], list[dict[str, Any]]]
+        self, raw_data: dict[str, Any] | list[dict[str, Any]]
     ) -> Any:
         """Process raw audio chapter data."""
         pass
@@ -199,7 +199,7 @@ class IClient(ABC):
 
     @property
     @abstractmethod
-    def user_id(self) -> Optional[int]:
+    def user_id(self) -> int | None:
         """Get the authenticated user ID."""
         pass
 
@@ -214,7 +214,7 @@ class IClient(ABC):
         pass
 
     @abstractmethod
-    async def verse_of_the_day(self, day: Optional[int] = None) -> Any:
+    async def verse_of_the_day(self, day: int | None = None) -> Any:
         """Get verse of the day."""
         pass
 

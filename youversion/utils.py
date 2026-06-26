@@ -1,7 +1,7 @@
 """Utility functions for YouVersion API client."""
 
 import re
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, create_model
 
@@ -43,7 +43,7 @@ class DynamicPydanticFactory:
             Tuple of (type, default_value)
         """
         if value is None:
-            return (Optional[Any], None)
+            return (Any | None, None)
         elif isinstance(value, bool):
             return (bool, False)
         elif isinstance(value, int):
@@ -80,7 +80,7 @@ class DynamicPydanticFactory:
             )
             nested_class = self.create_model(nested_class_name, value)
             # Return as optional type with None default
-            return (Optional[nested_class], None)
+            return (nested_class | None, None)
         else:
             return (Any, None)
 
@@ -187,7 +187,7 @@ class DynamicPydanticFactory:
                 ):
                     optional_type = field_type
                 else:
-                    optional_type = Optional[field_type]
+                    optional_type = field_type | None
                 field_definitions[field_name] = (optional_type, None)
             else:
                 # Field with explicit default value

@@ -1,13 +1,13 @@
 """Friends and social features data models."""
 
 from datetime import datetime
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 from .common import UserBase
 
@@ -16,8 +16,8 @@ class ContactProtocol(Protocol):
     """Protocol for contact information."""
 
     email: str
-    name: Optional[str]
-    phone: Optional[str]
+    name: str | None
+    phone: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -48,8 +48,8 @@ class FriendProtocol(Protocol):
     """Protocol for friend information."""
 
     user: UserBase
-    friendship_id: Optional[int]
-    created_dt: Optional[datetime]
+    friendship_id: int | None
+    created_dt: datetime | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -84,7 +84,7 @@ class FriendOfferProtocol(Protocol):
     from_user: UserBase
     to_user: UserBase
     status: str
-    created_dt: Optional[datetime]
+    created_dt: datetime | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -116,8 +116,8 @@ class FriendableProtocol(Protocol):
     """Protocol for friendable user (suggestion)."""
 
     user: UserBase
-    reason: Optional[str]
-    mutual_friends: Optional[int]
+    reason: str | None
+    mutual_friends: int | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""

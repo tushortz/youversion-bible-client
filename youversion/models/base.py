@@ -1,18 +1,18 @@
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Protocol
 
 try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 
 class ReferenceProtocol(Protocol):
     """Protocol for YouVersion Bible references."""
 
-    version_id: Union[str, int]
+    version_id: str | int
     human: str
-    usfm: Union[str, list[str]]
+    usfm: str | list[str]
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -35,12 +35,12 @@ class MomentProtocol(Protocol):
     # Core moment fields
     id: int
     kind_id: str
-    kind_color: Optional[str]
-    created_dt: Optional[str]  # ISO datetime string
-    updated_dt: Optional[str]  # ISO datetime string
+    kind_color: str | None
+    created_dt: str | None  # ISO datetime string
+    updated_dt: str | None  # ISO datetime string
 
     # Base moment information
-    base: Optional[dict[str, Any]]
+    base: dict[str, Any] | None
     # base structure typically contains:
     # - title: dict with l_str and l_args
     # - body: Optional[str]
@@ -49,7 +49,7 @@ class MomentProtocol(Protocol):
     # - share_url: Optional[str]
 
     # Extras information (varies by moment type)
-    extras: Optional[dict[str, Any]]
+    extras: dict[str, Any] | None
     # extras structure typically contains:
     # - user: dict with id, username, name, avatar
     # - title: Optional[str]
@@ -62,14 +62,14 @@ class MomentProtocol(Protocol):
     # - labels: Optional[list]
 
     # Commenting information
-    commenting: Optional[dict[str, Any]]
+    commenting: dict[str, Any] | None
     # commenting structure:
     # - enabled: bool
     # - total: int
     # - comments: Optional[list]
 
     # Liking information
-    liking: Optional[dict[str, Any]]
+    liking: dict[str, Any] | None
     # liking structure:
     # - enabled: bool
     # - total: int

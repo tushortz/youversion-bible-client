@@ -1,6 +1,6 @@
 """Unit tests for utility functions."""
 
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from pydantic import BaseModel
@@ -242,7 +242,7 @@ class TestDynamicPydanticFactory:
     def test_create_model_optional_type_hint_preserved(self):
         """Optional hints from inference are preserved without re-wrapping."""
         factory = DynamicPydanticFactory()
-        with patch.object(factory, "_infer_type", return_value=(Optional[int], None)):
+        with patch.object(factory, "_infer_type", return_value=(int | None, None)):
             model_class = factory.create_model("AlreadyOptional", {"count": 1})
         assert "count" in model_class.model_fields
 
@@ -262,7 +262,7 @@ class TestDynamicPydanticFactory:
         factory = DynamicPydanticFactory()
 
         class Parent(BaseModel):
-            meta: Optional[Any] = None
+            meta: Any | None = None
 
         instance = factory._create_instance_recursive(Parent, {"meta": {"k": "v"}})
         assert instance.meta == {"k": "v"}

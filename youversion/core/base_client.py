@@ -1,7 +1,7 @@
 """Base client class implementing common functionality."""
 
 from datetime import datetime, timezone
-from typing import Any, Optional, Union
+from typing import Any
 
 from ..enums import MomentKinds
 from ..models.base import Moment
@@ -15,7 +15,7 @@ from .interfaces import IClient, IHttpClient
 class BaseClient(IClient):
     """Base client implementing common API operations."""
 
-    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
+    def __init__(self, username: str | None = None, password: str | None = None):
         """Initialize base client.
 
         Args:
@@ -23,7 +23,7 @@ class BaseClient(IClient):
             password: Password for authentication
         """
         self._authenticator = Authenticator(username, password)
-        self._http_client: Optional[IHttpClient] = None
+        self._http_client: IHttpClient | None = None
         self._data_processor = DataProcessor()
         self._user_id = None
         self._access_token = None
@@ -91,7 +91,7 @@ class BaseClient(IClient):
         raw_data = raw_data.get("moments", [])
         return self._data_processor.process_highlights(raw_data)
 
-    async def verse_of_the_day(self, day: Optional[int] = None) -> Any:
+    async def verse_of_the_day(self, day: int | None = None) -> Any:
         """Get verse of the day.
         Note: this does not need authentication
 
@@ -209,7 +209,7 @@ class BaseClient(IClient):
         return self._authenticator.username
 
     @property
-    def user_id(self) -> Optional[int]:
+    def user_id(self) -> int | None:
         """Get the authenticated user ID."""
         return self._user_id
 
@@ -322,8 +322,8 @@ class BaseClient(IClient):
     async def search_bible(
         self,
         query: str,
-        version_id: Optional[int] = None,
-        book: Optional[str] = None,
+        version_id: int | None = None,
+        book: str | None = None,
         page: int = 1,
     ) -> dict[str, Any]:
         """Search Bible text.
@@ -452,8 +452,8 @@ class BaseClient(IClient):
     async def search_events(
         self,
         query: str,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
+        latitude: float | None = None,
+        longitude: float | None = None,
         page: int = 1,
     ) -> dict[str, Any]:
         """Search events.
@@ -500,7 +500,7 @@ class BaseClient(IClient):
         return self._data_processor.process_saved_events(raw_data)
 
     async def save_event(
-        self, event_id: int, comments: Optional[dict[str, Any]] = None
+        self, event_id: int, comments: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Save event.
 
@@ -552,10 +552,10 @@ class BaseClient(IClient):
     async def get_moments(
         self,
         page: int = 1,
-        user_id: Optional[int] = None,
-        kind: Optional[str] = None,
-        version_id: Optional[int] = None,
-        usfm: Optional[str] = None,
+        user_id: int | None = None,
+        kind: str | None = None,
+        version_id: int | None = None,
+        usfm: str | None = None,
     ) -> dict[str, Any]:
         """Get moments list.
 
@@ -589,7 +589,7 @@ class BaseClient(IClient):
         return self._data_processor.process_moment_details(raw_data)
 
     async def create_moment(
-        self, data: Union[CreateMoment, dict[str, Any]]
+        self, data: CreateMoment | dict[str, Any]
     ) -> dict[str, Any]:
         """Create a new moment.
 
@@ -756,9 +756,9 @@ class BaseClient(IClient):
         self,
         device_id: str,
         device_type: str = "android",
-        user_id: Optional[int] = None,
-        old_device_id: Optional[str] = None,
-        tags: Optional[str] = None,
+        user_id: int | None = None,
+        old_device_id: str | None = None,
+        tags: str | None = None,
     ) -> dict[str, Any]:
         """Register device for push notifications.
 
@@ -850,7 +850,7 @@ class BaseClient(IClient):
         return self._data_processor.process_remove_theme(raw_data)
 
     async def set_theme(
-        self, theme_id: int, previous_theme_id: Optional[int] = None
+        self, theme_id: int, previous_theme_id: int | None = None
     ) -> dict[str, Any]:
         """Set active theme.
 
@@ -1131,9 +1131,7 @@ class BaseClient(IClient):
         await self._ensure_authenticated()
         return await self._http_client.get_client_side_moments(page)
 
-    async def get_moments_votd(
-        self, language_tag: Optional[str] = None
-    ) -> dict[str, Any]:
+    async def get_moments_votd(self, language_tag: str | None = None) -> dict[str, Any]:
         """Get verse of the day from the moments API.
 
         Args:

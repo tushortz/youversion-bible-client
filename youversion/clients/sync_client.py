@@ -1,7 +1,7 @@
 """Synchronous client for YouVersion Bible API."""
 
 import asyncio
-from typing import Any, Optional, Union
+from typing import Any
 
 from ..core.base_client import BaseClient
 from ..models.moments import CreateMoment
@@ -10,7 +10,7 @@ from ..models.moments import CreateMoment
 class SyncClient(BaseClient):
     """Synchronous wrapper for BaseClient."""
 
-    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
+    def __init__(self, username: str | None = None, password: str | None = None):
         """Initialize sync client.
 
         Args:
@@ -115,7 +115,7 @@ class SyncClient(BaseClient):
             self._loop.close()
 
     @property
-    def username(self) -> Optional[str]:
+    def username(self) -> str | None:
         """Get the username, tolerant of BaseClient being mocked in tests."""
         auth = getattr(self, "_authenticator", None)
         if auth is not None and hasattr(auth, "username"):
@@ -146,7 +146,7 @@ class SyncClient(BaseClient):
         """
         return self._run_async(super().highlights(page))
 
-    def verse_of_the_day(self, day: Optional[int] = None) -> Any:
+    def verse_of_the_day(self, day: int | None = None) -> Any:
         """Get verse of the day.
 
         Args:
@@ -335,8 +335,8 @@ class SyncClient(BaseClient):
     def search_bible(
         self,
         query: str,
-        version_id: Optional[int] = None,
-        book: Optional[str] = None,
+        version_id: int | None = None,
+        book: str | None = None,
         page: int = 1,
     ) -> dict[str, Any]:
         """Search Bible text.
@@ -445,8 +445,8 @@ class SyncClient(BaseClient):
     def search_events(
         self,
         query: str,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
+        latitude: float | None = None,
+        longitude: float | None = None,
         page: int = 1,
     ) -> dict[str, Any]:
         """Search events.
@@ -485,7 +485,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().get_saved_events(page))
 
     def save_event(
-        self, event_id: int, comments: Optional[dict[str, Any]] = None
+        self, event_id: int, comments: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Save event.
 
@@ -529,10 +529,10 @@ class SyncClient(BaseClient):
     def get_moments(
         self,
         page: int = 1,
-        user_id: Optional[int] = None,
-        kind: Optional[str] = None,
-        version_id: Optional[int] = None,
-        usfm: Optional[str] = None,
+        user_id: int | None = None,
+        kind: str | None = None,
+        version_id: int | None = None,
+        usfm: str | None = None,
     ) -> dict[str, Any]:
         """Get moments list.
 
@@ -561,9 +561,7 @@ class SyncClient(BaseClient):
         """
         return self._run_async(super().get_moment_details(moment_id))
 
-    def create_moment(
-        self, data: Union[CreateMoment, dict[str, Any]]
-    ) -> dict[str, Any]:
+    def create_moment(self, data: CreateMoment | dict[str, Any]) -> dict[str, Any]:
         """Create a new moment.
 
         Args:
@@ -695,9 +693,9 @@ class SyncClient(BaseClient):
         self,
         device_id: str,
         device_type: str = "android",
-        user_id: Optional[int] = None,
-        old_device_id: Optional[str] = None,
-        tags: Optional[str] = None,
+        user_id: int | None = None,
+        old_device_id: str | None = None,
+        tags: str | None = None,
     ) -> dict[str, Any]:
         """Register device for push notifications.
 
@@ -781,7 +779,7 @@ class SyncClient(BaseClient):
         return self._run_async(super().remove_theme(theme_id))
 
     def set_theme(
-        self, theme_id: int, previous_theme_id: Optional[int] = None
+        self, theme_id: int, previous_theme_id: int | None = None
     ) -> dict[str, Any]:
         """Set active theme.
 
@@ -891,6 +889,6 @@ class SyncClient(BaseClient):
         """Get client-side moment items."""
         return self._run_async(super().get_client_side_moments(page))
 
-    def get_moments_votd(self, language_tag: Optional[str] = None) -> dict[str, Any]:
+    def get_moments_votd(self, language_tag: str | None = None) -> dict[str, Any]:
         """Get verse of the day from the moments API."""
         return self._run_async(super().get_moments_votd(language_tag))

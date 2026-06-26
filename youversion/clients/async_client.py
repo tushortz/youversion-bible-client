@@ -1,14 +1,12 @@
 """Asynchronous client for YouVersion Bible API."""
 
-from typing import Optional
-
 from ..core.base_client import BaseClient
 
 
 class AsyncClient(BaseClient):
     """Asynchronous client for YouVersion Bible API."""
 
-    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
+    def __init__(self, username: str | None = None, password: str | None = None):
         """Initialize async client.
 
         Args:

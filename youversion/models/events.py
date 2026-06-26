@@ -1,25 +1,25 @@
 """Events and church finder data models."""
 
 from datetime import datetime
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 
 class EventLocationProtocol(Protocol):
     """Protocol for event location information."""
 
     name: str
-    address: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    country: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
+    address: str | None
+    city: str | None
+    state: str | None
+    country: str | None
+    latitude: float | None
+    longitude: float | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -34,10 +34,10 @@ EventLocation: TypeAlias = EventLocationProtocol
 class EventTimeProtocol(Protocol):
     """Protocol for event time information."""
 
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
-    timezone: Optional[str]
-    recurring: Optional[str]
+    start_time: datetime | None
+    end_time: datetime | None
+    timezone: str | None
+    recurring: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -53,9 +53,9 @@ class EventContentProtocol(Protocol):
     """Protocol for event content information."""
 
     title: str
-    description: Optional[str]
-    image_url: Optional[str]
-    website_url: Optional[str]
+    description: str | None
+    image_url: str | None
+    website_url: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -74,8 +74,8 @@ class EventProtocol(Protocol):
     content: EventContent
     location: EventLocation
     time: EventTime
-    created_dt: Optional[datetime]
-    updated_dt: Optional[datetime]
+    created_dt: datetime | None
+    updated_dt: datetime | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -91,8 +91,8 @@ class SavedEventProtocol(Protocol):
     """Protocol for saved event information."""
 
     event: Event
-    saved_dt: Optional[datetime]
-    comments: Optional[dict[str, Any]]
+    saved_dt: datetime | None
+    comments: dict[str, Any] | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -124,8 +124,8 @@ class SearchEventProtocol(Protocol):
     """Protocol for search event result."""
 
     event: Event
-    distance: Optional[float]
-    relevance_score: Optional[float]
+    distance: float | None
+    relevance_score: float | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -142,7 +142,7 @@ class SearchEventsProtocol(Protocol):
 
     events: list[SearchEvent]
     total: int
-    query: Optional[str]
+    query: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""

@@ -1,7 +1,7 @@
 """Data processor for YouVersion API responses."""
 
 from datetime import datetime
-from typing import Any, Optional, Union
+from typing import Any
 
 from ..models import Moment, Reference, Votd
 from ..utils import create_instance_from_response
@@ -108,7 +108,7 @@ class DataProcessor(IDataProcessor):
         return highlights
 
     def process_verse_of_the_day(
-        self, raw_data: dict[str, Any], day: Optional[int] = None
+        self, raw_data: dict[str, Any], day: int | None = None
     ) -> Votd:
         """Process verse of the day data using dynamic creation.
 
@@ -119,7 +119,7 @@ class DataProcessor(IDataProcessor):
         Returns:
             Dynamically created Votd object
         """
-        requested_day: Optional[int] = day
+        requested_day: int | None = day
         if day is None:
             day = datetime.now().timetuple().tm_yday
 
@@ -296,7 +296,7 @@ class DataProcessor(IDataProcessor):
         return create_instance_from_response("BibleVersions", processed_data)
 
     def process_audio_chapter(
-        self, raw_data: Union[dict[str, Any], list[dict[str, Any]]]
+        self, raw_data: dict[str, Any] | list[dict[str, Any]]
     ) -> Any:
         """Process raw audio chapter data using dynamic Pydantic models.
 

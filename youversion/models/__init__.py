@@ -4,7 +4,7 @@ try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 from youversion.models.base import Moment, MomentProtocol, Reference, ReferenceProtocol
 
@@ -58,8 +58,8 @@ class VotdProtocol(Protocol):
     """Protocol for verse of the day objects."""
 
     day: int
-    image_id: Optional[str]
-    usfm: Optional[list[str]]
+    image_id: str | None
+    usfm: list[str] | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""

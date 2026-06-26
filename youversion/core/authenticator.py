@@ -2,7 +2,6 @@
 
 import base64
 import os
-from typing import Optional
 
 import httpx
 import jwt
@@ -15,7 +14,7 @@ from .interfaces import IAuthenticator
 class Authenticator(IAuthenticator):
     """Handles authentication for YouVersion API using OAuth2."""
 
-    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
+    def __init__(self, username: str | None = None, password: str | None = None):
         """Initialize authenticator with credentials.
 
         Args:

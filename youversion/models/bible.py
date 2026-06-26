@@ -1,12 +1,12 @@
 """Bible-related data models."""
 
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 
 class LanguageProtocol(Protocol):
@@ -15,7 +15,7 @@ class LanguageProtocol(Protocol):
     id: int
     name: str
     language_tag: str
-    local_name: Optional[str]
+    local_name: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -32,7 +32,7 @@ class PublisherProtocol(Protocol):
 
     id: int
     name: str
-    url: Optional[str]
+    url: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -51,7 +51,7 @@ class BookProtocol(Protocol):
     name: str
     abbreviation: str
     chapters: list[int]
-    testament: Optional[str]
+    testament: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -74,15 +74,15 @@ class VersionProtocol(Protocol):
     books: list[Book]
     text: bool
     audio: bool
-    copyright_short: Optional[str]
-    copyright_long: Optional[str]
-    local_title: Optional[str]
-    local_abbreviation: Optional[str]
-    language_tag_selected: Optional[str]
-    last_modified: Optional[int]
-    metadata_build: Optional[int]
-    reader_footer: Optional[str]
-    reader_footer_url: Optional[str]
+    copyright_short: str | None
+    copyright_long: str | None
+    local_title: str | None
+    local_abbreviation: str | None
+    language_tag_selected: str | None
+    last_modified: int | None
+    metadata_build: int | None
+    reader_footer: str | None
+    reader_footer_url: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -137,7 +137,7 @@ class ConfigurationProtocol(Protocol):
 
     versions: list[Version]
     languages: list[Language]
-    stylesheets: Optional[list[dict]]
+    stylesheets: list[dict] | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""

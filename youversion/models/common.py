@@ -1,12 +1,12 @@
 """Common data models used across different API endpoints."""
 
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 try:
     from typing import TypeAlias
 except ImportError:
     # Python < 3.10 compatibility
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 
 class UserBaseProtocol(Protocol):
@@ -14,8 +14,8 @@ class UserBaseProtocol(Protocol):
 
     id: int
     name: str
-    avatar: Optional[str]
-    email: Optional[str]
+    avatar: str | None
+    email: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -31,8 +31,8 @@ class AvatarProtocol(Protocol):
     """Protocol for user avatar information."""
 
     url: str
-    width: Optional[int]
-    height: Optional[int]
+    width: int | None
+    height: int | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -48,9 +48,9 @@ class ImagesProtocol(Protocol):
     """Protocol for image information."""
 
     url: str
-    width: Optional[int]
-    height: Optional[int]
-    alt: Optional[str]
+    width: int | None
+    height: int | None
+    alt: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -66,8 +66,8 @@ class LinkProtocol(Protocol):
     """Protocol for link information."""
 
     url: str
-    text: Optional[str]
-    target: Optional[str]
+    text: str | None
+    target: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -83,7 +83,7 @@ class LocalizeProtocol(Protocol):
     """Protocol for localized text information."""
 
     text: str
-    language_tag: Optional[str]
+    language_tag: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -100,7 +100,7 @@ class ApiErrorProtocol(Protocol):
 
     code: str
     message: str
-    field: Optional[str]
+    field: str | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
@@ -151,8 +151,8 @@ class ApiResponseProtocol(Protocol):
     """Protocol for generic API response wrapper."""
 
     data: Any
-    pagination: Optional[PaginationInfo]
-    errors: Optional[list[ApiError]]
+    pagination: PaginationInfo | None
+    errors: list[ApiError] | None
 
     def __getattr__(self, name: str) -> Any:
         """Allow access to dynamically added fields."""
