@@ -1,378 +1,166 @@
 Data Models
 ===========
 
-The YouVersion Bible Client uses Pydantic models for type-safe data handling and validation.
+The client uses three complementary model layers:
 
-Core Models
------------
+1. **Dynamic Pydantic models** — generated at runtime from API responses (moments, highlights, plans, etc.)
+2. **Protocol type aliases** — static typing hints for common response shapes
+3. **Static Pydantic models** — request payloads for creating moments
 
-Votd
-~~~~
+See :doc:`dynamic_models` for how runtime model generation works.
 
-Verse of the day model.
+Dynamic Response Models
+-----------------------
 
-.. class:: Votd
-
-   .. attribute:: day: int
-
-      Day number (1-365)
-
-   .. attribute:: usfm: List[str]
-
-      USFM references for the verse
-
-   .. attribute:: image_id: Optional[str]
-
-      Associated image ID
+Most client methods return dynamically created Pydantic instances or plain ``dict``/``list`` wrappers. There is no fixed ``Highlight``, ``Note``, or ``Image`` class to import — the API response shape drives the model.
 
 .. code-block:: python
 
-   from youversion import Votd
+   from youversion import SyncClient
 
-   votd = Votd(day=1, usfm=["JHN.3.16"], image_id="img123")
-   print(f"Day {votd.day}: {votd.usfm}")
+   with SyncClient() as client:
+       # Each item is a runtime-generated Pydantic model
+       for highlight in client.highlights():
+           print(highlight.id, highlight.moment_title)
 
-Moment
-~~~~~~
+       for note in client.notes():
+           print(note.content)
 
-Base model for all YouVersion moment objects.
+       progress = client.plan_progress()
+       subscriptions = client.plan_subscriptions()
 
-.. class:: Moment
+Moment kinds are distinguished by ``kind_id`` (or ``kind``) on the returned object, not by separate Python classes.
 
-   .. attribute:: id: str
+Static Request Models
+---------------------
 
-      Unique moment identifier
+Use these when **creating** moments via ``create_moment``:
 
-   .. attribute:: kind: str
+CreateMoment
+~~~~~~~~~~~~
 
-      Type of moment (e.g., "highlight", "note", "image")
+.. autoclass:: youversion.models.moments.CreateMoment
+   :members:
+   :no-index:
 
-   .. attribute:: moment_title: str
+ReferenceCreate
+~~~~~~~~~~~~~~~
 
-      Title of the moment
-
-   .. attribute:: time_ago: str
-
-      Human-readable time since creation
-
-   .. attribute:: owned_by_me: bool
-
-      Whether the moment is owned by the current user
-
-   .. attribute:: created_dt: Optional[datetime]
-
-      Creation datetime
-
-   .. attribute:: updated_dt: Optional[datetime]
-
-      Last update datetime
-
-   .. attribute:: user: User
-
-      User who created the moment
-
-   .. attribute:: actions: Action
-
-      Available actions for the moment
-
-   .. attribute:: comments: Comment
-
-      Comment information
-
-   .. attribute:: likes: Like
-
-      Like information
-
-   .. attribute:: avatar: str
-
-      Avatar URL
-
-   .. attribute:: path: str
-
-      Full URL path to the moment
-
-Highlight
-~~~~~~~~~
-
-Model for Bible verse highlights.
-
-.. class:: Highlight(Moment)
-
-   .. attribute:: references: List[Reference]
-
-      Bible verse references
-
-   .. attribute:: text: Optional[str]
-
-      Highlighted text content
+.. autoclass:: youversion.models.moments.ReferenceCreate
+   :members:
+   :no-index:
 
 .. code-block:: python
 
-   from youversion import Highlight
+   from youversion.enums import MomentKinds, StatusEnum
+   from youversion.models.moments import CreateMoment, ReferenceCreate
+   from youversion import SyncClient
 
-   highlight = Highlight(
-       id="123",
-       kind="highlight",
-       moment_title="John 3:16",
-       references=[Reference(version_id=1, human="John 3:16", usfm="JHN.3.16")],
-       text="For God so loved the world..."
+   payload = CreateMoment(
+       kind=MomentKinds.NOTE,
+       title="Study note",
+       content="Key takeaway from today's reading",
+       body="",
+       color="ffff00",
+       status=StatusEnum.PRIVATE,
+       labels=["study"],
+       language_tag="en",
+       references=[
+           ReferenceCreate(
+               human="John 3:16",
+               version_id=111,
+               usfm=["JHN.3.16"],
+           )
+       ],
    )
 
-Note
-~~~~
+   with SyncClient() as client:
+       client.create_moment(payload)
 
-Model for Bible study notes.
+Protocol Type Aliases
+---------------------
 
-.. class:: Note(Moment)
+Protocols describe expected fields on dynamic models. Import them for type hints and IDE support; they are **not** constructors.
 
-   .. attribute:: content: str
+Base protocols (``youversion.models.base``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      Note content
+.. autoclass:: youversion.models.base.MomentProtocol
+   :members:
+   :no-index:
 
-   .. attribute:: references: List[Reference]
+.. autoclass:: youversion.models.base.ReferenceProtocol
+   :members:
+   :no-index:
 
-      Related Bible verse references
-
-   .. attribute:: status: StatusEnum
-
-      Note status (PRIVATE, PUBLIC, etc.)
+``Moment`` and ``Reference`` are type aliases for these protocols.
 
 .. code-block:: python
 
-   from youversion import Note, StatusEnum
+   from youversion.models.base import Moment, Reference
 
-   note = Note(
-       id="456",
-       kind="note",
-       moment_title="Study Notes",
-       content="This verse teaches us about God's love",
-       references=[Reference(version_id=1, human="John 3:16", usfm="JHN.3.16")],
-       status=StatusEnum.PRIVATE
-   )
+   def title_for(moment: Moment) -> str:
+       base = moment.base or {}
+       title = base.get("title") or {}
+       return str(title.get("l_str", ""))
 
-Image
-~~~~~
+Commons protocols (``youversion.models.commons``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Model for shared Bible images.
+Shared nested structures on moment objects:
 
-.. class:: Image(Moment)
+* ``User`` / ``UserProtocol`` — user embedded in moments
+* ``Action`` / ``ActionProtocol`` — deletable, editable, read, show flags
+* ``Comment`` / ``CommentProtocol`` — commenting metadata
+* ``Like`` / ``LikeProtocol`` — liking metadata
+* ``BodyImage`` / ``BodyImageProtocol`` — image dimensions and URL
+* ``ReactionModel`` / ``ReactionModelProtocol`` — base for comment/like shapes
 
-   .. attribute:: references: List[Reference]
+Bible protocols (``youversion.models.bible``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      Related Bible verse references
+* ``Language``, ``Publisher``, ``Book``, ``Version``
+* ``Chapter``, ``ChapterContent``, ``Configuration``, ``RecommendedLanguages``
 
-   .. attribute:: body_image: str
+Friends protocols (``youversion.models.friends``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      Image URL
+* ``Contact``, ``Contacts``, ``Friend``, ``Friends``
+* ``FriendOffer``, ``Offers``, ``Friendable``, ``Friendables``
 
-   .. attribute:: action_url: Optional[str]
+Events protocols (``youversion.models.events``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      Action URL for the image
+* ``Event``, ``EventContent``, ``EventLocation``, ``EventTime``
+* ``SavedEvent``, ``SavedEvents``, ``SearchEvent``, ``SearchEvents``
+* ``EventConfiguration``
 
-Friendship
-~~~~~~~~~~
+Common API protocols (``youversion.models.common``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Model for friendship moments.
+* ``UserBase``, ``Avatar``, ``Images``, ``Link``, ``Localize``
+* ``ApiError``, ``ApiErrors``, ``ApiResponse``, ``PaginationInfo``
 
-.. class:: Friendship(Moment)
-
-   .. attribute:: friend_name: str
-
-      Friend's name
-
-   .. attribute:: friend_path: str
-
-      Friend's profile path
-
-   .. attribute:: friend_avatar: str
-
-      Friend's avatar URL
-
-Plan Models
------------
-
-PlanSegmentCompletion
-~~~~~~~~~~~~~~~~~~~~~
-
-Model for reading plan segment completions.
-
-.. class:: PlanSegmentCompletion(PlanModel)
-
-   .. attribute:: percent_complete: float
-
-      Completion percentage (0.0-1.0)
-
-   .. attribute:: segment: int
-
-      Segment number
-
-   .. attribute:: total_segments: int
-
-      Total segments in the plan
-
-   .. attribute:: plan_id: int
-
-      Plan identifier
-
-   .. attribute:: subscribed: bool
-
-      Whether the user is subscribed to the plan
-
-PlanSubscription
+Verse of the day
 ~~~~~~~~~~~~~~~~
 
-Model for reading plan subscriptions.
+.. autoclass:: youversion.models.VotdProtocol
+   :members:
+   :no-index:
 
-.. class:: PlanSubscription(PlanModel)
+``Votd`` is a type alias for ``VotdProtocol``.
 
-   .. attribute:: plan_title: str
+.. code-block:: python
 
-      Title of the subscribed plan
+   from youversion import SyncClient
+   from youversion.models import Votd
 
-   .. attribute:: plan_id: int
+   def day_label(votd: Votd) -> str:
+       refs = votd.usfm or []
+       return f"Day {votd.day}: {', '.join(refs)}"
 
-      Plan identifier
-
-   .. attribute:: subscribed: bool
-
-      Whether the user is subscribed to the plan
-
-PlanCompletion
-~~~~~~~~~~~~~~
-
-Model for completed reading plans.
-
-.. class:: PlanCompletion(PlanModel)
-
-   .. attribute:: plan_title: str
-
-      Title of the completed plan
-
-   .. attribute:: plan_id: int
-
-      Plan identifier
-
-   .. attribute:: subscribed: bool
-
-      Whether the user is subscribed to the plan
-
-Supporting Models
------------------
-
-Reference
-~~~~~~~~~
-
-Model for Bible verse references.
-
-.. class:: Reference
-
-   .. attribute:: version_id: Union[str, int]
-
-      Bible version identifier
-
-   .. attribute:: human: str
-
-      Human-readable reference (e.g., "John 3:16")
-
-   .. attribute:: usfm: Union[str, List[str]]
-
-      USFM reference format
-
-User
-~~~~
-
-Model for YouVersion users.
-
-.. class:: User
-
-   .. attribute:: id: Optional[Union[str, int]]
-
-      User identifier
-
-   .. attribute:: path: str
-
-      User profile path
-
-   .. attribute:: user_name: Optional[str]
-
-      Username
-
-Action
-~~~~~~
-
-Model for moment actions.
-
-.. class:: Action
-
-   .. attribute:: deletable: bool
-
-      Whether the moment can be deleted
-
-   .. attribute:: editable: bool
-
-      Whether the moment can be edited
-
-   .. attribute:: read: bool
-
-      Whether the moment can be read
-
-   .. attribute:: show: bool
-
-      Whether the moment should be shown
-
-Comment
-~~~~~~~
-
-Model for comment information.
-
-.. class:: Comment(ReactionModel)
-
-   .. attribute:: enabled: bool
-
-      Whether comments are enabled
-
-   .. attribute:: count: int
-
-      Number of comments
-
-   .. attribute:: strings: Dict[str, Any]
-
-      Comment-related strings
-
-   .. attribute:: all: List[Any]
-
-      All comment data
-
-Like
-~~~
-
-Model for like information.
-
-.. class:: Like(ReactionModel)
-
-   .. attribute:: enabled: bool
-
-      Whether likes are enabled
-
-   .. attribute:: count: int
-
-      Number of likes
-
-   .. attribute:: strings: Dict[str, Any]
-
-      Like-related strings
-
-   .. attribute:: all: List[Any]
-
-      All like data
-
-   .. attribute:: is_liked: bool
-
-      Whether the current user has liked the moment
-
-   .. attribute:: user_ids: Optional[List[int]]
-
-      List of user IDs who liked the moment
+   with SyncClient() as client:
+       print(day_label(client.verse_of_the_day()))
 
 Enums
 -----
@@ -380,92 +168,43 @@ Enums
 StatusEnum
 ~~~~~~~~~~
 
-Enumeration for note status values.
-
-.. class:: StatusEnum
-
-   .. attribute:: PRIVATE
-
-      Private note
-
-   .. attribute:: PUBLIC
-
-      Public note
+.. autoclass:: youversion.enums.StatusEnum
+   :members:
+   :no-index:
 
 MomentKinds
 ~~~~~~~~~~~
 
-Enumeration for moment types.
+.. autoclass:: youversion.enums.MomentKinds
+   :members:
+   :no-index:
 
-.. class:: MomentKinds
+``MomentKinds`` values include ``HIGHLIGHT``, ``NOTE``, ``IMAGE``, ``BOOKMARK``, ``FRIENDSHIP``, ``PLAN_SEGMENT_COMPLETION``, ``PLAN_SUBSCRIPTION``, and ``PLAN_COMPLETION``. Use them when building ``CreateMoment`` payloads, not when typing API responses.
 
-   .. attribute:: HIGHLIGHT
+Serialization
+-------------
 
-      Highlight moment
-
-   .. attribute:: NOTE
-
-      Note moment
-
-   .. attribute:: IMAGE
-
-      Image moment
-
-   .. attribute:: FRIENDSHIP
-
-      Friendship moment
-
-   .. attribute:: PLAN_SEGMENT_COMPLETION
-
-      Plan segment completion
-
-   .. attribute:: PLAN_COMPLETION
-
-      Plan completion
-
-   .. attribute:: PLAN_SUBSCRIPTION
-
-      Plan subscription
-
-Model Validation
-----------------
-
-All models use Pydantic for automatic validation and serialization:
+**Dynamic models** (API responses):
 
 .. code-block:: python
 
-   from youversion import Highlight
-   from pydantic import ValidationError
+   from youversion import SyncClient
 
-   try:
-       highlight = Highlight(
-           id="123",
-           kind="highlight",
-           moment_title="Test",
-           # Missing required fields will raise ValidationError
-       )
-   except ValidationError as e:
-       print(f"Validation error: {e}")
+   with SyncClient() as client:
+       moment = client.highlights()[0]
+       data = moment.model_dump()
+       json_data = moment.model_dump_json()
 
-Model Serialization
--------------------
-
-Models can be serialized to dictionaries and JSON:
+**Static models** (request payloads):
 
 .. code-block:: python
 
-   from youversion import Votd
+   from youversion.models.moments import CreateMoment
 
-   votd = Votd(day=1, usfm=["JHN.3.16"], image_id="img123")
+   payload = CreateMoment(...)  # see example above
+   api_body = payload.model_dump()  # enums serialized to API string values
 
-   # Convert to dictionary
-   data = votd.model_dump()
-   print(data)
+Package exports
+---------------
 
-   # Convert to JSON
-   json_data = votd.model_dump_json()
-   print(json_data)
-
-   # Convert with exclusions
-   minimal_data = votd.model_dump(exclude={'image_id'})
-   print(minimal_data)
+``youversion.models`` re-exports protocols and static models. The top-level ``youversion`` package exports only ``AsyncClient`` and ``SyncClient`` — import model types from ``youversion.models`` or their submodules.

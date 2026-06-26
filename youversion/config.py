@@ -11,7 +11,6 @@ class Config:
 
     # YouVersion API Base URLs
     AUDIO_BIBLE_API_BASE = "http://audio-bible.youversionapi.com"
-    BADGES_API_BASE = "https://badges.youversionapi.com"
     BIBLE_API_BASE = "https://bible.youversionapi.com"
     EVENTS_API_BASE = "https://events.youversionapi.com"
     FRIENDS_API_BASE = "https://friends.youversionapi.com"
@@ -79,15 +78,11 @@ class Config:
     # Search API Endpoints
     SEARCH_BIBLE_URL = "/3.1/bible.json"
     SEARCH_PLANS_URL = "/3.1/plans.json"
-    SEARCH_SUGGEST_URL = "/3.1/suggest.json"
     SEARCH_USERS_URL = "/3.1/users.json"
     SEARCH_VIDEOS_URL = "/3.1/videos.json"
 
     # Videos API Endpoints
     VIDEOS_VIEW_URL = "/3.1/view.json"
-
-    # Badges API Endpoints
-    BADGES_ITEMS_URL = "/3.1/items.json"
 
     # Images API Endpoints
     IMAGES_ITEMS_URL = "/3.1/items.json"
@@ -110,7 +105,6 @@ class Config:
     MOMENTS_HIDE_VERSE_COLORS_URL = "/3.1/hide_verse_colors.json"
     MOMENTS_ITEMS_URL = "/3.1/items.json"
     MOMENTS_LABELS_URL = "/3.1/labels.json"
-    MOMENTS_SEARCH_URL = "/3.1/search/moments.json"
     MOMENTS_UPDATE_URL = "/3.1/update.json"
     MOMENTS_VERSE_COLORS_URL = "/3.1/verse_colors.json"
     MOMENTS_VIEW_URL = "/3.1/view.json"
@@ -134,9 +128,6 @@ class Config:
     THEMES_ITEMS_URL = "/3.1/items.json"
     THEMES_REMOVE_URL = "/3.1/remove.json"
     THEMES_SET_URL = "/3.1/set.json"
-
-    # Localization API Endpoints
-    LOCALIZATION_ITEMS_URL = "/3.1/localization/items.po"
 
     # Alternative endpoints without build ID
     READING_PLANS_URL = "/users/{username}/reading-plans"

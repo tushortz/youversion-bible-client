@@ -14,16 +14,7 @@ The YouVersion Bible Client is a modern Python library that provides:
 
 * **Dual Client Support**: Both synchronous (`SyncClient`) and asynchronous (`AsyncClient`) implementations
 * **OAuth2 Authentication**: Secure authentication using YouVersion's OAuth2 system
-* **Comprehensive API Coverage**: Access to 55+ API endpoints including:
-  - Bible content and versions
-  - Audio Bible
-  - Moments (highlights, notes, bookmarks, images, badges)
-  - Reading plans
-  - Events
-  - Videos
-  - Friendships
-  - Themes
-  - And much more
+* **Comprehensive API Coverage**: Bible, audio, moments, plans, events, friends, notifications, themes, and more
 * **Dynamic Pydantic Models**: Automatically generated models from API responses
 * **Type Safety**: Full type hints throughout the codebase
 * **CLI Support**: Command-line interface for easy access to all features
@@ -40,8 +31,8 @@ Installation
    # Using pip
    pip install youversion-bible-client
 
-   # Using Poetry
-   poetry add youversion-bible-client
+   # Using uv
+   uv add youversion-bible-client
 
 Basic Usage
 ~~~~~~~~~~~

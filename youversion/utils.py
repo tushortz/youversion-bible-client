@@ -180,7 +180,11 @@ class DynamicPydanticFactory:
             elif default_value is None:
                 # Optional field with None default
                 type_str = str(field_type)
-                if "Optional" in type_str or "Union" in type_str:
+                if (
+                    "Optional" in type_str
+                    or "Union" in type_str
+                    or "| None" in type_str
+                ):
                     optional_type = field_type
                 else:
                     optional_type = Optional[field_type]
@@ -250,9 +254,9 @@ class DynamicPydanticFactory:
                                 nested_class = arg
                                 break
                         if nested_class:
-                            processed_data[
-                                field_name
-                            ] = self._create_instance_recursive(nested_class, value)
+                            processed_data[field_name] = (
+                                self._create_instance_recursive(nested_class, value)
+                            )
                         else:
                             # No model type found, pass dict
                             processed_data[field_name] = value

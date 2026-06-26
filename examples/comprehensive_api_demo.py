@@ -232,7 +232,7 @@ async def demonstrate_themes_api(client: AsyncClient):
 
     # Get available themes
     print("\n1. Getting available themes...")
-    themes = await client.get_themes(page=1, language_tag="eng")
+    themes = await client.get_themes(page=1, language_tag="en")
     print(f"Themes type: {type(themes)}")
 
     # Get theme description (if we have a theme ID)
@@ -244,17 +244,19 @@ async def demonstrate_themes_api(client: AsyncClient):
         print(f"Note: Theme may not exist - {e}")
 
 
-async def demonstrate_localization_api(client: AsyncClient):
-    """Demonstrate Localization API endpoints."""
-    print("\n=== Localization API Examples ===")
+async def demonstrate_social_api(client: AsyncClient):
+    """Demonstrate friends and notifications endpoints."""
+    print("\n=== Friends and Notifications ===")
 
-    # Get localization items
-    print("\n1. Getting localization items for English...")
-    localization = await client.get_localization_items("eng")
-    print(f"Localization type: {type(localization)}")
-    print(
-        f"Localization length: {len(localization) if isinstance(localization, str) else 'N/A'}"
-    )
+    friends = await client.get_friends(page=1)
+    print(f"Friends response type: {type(friends)}")
+
+    suggestions = await client.get_friend_suggestions(page=1, language_tag="en")
+    count = len(suggestions.get("suggestions", [])) if isinstance(suggestions, dict) else 0
+    print(f"Friend suggestions: {count}")
+
+    notifications = await client.get_notifications(page=1)
+    print(f"Notifications type: {type(notifications)}")
 
 
 async def main():
@@ -265,8 +267,8 @@ async def main():
     # Note: Most endpoints require authentication
     try:
         async with AsyncClient() as client:
-            print(f"✅ Connected as: {client.username}")
-            print(f"✅ User ID: {client.user_id}")
+            print(f"Connected as: {client.username}")
+            print(f"User ID: {client.user_id}")
             print()
 
             # Demonstrate all API categories
@@ -279,12 +281,12 @@ async def main():
             await demonstrate_videos_api(client)
             await demonstrate_images_api(client)
             await demonstrate_themes_api(client)
-            await demonstrate_localization_api(client)
+            await demonstrate_social_api(client)
 
-            print("\n✅ Comprehensive demo completed!")
+            print("\nComprehensive demo completed!")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         print("Note: Some endpoints may require authentication.")
         print(
             "To use authenticated endpoints, initialize the client with username and password:"

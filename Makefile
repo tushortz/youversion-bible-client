@@ -101,8 +101,6 @@ help:
 	@echo "    make cli-get-theme-description Get theme description"
 	@echo "  Social:"
 	@echo "    make cli-send-friend-request Send friend request"
-	@echo "  Localization:"
-	@echo "    make cli-get-localization-items Get localization items"
 	@echo "  Help:"
 	@echo "    make cli-help              Show CLI help"
 	@echo ""
@@ -115,10 +113,10 @@ help:
 	@echo "  make lock                  Lock dependencies"
 	@echo ""
 	@echo "Environment:"
-	@echo "  make shell                 Start Poetry shell"
+	@echo "  make shell                 Start uv shell"
 	@echo "  make env                   Show environment info"
-	@echo "  make env-info              Show Poetry environment info"
-	@echo "  make env-remove            Remove Poetry environment"
+	@echo "  make env-info              Show uv environment info"
+	@echo "  make env-remove            Remove uv environment"
 	@echo ""
 	@echo "Code Quality (Extended):"
 	@echo "  make type-check            Run type checking (mypy)"
@@ -160,42 +158,42 @@ help:
 
 # Installation
 install:
-	poetry install --no-dev
+	uv sync --no-dev
 
 install-dev:
-	poetry install
+	uv sync
 
 # Testing
 test:
-	poetry run pytest
+	uv run pytest
 
 test-cov:
-	poetry run pytest --cov=youversion --cov-report=html --cov-report=term
+	uv run pytest --cov=youversion --cov-report=html --cov-report=term --cov-fail-under=100
 
 test-verbose:
-	poetry run pytest -v
+	uv run pytest -v
 
 test-fast:
-	poetry run pytest -m "not slow"
+	uv run pytest -m "not slow"
 
 test-unit:
-	poetry run pytest -m unit
+	uv run pytest -m unit
 
 test-integration:
-	poetry run pytest -m integration
+	uv run pytest -m integration --no-cov
 
 # Code Quality
 lint:
-	poetry run ruff check youversion tests
+	uv run ruff check youversion tests
 
 lint-fix:
-	poetry run ruff check --fix youversion tests
+	uv run ruff check --fix youversion tests
 
 format:
-	poetry run black youversion tests
+	uv run black youversion tests
 
 format-check:
-	poetry run black --check youversion tests
+	uv run black --check youversion tests
 
 check: lint format-check
 	@echo "✓ All checks passed"
@@ -205,17 +203,17 @@ fix: format lint-fix
 
 # Documentation
 docs:
-	cd docs && poetry run make html
+	cd docs && uv run make html
 
 docs-clean:
-	cd docs && poetry run make clean
+	cd docs && uv run make clean
 
 docs-serve:
-	cd docs && poetry run make html && open build/html/index.html
+	cd docs && uv run make html && open build/html/index.html
 
 # Build & Clean
 build:
-	poetry build
+	uv build
 
 clean:
 	rm -rf build dist *.egg-info .pytest_cache .coverage htmlcov
@@ -228,34 +226,34 @@ clean-all: clean docs-clean
 
 # CLI Commands (examples - modify as needed)
 cli-help:
-	poetry run youversion --help
+	uv run youversion --help
 
 cli-votd:
-	poetry run youversion votd
+	uv run youversion votd
 
 cli-moments:
-	poetry run youversion moments
+	uv run youversion moments
 
 cli-highlights:
-	poetry run youversion highlights
+	uv run youversion highlights
 
 cli-notes:
-	poetry run youversion notes
+	uv run youversion notes
 
 cli-bookmarks:
-	poetry run youversion bookmarks
+	uv run youversion bookmarks
 
 cli-images:
-	poetry run youversion images
+	uv run youversion images
 
 cli-plan-progress:
-	poetry run youversion plan-progress
+	uv run youversion plan-progress
 
 cli-plan-subscriptions:
-	poetry run youversion plan-subscriptions
+	uv run youversion plan-subscriptions
 
 cli-plan-completions:
-	poetry run youversion plan-completions
+	uv run youversion plan-completions
 
 cli-create-moment:
 	@echo "Usage: make cli-create-moment KIND='note' CONTENT='...' TITLE='...'"
@@ -264,19 +262,19 @@ cli-create-moment:
 		echo "Error: KIND, CONTENT, and TITLE are required"; \
 		exit 1; \
 	fi
-	poetry run youversion create-moment --kind $(KIND) --content "$(CONTENT)" --title "$(TITLE)"
+	uv run youversion create-moment --kind $(KIND) --content "$(CONTENT)" --title "$(TITLE)"
 
 cli-badges:
-	poetry run youversion badges
+	uv run youversion badges
 
 cli-convert-notes:
-	poetry run youversion convert-notes
+	uv run youversion convert-notes
 
 cli-get-bible-configuration:
-	poetry run youversion get-bible-configuration
+	uv run youversion get-bible-configuration
 
 cli-get-bible-versions:
-	poetry run youversion get-bible-versions
+	uv run youversion get-bible-versions
 
 cli-get-bible-version:
 	@echo "Usage: make cli-get-bible-version ID=1"
@@ -284,7 +282,7 @@ cli-get-bible-version:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-bible-version $(ID)
+	uv run youversion get-bible-version $(ID)
 
 cli-get-bible-chapter:
 	@echo "Usage: make cli-get-bible-chapter REFERENCE='GEN.1' VERSION_ID=1"
@@ -292,10 +290,10 @@ cli-get-bible-chapter:
 		echo "Error: REFERENCE and VERSION_ID are required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-bible-chapter $(REFERENCE) --version-id $(VERSION_ID)
+	uv run youversion get-bible-chapter $(REFERENCE) --version-id $(VERSION_ID)
 
 cli-get-recommended-languages:
-	poetry run youversion get-recommended-languages
+	uv run youversion get-recommended-languages
 
 cli-get-audio-chapter:
 	@echo "Usage: make cli-get-audio-chapter REFERENCE='GEN.1' VERSION_ID=1"
@@ -303,7 +301,7 @@ cli-get-audio-chapter:
 		echo "Error: REFERENCE and VERSION_ID are required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-audio-chapter $(REFERENCE) --version-id $(VERSION_ID)
+	uv run youversion get-audio-chapter $(REFERENCE) --version-id $(VERSION_ID)
 
 cli-get-audio-version:
 	@echo "Usage: make cli-get-audio-version ID=1"
@@ -311,7 +309,7 @@ cli-get-audio-version:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-audio-version $(ID)
+	uv run youversion get-audio-version $(ID)
 
 cli-search-bible:
 	@echo "Usage: make cli-search-bible QUERY='love' VERSION_ID=1"
@@ -319,7 +317,7 @@ cli-search-bible:
 		echo "Error: QUERY is required"; \
 		exit 1; \
 	fi
-	poetry run youversion search-bible "$(QUERY)" --version-id $(VERSION_ID)
+	uv run youversion search-bible "$(QUERY)" --version-id $(VERSION_ID)
 
 cli-search-plans:
 	@echo "Usage: make cli-search-plans QUERY='daily' LANGUAGE_TAG='en'"
@@ -327,7 +325,7 @@ cli-search-plans:
 		echo "Error: QUERY is required"; \
 		exit 1; \
 	fi
-	poetry run youversion search-plans "$(QUERY)" --language-tag $(LANGUAGE_TAG)
+	uv run youversion search-plans "$(QUERY)" --language-tag $(LANGUAGE_TAG)
 
 cli-search-users:
 	@echo "Usage: make cli-search-users QUERY='john'"
@@ -335,10 +333,10 @@ cli-search-users:
 		echo "Error: QUERY is required"; \
 		exit 1; \
 	fi
-	poetry run youversion search-users "$(QUERY)"
+	uv run youversion search-users "$(QUERY)"
 
 cli-get-videos:
-	poetry run youversion get-videos
+	uv run youversion get-videos
 
 cli-get-video-details:
 	@echo "Usage: make cli-get-video-details ID=123"
@@ -346,13 +344,13 @@ cli-get-video-details:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-video-details $(ID)
+	uv run youversion get-video-details $(ID)
 
 cli-get-images:
-	poetry run youversion get-images
+	uv run youversion get-images
 
 cli-get-image-upload-url:
-	poetry run youversion get-image-upload-url
+	uv run youversion get-image-upload-url
 
 cli-search-events:
 	@echo "Usage: make cli-search-events QUERY='church' LATITUDE=40.7128 LONGITUDE=-74.0060"
@@ -360,7 +358,7 @@ cli-search-events:
 		echo "Error: QUERY is required"; \
 		exit 1; \
 	fi
-	poetry run youversion search-events "$(QUERY)" --latitude $(LATITUDE) --longitude $(LONGITUDE)
+	uv run youversion search-events "$(QUERY)" --latitude $(LATITUDE) --longitude $(LONGITUDE)
 
 cli-get-event-details:
 	@echo "Usage: make cli-get-event-details ID=123"
@@ -368,10 +366,10 @@ cli-get-event-details:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-event-details $(ID)
+	uv run youversion get-event-details $(ID)
 
 cli-get-saved-events:
-	poetry run youversion get-saved-events
+	uv run youversion get-saved-events
 
 cli-save-event:
 	@echo "Usage: make cli-save-event ID=123"
@@ -379,7 +377,7 @@ cli-save-event:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion save-event $(ID)
+	uv run youversion save-event $(ID)
 
 cli-delete-saved-event:
 	@echo "Usage: make cli-delete-saved-event ID=123"
@@ -387,16 +385,16 @@ cli-delete-saved-event:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion delete-saved-event $(ID)
+	uv run youversion delete-saved-event $(ID)
 
 cli-get-all-saved-event-ids:
-	poetry run youversion get-all-saved-event-ids
+	uv run youversion get-all-saved-event-ids
 
 cli-get-event-configuration:
-	poetry run youversion get-event-configuration
+	uv run youversion get-event-configuration
 
 cli-get-moments:
-	poetry run youversion get-moments
+	uv run youversion get-moments
 
 cli-get-moment-details:
 	@echo "Usage: make cli-get-moment-details ID=123"
@@ -404,7 +402,7 @@ cli-get-moment-details:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-moment-details $(ID)
+	uv run youversion get-moment-details $(ID)
 
 cli-update-moment:
 	@echo "Usage: make cli-update-moment ID=123 CONTENT='...'"
@@ -412,7 +410,7 @@ cli-update-moment:
 		echo "Error: ID and CONTENT are required"; \
 		exit 1; \
 	fi
-	poetry run youversion update-moment $(ID) --content "$(CONTENT)"
+	uv run youversion update-moment $(ID) --content "$(CONTENT)"
 
 cli-delete-moment:
 	@echo "Usage: make cli-delete-moment ID=123"
@@ -420,22 +418,22 @@ cli-delete-moment:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion delete-moment $(ID)
+	uv run youversion delete-moment $(ID)
 
 cli-get-moment-colors:
-	poetry run youversion get-moment-colors
+	uv run youversion get-moment-colors
 
 cli-get-moment-labels:
-	poetry run youversion get-moment-labels
+	uv run youversion get-moment-labels
 
 cli-get-verse-colors:
-	poetry run youversion get-verse-colors
+	uv run youversion get-verse-colors
 
 cli-hide-verse-colors:
-	poetry run youversion hide-verse-colors
+	uv run youversion hide-verse-colors
 
 cli-get-moments-configuration:
-	poetry run youversion get-moments-configuration
+	uv run youversion get-moments-configuration
 
 cli-create-comment:
 	@echo "Usage: make cli-create-comment MOMENT_ID=123 BODY='...'"
@@ -443,7 +441,7 @@ cli-create-comment:
 		echo "Error: MOMENT_ID and BODY are required"; \
 		exit 1; \
 	fi
-	poetry run youversion create-comment $(MOMENT_ID) --body "$(BODY)"
+	uv run youversion create-comment $(MOMENT_ID) --body "$(BODY)"
 
 cli-delete-comment:
 	@echo "Usage: make cli-delete-comment MOMENT_ID=123 COMMENT_ID=456"
@@ -451,7 +449,7 @@ cli-delete-comment:
 		echo "Error: MOMENT_ID and COMMENT_ID are required"; \
 		exit 1; \
 	fi
-	poetry run youversion delete-comment $(MOMENT_ID) $(COMMENT_ID)
+	uv run youversion delete-comment $(MOMENT_ID) $(COMMENT_ID)
 
 cli-like-moment:
 	@echo "Usage: make cli-like-moment ID=123"
@@ -459,7 +457,7 @@ cli-like-moment:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion like-moment $(ID)
+	uv run youversion like-moment $(ID)
 
 cli-unlike-moment:
 	@echo "Usage: make cli-unlike-moment ID=123"
@@ -467,7 +465,7 @@ cli-unlike-moment:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion unlike-moment $(ID)
+	uv run youversion unlike-moment $(ID)
 
 cli-register-device:
 	@echo "Usage: make cli-register-device TOKEN='...' PLATFORM='android'"
@@ -475,7 +473,7 @@ cli-register-device:
 		echo "Error: TOKEN and PLATFORM are required"; \
 		exit 1; \
 	fi
-	poetry run youversion register-device --token "$(TOKEN)" --platform $(PLATFORM)
+	uv run youversion register-device --token "$(TOKEN)" --platform $(PLATFORM)
 
 cli-unregister-device:
 	@echo "Usage: make cli-unregister-device TOKEN='...'"
@@ -483,10 +481,10 @@ cli-unregister-device:
 		echo "Error: TOKEN is required"; \
 		exit 1; \
 	fi
-	poetry run youversion unregister-device --token "$(TOKEN)"
+	uv run youversion unregister-device --token "$(TOKEN)"
 
 cli-get-themes:
-	poetry run youversion get-themes
+	uv run youversion get-themes
 
 cli-add-theme:
 	@echo "Usage: make cli-add-theme ID=1 LANGUAGE_TAG='eng'"
@@ -494,7 +492,7 @@ cli-add-theme:
 		echo "Error: ID and LANGUAGE_TAG are required"; \
 		exit 1; \
 	fi
-	poetry run youversion add-theme $(ID) --language-tag $(LANGUAGE_TAG)
+	uv run youversion add-theme $(ID) --language-tag $(LANGUAGE_TAG)
 
 cli-remove-theme:
 	@echo "Usage: make cli-remove-theme ID=1"
@@ -502,7 +500,7 @@ cli-remove-theme:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion remove-theme $(ID)
+	uv run youversion remove-theme $(ID)
 
 cli-set-theme:
 	@echo "Usage: make cli-set-theme ID=1"
@@ -510,7 +508,7 @@ cli-set-theme:
 		echo "Error: ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion set-theme $(ID)
+	uv run youversion set-theme $(ID)
 
 cli-get-theme-description:
 	@echo "Usage: make cli-get-theme-description ID=1 LANGUAGE_TAG='eng'"
@@ -518,7 +516,7 @@ cli-get-theme-description:
 		echo "Error: ID and LANGUAGE_TAG are required"; \
 		exit 1; \
 	fi
-	poetry run youversion get-theme-description $(ID) --language-tag $(LANGUAGE_TAG)
+	uv run youversion get-theme-description $(ID) --language-tag $(LANGUAGE_TAG)
 
 cli-send-friend-request:
 	@echo "Usage: make cli-send-friend-request USER_ID=123456"
@@ -526,61 +524,58 @@ cli-send-friend-request:
 		echo "Error: USER_ID is required"; \
 		exit 1; \
 	fi
-	poetry run youversion send-friend-request $(USER_ID)
-
-cli-get-localization-items:
-	poetry run youversion get-localization-items
+	uv run youversion send-friend-request $(USER_ID)
 
 
 # Dependencies
 deps:
-	poetry show
+	uv tree
 
 deps-update:
-	poetry update
+	uv lock --upgrade
 
 deps-outdated:
-	poetry show --outdated
+	uv pip list --outdated
 
 deps-tree:
-	poetry show --tree
+	uv tree
 
 update:
-	poetry lock
+	uv lock
 
 lock:
-	poetry lock
+	uv lock
 
 # Environment
 shell:
-	poetry shell
+	uv shell
 
 env:
 	@echo "Python version:"
-	@poetry run python --version
-	@echo "\nPoetry environment:"
-	@poetry env info
+	@uv run python --version
+	@echo "\nVirtualenv:"
+	@uv run python -c "import sys; print(sys.executable)"
 
 env-info:
-	poetry env info
+	@uv run python -c "import sys; print(sys.executable)"
 
 env-remove:
-	poetry env remove --all
+	rm -rf .venv
 
 # Code Quality (Extended)
 type-check:
 	@if command -v mypy >/dev/null 2>&1; then \
-		poetry run mypy youversion --ignore-missing-imports; \
+		uv run mypy youversion --ignore-missing-imports; \
 	else \
-		echo "⚠️  mypy not installed. Install with: poetry add --group dev mypy"; \
+		echo "⚠️  mypy not installed. Install with: uv add --dev mypy"; \
 	fi
 
 security-check:
 	@if command -v bandit >/dev/null 2>&1; then \
-		poetry run bandit -r youversion -f json -o bandit-report.json || true; \
-		poetry run bandit -r youversion; \
+		uv run bandit -r youversion -f json -o bandit-report.json || true; \
+		uv run bandit -r youversion; \
 	else \
-		echo "⚠️  bandit not installed. Install with: poetry add --group dev bandit[toml]"; \
+		echo "⚠️  bandit not installed. Install with: uv add --dev bandit[toml]"; \
 	fi
 
 validate: lint format-check
@@ -593,11 +588,11 @@ validate-all: lint format-check type-check test
 coverage: test-cov
 
 coverage-html:
-	poetry run pytest --cov=youversion --cov-report=html
+	uv run pytest --cov=youversion --cov-report=html
 	@echo "✓ Coverage report generated in htmlcov/index.html"
 
 coverage-report:
-	poetry run pytest --cov=youversion --cov-report=term-missing
+	uv run pytest --cov=youversion --cov-report=term-missing
 
 coverage-open: coverage-html
 	@if command -v open >/dev/null 2>&1; then \
@@ -610,70 +605,70 @@ coverage-open: coverage-html
 
 watch-test:
 	@if command -v entr >/dev/null 2>&1; then \
-		find youversion tests -name "*.py" | entr -c poetry run pytest; \
+		find youversion tests -name "*.py" | entr -c uv run pytest; \
 	else \
 		echo "⚠️  entr not installed. Install with: brew install entr (macOS) or apt-get install entr (Linux)"; \
 	fi
 
 watch-lint:
 	@if command -v entr >/dev/null 2>&1; then \
-		find youversion tests -name "*.py" | entr -c poetry run ruff check youversion tests; \
+		find youversion tests -name "*.py" | entr -c uv run ruff check youversion tests; \
 	else \
 		echo "⚠️  entr not installed. Install with: brew install entr (macOS) or apt-get install entr (Linux)"; \
 	fi
 
 watch-format:
 	@if command -v entr >/dev/null 2>&1; then \
-		find youversion tests -name "*.py" | entr -c poetry run black youversion tests; \
+		find youversion tests -name "*.py" | entr -c uv run black youversion tests; \
 	else \
 		echo "⚠️  entr not installed. Install with: brew install entr (macOS) or apt-get install entr (Linux)"; \
 	fi
 
 # Examples
 run-example:
-	poetry run python examples/basic_usage.py
+	uv run python examples/basic_usage.py
 
 run-examples:
 	@echo "Running all examples..."
 	@for example in examples/*.py; do \
 		if [ -f "$$example" ] && [ "$$example" != "examples/README.md" ]; then \
 			echo "\n=== Running $$example ==="; \
-			poetry run python "$$example" || true; \
+			uv run python "$$example" || true; \
 		fi \
 	done
 
 # Version & Release
 version:
-	@poetry version
+	@uv version
 
 bump-version:
 	@read -p "Enter new version (e.g., 0.2.0): " version; \
-	poetry version $$version
+	uv version $$version
 
 bump-patch:
-	poetry version patch
-	@echo "✓ Version bumped to $(shell poetry version -s)"
+	uv version --bump patch
+	@echo "✓ Version bumped to $(shell uv version --short)"
 
 bump-minor:
-	poetry version minor
-	@echo "✓ Version bumped to $(shell poetry version -s)"
+	uv version --bump minor
+	@echo "✓ Version bumped to $(shell uv version --short)"
 
 bump-major:
-	poetry version major
-	@echo "✓ Version bumped to $(shell poetry version -s)"
+	uv version --bump major
+	@echo "✓ Version bumped to $(shell uv version --short)"
 
 release:
 	@echo "Preparing release..."
-	@echo "Current version: $(shell poetry version -s)"
+	@echo "Current version: $(shell uv version --short)"
 	@echo "Running validation checks..."
 	@make validate-all
 	@echo "Building package..."
 	@make build
-	@echo "✓ Release prepared. Version: $(shell poetry version -s)"
+	@echo "✓ Release prepared. Version: $(shell uv version --short)"
 
 release-check:
 	@echo "Checking release readiness..."
-	@echo "Version: $(shell poetry version -s)"
+	@echo "Version: $(shell uv version --short)"
 	@make validate-all
 	@echo "✓ Release checks passed"
 
@@ -683,14 +678,14 @@ publish:
 
 publish-test:
 	@echo "Publishing to TestPyPI..."
-	poetry publish --repository testpypi
+	uv publish --index testpypi
 
 publish-prod:
 	@echo "⚠️  Publishing to PyPI (production)..."
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		poetry publish; \
+		uv publish; \
 	else \
 		echo "Publishing cancelled."; \
 	fi

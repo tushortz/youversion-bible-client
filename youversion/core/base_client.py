@@ -93,6 +93,7 @@ class BaseClient(IClient):
 
     async def verse_of_the_day(self, day: Optional[int] = None) -> Any:
         """Get verse of the day.
+        Note: this does not need authentication
 
         Args:
             day: Specific day number (optional)
@@ -792,7 +793,7 @@ class BaseClient(IClient):
 
     # Themes API methods
     async def get_themes(
-        self, page: int = 1, language_tag: str = "eng"
+        self, page: int = 1, language_tag: str = "en"
     ) -> dict[str, Any]:
         """Get available themes.
 
@@ -894,15 +895,252 @@ class BaseClient(IClient):
         raw_data = await self._http_client.send_friend_request(user_id)
         return self._data_processor.process_send_friend_request(raw_data)
 
-    # Localization API methods
-    async def get_localization_items(self, language_tag: str = "eng") -> str:
-        """Get localization strings for a language.
+    # Friends API methods
+    async def get_friends(self, page: int = 1) -> dict[str, Any]:
+        """Get the authenticated user's friends list.
 
         Args:
-            language_tag: Language tag
+            page: Page number for pagination.
 
         Returns:
-            Localization strings (PO file format)
+            Friends list data.
         """
         await self._ensure_authenticated()
-        return await self._http_client.get_localization_items(language_tag)
+        return await self._http_client.get_friends(page)
+
+    async def get_all_friends(self, page: int = 1) -> dict[str, Any]:
+        """Get all friends including extended metadata.
+
+        Args:
+            page: Page number for pagination.
+
+        Returns:
+            All friends data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_all_friends(page)
+
+    async def delete_friend(self, user_id: int) -> dict[str, Any]:
+        """Remove a friend by user ID.
+
+        Args:
+            user_id: Friend's YouVersion user ID.
+
+        Returns:
+            Delete operation result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.delete_friend(user_id)
+
+    # Extended friendships API methods
+    async def get_incoming_friend_requests(self, page: int = 1) -> dict[str, Any]:
+        """Get incoming friend requests.
+
+        Args:
+            page: Page number for pagination.
+
+        Returns:
+            Incoming friend request data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_incoming_friend_requests(page)
+
+    async def get_friend_suggestions(
+        self, page: int = 1, language_tag: str = "en"
+    ) -> dict[str, Any]:
+        """Get friend suggestions.
+
+        Args:
+            page: Page number for pagination.
+            language_tag: ISO 639-1 locale (e.g. ``en``).
+
+        Returns:
+            Friend suggestion data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_friend_suggestions(page, language_tag)
+
+    async def accept_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Accept an incoming friend request.
+
+        Args:
+            user_id: Requester's user ID.
+
+        Returns:
+            Accept operation result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.accept_friend_request(user_id)
+
+    async def decline_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Decline an incoming friend request.
+
+        Args:
+            user_id: Requester's user ID.
+
+        Returns:
+            Decline operation result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.decline_friend_request(user_id)
+
+    async def dismiss_friend_suggestion(self, user_id: int) -> dict[str, Any]:
+        """Dismiss a friend suggestion.
+
+        Args:
+            user_id: Suggested user's ID.
+
+        Returns:
+            Dismiss operation result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.dismiss_friend_suggestion(user_id)
+
+    async def get_facebook_friends(self, page: int = 1) -> dict[str, Any]:
+        """Get Facebook-linked friend suggestions.
+
+        Args:
+            page: Page number for pagination.
+
+        Returns:
+            Facebook friends data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_facebook_friends(page)
+
+    async def sync_friendship_contacts(
+        self, contacts: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Upload contacts for friend matching.
+
+        Args:
+            contacts: Contact records to sync.
+
+        Returns:
+            Contact sync result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.sync_friendship_contacts(contacts)
+
+    # Notifications API methods
+    async def get_notifications(self, page: int = 1) -> dict[str, Any]:
+        """Get notification feed items.
+
+        Args:
+            page: Page number for pagination.
+
+        Returns:
+            Notification feed data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_notifications(page)
+
+    async def get_notification_settings(self) -> dict[str, Any]:
+        """Get notification settings for the authenticated user.
+
+        Returns:
+            Notification settings data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_notification_settings()
+
+    async def update_notification_settings(
+        self, data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Update notification settings.
+
+        Args:
+            data: Settings fields to update.
+
+        Returns:
+            Updated settings data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.update_notification_settings(data)
+
+    async def update_notifications(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Update notification read state.
+
+        Args:
+            data: Notification update payload.
+
+        Returns:
+            Update result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.update_notifications(data)
+
+    async def get_votd_notification_settings(self) -> dict[str, Any]:
+        """Get verse-of-the-day notification settings.
+
+        Returns:
+            VOTD notification settings.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_votd_notification_settings()
+
+    async def update_votd_notification_settings(
+        self, data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Update verse-of-the-day notification settings.
+
+        Args:
+            data: VOTD settings to update.
+
+        Returns:
+            Updated VOTD settings data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.update_votd_notification_settings(data)
+
+    # Share API methods
+    async def invite_by_email(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Send a YouVersion invite by email.
+
+        Args:
+            data: Invite payload.
+
+        Returns:
+            Invite operation result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.invite_by_email(data)
+
+    async def invite_by_sms(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Send a YouVersion invite by SMS.
+
+        Args:
+            data: Invite payload.
+
+        Returns:
+            Invite operation result data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.invite_by_sms(data)
+
+    # Additional moments and search API methods
+    async def get_client_side_moments(self, page: int = 1) -> dict[str, Any]:
+        """Get client-side moment items.
+
+        Args:
+            page: Page number for pagination.
+
+        Returns:
+            Client-side moments data.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_client_side_moments(page)
+
+    async def get_moments_votd(
+        self, language_tag: Optional[str] = None
+    ) -> dict[str, Any]:
+        """Get verse of the day from the moments API.
+
+        Args:
+            language_tag: Optional language tag; omit for default VOTD payload.
+
+        Returns:
+            VOTD data from moments service.
+        """
+        await self._ensure_authenticated()
+        return await self._http_client.get_moments_votd(language_tag)

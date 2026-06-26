@@ -1,7 +1,7 @@
 API Reference
 =============
 
-This section contains the complete API reference for the YouVersion Bible Client, including all 55+ available methods.
+This section contains the API reference for the YouVersion Bible Client.
 
 Overview
 --------
@@ -126,12 +126,6 @@ Base Models
    :show-inheritance:
    :no-index:
 
-.. autoclass:: youversion.models.base.PlanModel
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
 .. autoclass:: youversion.models.base.Reference
    :members:
    :undoc-members:
@@ -177,8 +171,53 @@ Common Models
    :show-inheritance:
    :no-index:
 
-Main Models
-~~~~~~~~~~~
+Bible Models
+~~~~~~~~~~~~
+
+.. automodule:: youversion.models.bible
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :no-index:
+
+Friends Models
+~~~~~~~~~~~~~~
+
+.. automodule:: youversion.models.friends
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :no-index:
+
+Events Models
+~~~~~~~~~~~~~
+
+.. automodule:: youversion.models.events
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :no-index:
+
+API Response Models
+~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: youversion.models.common
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :no-index:
+
+Moment Creation Models
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: youversion.models.moments
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :no-index:
+
+Package Exports
+~~~~~~~~~~~~~~~
 
 .. automodule:: youversion.models
    :members:
@@ -187,48 +226,6 @@ Main Models
    :no-index:
 
 .. autoclass:: youversion.models.Votd
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.Highlight
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.Note
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.Image
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.Friendship
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.PlanSegmentCompletion
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.PlanSubscription
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :no-index:
-
-.. autoclass:: youversion.models.PlanCompletion
    :members:
    :undoc-members:
    :show-inheritance:

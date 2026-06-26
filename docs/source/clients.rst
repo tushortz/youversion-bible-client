@@ -219,9 +219,9 @@ Usage Example
 
 .. code-block:: python
 
-   from youversion import Client
+   from youversion.clients import SyncClient
 
-   with Client() as client:
+   with SyncClient() as client:
        # Get verse of the day
        votd = client.verse_of_the_day()
        print(f"Today's verse: {votd.usfm}")

@@ -13,11 +13,10 @@ class TestBaseClient:
         username = "testuser"
         password = "testpass"
 
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
-        ) as mock_processor_class:
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor") as mock_processor_class,
+        ):
             mock_auth = MagicMock()
             mock_auth.username = username
             mock_auth.password = password
@@ -35,11 +34,10 @@ class TestBaseClient:
 
     def test_init_without_credentials(self):
         """Test initializing base client without explicit credentials."""
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
-        ) as mock_processor_class:
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor") as mock_processor_class,
+        ):
             mock_auth = MagicMock()
             mock_auth_class.return_value = mock_auth
 
@@ -58,9 +56,10 @@ class TestBaseClient:
         username = "testuser"
         password = "testpass"
 
-        with patch("youversion.core.base_client.Authenticator"), patch(
-            "youversion.core.base_client.DataProcessor"
-        ) as mock_processor_class:
+        with (
+            patch("youversion.core.base_client.Authenticator"),
+            patch("youversion.core.base_client.DataProcessor") as mock_processor_class,
+        ):
             mock_auth = MagicMock()
             mock_auth.username = username
             mock_auth.password = password

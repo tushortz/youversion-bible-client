@@ -1,6 +1,5 @@
 """Unit tests for Pydantic models."""
 
-
 import pytest
 
 from youversion.enums import MomentKinds, StatusEnum

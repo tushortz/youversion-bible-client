@@ -24,13 +24,11 @@ class TestBaseClientExtended:
         mock_auth.access_token = "test_token"
         mock_auth.authenticate = AsyncMock(return_value=mock_http_client)
 
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
-        ), patch(
-            "youversion.core.base_client.HttpClient"
-        ) as mock_http_class:
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor"),
+            patch("youversion.core.base_client.HttpClient") as mock_http_class,
+        ):
             mock_auth_class.return_value = mock_auth
             mock_http_class.return_value = MagicMock()
 
@@ -52,10 +50,9 @@ class TestBaseClientExtended:
         mock_auth.username = username
         mock_auth.password = password
 
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor"),
         ):
             mock_auth_class.return_value = mock_auth
 
@@ -75,9 +72,7 @@ class TestBaseClientExtended:
         mock_http_client = MagicMock()
         mock_http_client.get_cards = AsyncMock(
             return_value={
-                "response": {
-                    "data": {"moments": [{"id": 1, "kind_id": "note"}]}
-                }
+                "response": {"data": {"moments": [{"id": 1, "kind_id": "note"}]}}
             }
         )
 
@@ -85,10 +80,9 @@ class TestBaseClientExtended:
         mock_auth.username = username
         mock_auth.password = password
 
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor"),
         ):
             mock_auth_class.return_value = mock_auth
 
@@ -113,10 +107,9 @@ class TestBaseClientExtended:
         mock_auth.username = username
         mock_auth.password = password
 
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor"),
         ):
             mock_auth_class.return_value = mock_auth
 
@@ -133,8 +126,9 @@ class TestBaseClientExtended:
         username = "testuser"
         password = "testpass"
 
-        with patch("youversion.core.base_client.Authenticator"), patch(
-            "youversion.core.base_client.DataProcessor"
+        with (
+            patch("youversion.core.base_client.Authenticator"),
+            patch("youversion.core.base_client.DataProcessor"),
         ):
             client = BaseClient(username=username, password=password)
             client._user_id = 12345
@@ -150,8 +144,9 @@ class TestBaseClientExtended:
         mock_http_client = MagicMock()
         mock_http_client.close = AsyncMock()
 
-        with patch("youversion.core.base_client.Authenticator"), patch(
-            "youversion.core.base_client.DataProcessor"
+        with (
+            patch("youversion.core.base_client.Authenticator"),
+            patch("youversion.core.base_client.DataProcessor"),
         ):
             client = BaseClient(username=username, password=password)
             client._http_client = mock_http_client
@@ -166,8 +161,9 @@ class TestBaseClientExtended:
         username = "testuser"
         password = "testpass"
 
-        with patch("youversion.core.base_client.Authenticator"), patch(
-            "youversion.core.base_client.DataProcessor"
+        with (
+            patch("youversion.core.base_client.Authenticator"),
+            patch("youversion.core.base_client.DataProcessor"),
         ):
             client = BaseClient(username=username, password=password)
             client._http_client = None
@@ -197,11 +193,10 @@ class TestBaseClientExtended:
             return_value=[{"id": 1, "kind_id": "note"}]
         )
 
-        with patch(
-            "youversion.core.base_client.Authenticator"
-        ) as mock_auth_class, patch(
-            "youversion.core.base_client.DataProcessor"
-        ) as mock_processor_class:
+        with (
+            patch("youversion.core.base_client.Authenticator") as mock_auth_class,
+            patch("youversion.core.base_client.DataProcessor") as mock_processor_class,
+        ):
             mock_auth_class.return_value = mock_auth
             mock_processor_class.return_value = mock_processor
 
@@ -211,4 +206,3 @@ class TestBaseClientExtended:
             result = await client.convert_note_to_md()
 
             assert isinstance(result, list)
-

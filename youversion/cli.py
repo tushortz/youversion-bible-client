@@ -931,18 +931,6 @@ async def cmd_send_friend_request(args):
         sys.exit(1)
 
 
-# Localization commands
-async def cmd_get_localization_items(args):
-    """Get localization items"""
-    try:
-        async with AsyncClient() as client:
-            items = await client.get_localization_items(args.language_tag)
-            print(items if not args.json else json.dumps({"content": items}))
-    except Exception as e:
-        print(f"❌ Error: {e}", file=sys.stderr)
-        sys.exit(1)
-
-
 async def cmd_convert_notes(args):
     """Convert notes to markdown"""
     try:
@@ -1634,18 +1622,6 @@ Or create a .env file in the project root with these variables.
         "user_id", type=int, help="User ID to send friend request to"
     )
 
-    # Localization API
-    localization_parser = subparsers.add_parser(
-        "get-localization-items", help="Get localization items"
-    )
-    localization_parser.add_argument(
-        "--language-tag",
-        type=str,
-        default="eng",
-        dest="language_tag",
-        help="Language tag (default: eng)",
-    )
-
     # Ensure choices mapping is populated for tests that inspect it directly
     try:
         action = parser._subparsers._actions[0]
@@ -1706,7 +1682,6 @@ Or create a .env file in the project root with these variables.
                 "set-theme": set_theme_parser,
                 "get-theme-description": theme_description_parser,
                 "send-friend-request": send_friend_request_parser,
-                "get-localization-items": localization_parser,
             }
         )
     except Exception:
@@ -1783,7 +1758,6 @@ def main():
         "set-theme": cmd_set_theme,
         "get-theme-description": cmd_get_theme_description,
         "send-friend-request": cmd_send_friend_request,
-        "get-localization-items": cmd_get_localization_items,
     }
 
     # Execute command
@@ -1799,9 +1773,9 @@ def main():
     asyncio.run(command_func(args))
 
 
-# Poetry script entry points
+# Console script entry points
 def poetry_cmd_votd():
-    """Poetry script entry point for votd command"""
+    """Console script entry point for votd command"""
     parser = create_parser()
     args = parser.parse_args(["votd"])
     check_credentials()
@@ -1815,7 +1789,7 @@ def poetry_cmd_votd():
 
 
 def poetry_cmd_moments():
-    """Poetry script entry point for moments command"""
+    """Console script entry point for moments command"""
     parser = create_parser()
     args = parser.parse_args(["moments"])
     check_credentials()
@@ -1829,7 +1803,7 @@ def poetry_cmd_moments():
 
 
 def poetry_cmd_highlights():
-    """Poetry script entry point for highlights command"""
+    """Console script entry point for highlights command"""
     parser = create_parser()
     args = parser.parse_args(["highlights"])
     check_credentials()
@@ -1843,7 +1817,7 @@ def poetry_cmd_highlights():
 
 
 def poetry_cmd_notes():
-    """Poetry script entry point for notes command"""
+    """Console script entry point for notes command"""
     parser = create_parser()
     args = parser.parse_args(["notes"])
     check_credentials()
@@ -1857,7 +1831,7 @@ def poetry_cmd_notes():
 
 
 def poetry_cmd_bookmarks():
-    """Poetry script entry point for bookmarks command"""
+    """Console script entry point for bookmarks command"""
     parser = create_parser()
     args = parser.parse_args(["bookmarks"])
     check_credentials()
@@ -1871,7 +1845,7 @@ def poetry_cmd_bookmarks():
 
 
 def poetry_cmd_images():
-    """Poetry script entry point for images command"""
+    """Console script entry point for images command"""
     parser = create_parser()
     args = parser.parse_args(["images"])
     check_credentials()
@@ -1885,7 +1859,7 @@ def poetry_cmd_images():
 
 
 def poetry_cmd_plan_progress():
-    """Poetry script entry point for plan-progress command"""
+    """Console script entry point for plan-progress command"""
     parser = create_parser()
     args = parser.parse_args(["plan-progress"])
     check_credentials()
@@ -1899,7 +1873,7 @@ def poetry_cmd_plan_progress():
 
 
 def poetry_cmd_plan_subscriptions():
-    """Poetry script entry point for plan-subscriptions command"""
+    """Console script entry point for plan-subscriptions command"""
     parser = create_parser()
     args = parser.parse_args(["plan-subscriptions"])
     check_credentials()
@@ -1913,7 +1887,7 @@ def poetry_cmd_plan_subscriptions():
 
 
 def poetry_cmd_plan_completions():
-    """Poetry script entry point for plan-completions command"""
+    """Console script entry point for plan-completions command"""
     parser = create_parser()
     args = parser.parse_args(["plan-completions"])
     check_credentials()
@@ -1927,7 +1901,7 @@ def poetry_cmd_plan_completions():
 
 
 def poetry_cmd_convert_notes():
-    """Poetry script entry point for convert-notes command"""
+    """Console script entry point for convert-notes command"""
     parser = create_parser()
     args = parser.parse_args(["convert-notes"])
     check_credentials()
@@ -1941,7 +1915,7 @@ def poetry_cmd_convert_notes():
 
 
 def poetry_cmd_create_moment():
-    """Poetry script entry point for create-moment command"""
+    """Console script entry point for create-moment command"""
     parser = create_parser()
     args = parser.parse_args()
     check_credentials()
@@ -1955,7 +1929,7 @@ def poetry_cmd_create_moment():
 
 
 def poetry_cmd_badges():
-    """Poetry script entry point for badges command"""
+    """Console script entry point for badges command"""
     parser = create_parser()
     args = parser.parse_args(["badges"])
     check_credentials()
@@ -1969,7 +1943,7 @@ def poetry_cmd_badges():
 
 
 def poetry_cmd_get_bible_configuration():
-    """Poetry script entry point for get-bible-configuration command"""
+    """Console script entry point for get-bible-configuration command"""
     parser = create_parser()
     args = parser.parse_args(["get-bible-configuration"])
     check_credentials()
@@ -1983,7 +1957,7 @@ def poetry_cmd_get_bible_configuration():
 
 
 def poetry_cmd_get_bible_versions():
-    """Poetry script entry point for get-bible-versions command"""
+    """Console script entry point for get-bible-versions command"""
     parser = create_parser()
     args = parser.parse_args(["get-bible-versions"])
     check_credentials()
@@ -1997,7 +1971,7 @@ def poetry_cmd_get_bible_versions():
 
 
 def poetry_cmd_get_bible_version():
-    """Poetry script entry point for get-bible-version command"""
+    """Console script entry point for get-bible-version command"""
     parser = create_parser()
     args = parser.parse_args(["get-bible-version"])
     check_credentials()
@@ -2011,7 +1985,7 @@ def poetry_cmd_get_bible_version():
 
 
 def poetry_cmd_get_bible_chapter():
-    """Poetry script entry point for get-bible-chapter command"""
+    """Console script entry point for get-bible-chapter command"""
     parser = create_parser()
     args = parser.parse_args(["get-bible-chapter"])
     check_credentials()
@@ -2025,7 +1999,7 @@ def poetry_cmd_get_bible_chapter():
 
 
 def poetry_cmd_get_recommended_languages():
-    """Poetry script entry point for get-recommended-languages command"""
+    """Console script entry point for get-recommended-languages command"""
     parser = create_parser()
     args = parser.parse_args(["get-recommended-languages"])
     check_credentials()
@@ -2039,7 +2013,7 @@ def poetry_cmd_get_recommended_languages():
 
 
 def poetry_cmd_get_audio_chapter():
-    """Poetry script entry point for get-audio-chapter command"""
+    """Console script entry point for get-audio-chapter command"""
     parser = create_parser()
     args = parser.parse_args(["get-audio-chapter"])
     check_credentials()
@@ -2053,7 +2027,7 @@ def poetry_cmd_get_audio_chapter():
 
 
 def poetry_cmd_get_audio_version():
-    """Poetry script entry point for get-audio-version command"""
+    """Console script entry point for get-audio-version command"""
     parser = create_parser()
     args = parser.parse_args(["get-audio-version"])
     check_credentials()
@@ -2067,7 +2041,7 @@ def poetry_cmd_get_audio_version():
 
 
 def poetry_cmd_search_bible():
-    """Poetry script entry point for search-bible command"""
+    """Console script entry point for search-bible command"""
     parser = create_parser()
     args = parser.parse_args(["search-bible"])
     check_credentials()
@@ -2081,7 +2055,7 @@ def poetry_cmd_search_bible():
 
 
 def poetry_cmd_search_plans():
-    """Poetry script entry point for search-plans command"""
+    """Console script entry point for search-plans command"""
     parser = create_parser()
     args = parser.parse_args(["search-plans"])
     check_credentials()
@@ -2095,7 +2069,7 @@ def poetry_cmd_search_plans():
 
 
 def poetry_cmd_search_users():
-    """Poetry script entry point for search-users command"""
+    """Console script entry point for search-users command"""
     parser = create_parser()
     args = parser.parse_args(["search-users"])
     check_credentials()
@@ -2109,7 +2083,7 @@ def poetry_cmd_search_users():
 
 
 def poetry_cmd_get_videos():
-    """Poetry script entry point for get-videos command"""
+    """Console script entry point for get-videos command"""
     parser = create_parser()
     args = parser.parse_args(["get-videos"])
     check_credentials()
@@ -2123,7 +2097,7 @@ def poetry_cmd_get_videos():
 
 
 def poetry_cmd_get_video_details():
-    """Poetry script entry point for get-video-details command"""
+    """Console script entry point for get-video-details command"""
     parser = create_parser()
     args = parser.parse_args(["get-video-details"])
     check_credentials()
@@ -2137,7 +2111,7 @@ def poetry_cmd_get_video_details():
 
 
 def poetry_cmd_get_images():
-    """Poetry script entry point for get-images command"""
+    """Console script entry point for get-images command"""
     parser = create_parser()
     args = parser.parse_args(["get-images"])
     check_credentials()
@@ -2151,7 +2125,7 @@ def poetry_cmd_get_images():
 
 
 def poetry_cmd_get_image_upload_url():
-    """Poetry script entry point for get-image-upload-url command"""
+    """Console script entry point for get-image-upload-url command"""
     parser = create_parser()
     args = parser.parse_args(["get-image-upload-url"])
     check_credentials()
@@ -2165,7 +2139,7 @@ def poetry_cmd_get_image_upload_url():
 
 
 def poetry_cmd_search_events():
-    """Poetry script entry point for search-events command"""
+    """Console script entry point for search-events command"""
     parser = create_parser()
     args = parser.parse_args(["search-events"])
     check_credentials()
@@ -2179,7 +2153,7 @@ def poetry_cmd_search_events():
 
 
 def poetry_cmd_get_event_details():
-    """Poetry script entry point for get-event-details command"""
+    """Console script entry point for get-event-details command"""
     parser = create_parser()
     args = parser.parse_args(["get-event-details"])
     check_credentials()
@@ -2193,7 +2167,7 @@ def poetry_cmd_get_event_details():
 
 
 def poetry_cmd_get_saved_events():
-    """Poetry script entry point for get-saved-events command"""
+    """Console script entry point for get-saved-events command"""
     parser = create_parser()
     args = parser.parse_args(["get-saved-events"])
     check_credentials()
@@ -2207,7 +2181,7 @@ def poetry_cmd_get_saved_events():
 
 
 def poetry_cmd_save_event():
-    """Poetry script entry point for save-event command"""
+    """Console script entry point for save-event command"""
     parser = create_parser()
     args = parser.parse_args(["save-event"])
     check_credentials()
@@ -2221,7 +2195,7 @@ def poetry_cmd_save_event():
 
 
 def poetry_cmd_delete_saved_event():
-    """Poetry script entry point for delete-saved-event command"""
+    """Console script entry point for delete-saved-event command"""
     parser = create_parser()
     args = parser.parse_args(["delete-saved-event"])
     check_credentials()
@@ -2235,7 +2209,7 @@ def poetry_cmd_delete_saved_event():
 
 
 def poetry_cmd_get_all_saved_event_ids():
-    """Poetry script entry point for get-all-saved-event-ids command"""
+    """Console script entry point for get-all-saved-event-ids command"""
     parser = create_parser()
     args = parser.parse_args(["get-all-saved-event-ids"])
     check_credentials()
@@ -2249,7 +2223,7 @@ def poetry_cmd_get_all_saved_event_ids():
 
 
 def poetry_cmd_get_event_configuration():
-    """Poetry script entry point for get-event-configuration command"""
+    """Console script entry point for get-event-configuration command"""
     parser = create_parser()
     args = parser.parse_args(["get-event-configuration"])
     check_credentials()
@@ -2263,7 +2237,7 @@ def poetry_cmd_get_event_configuration():
 
 
 def poetry_cmd_get_moments():
-    """Poetry script entry point for get-moments command"""
+    """Console script entry point for get-moments command"""
     parser = create_parser()
     args = parser.parse_args(["get-moments"])
     check_credentials()
@@ -2277,7 +2251,7 @@ def poetry_cmd_get_moments():
 
 
 def poetry_cmd_get_moment_details():
-    """Poetry script entry point for get-moment-details command"""
+    """Console script entry point for get-moment-details command"""
     parser = create_parser()
     args = parser.parse_args(["get-moment-details"])
     check_credentials()
@@ -2291,7 +2265,7 @@ def poetry_cmd_get_moment_details():
 
 
 def poetry_cmd_update_moment():
-    """Poetry script entry point for update-moment command"""
+    """Console script entry point for update-moment command"""
     parser = create_parser()
     args = parser.parse_args(["update-moment"])
     check_credentials()
@@ -2305,7 +2279,7 @@ def poetry_cmd_update_moment():
 
 
 def poetry_cmd_delete_moment():
-    """Poetry script entry point for delete-moment command"""
+    """Console script entry point for delete-moment command"""
     parser = create_parser()
     args = parser.parse_args(["delete-moment"])
     check_credentials()
@@ -2319,7 +2293,7 @@ def poetry_cmd_delete_moment():
 
 
 def poetry_cmd_get_moment_colors():
-    """Poetry script entry point for get-moment-colors command"""
+    """Console script entry point for get-moment-colors command"""
     parser = create_parser()
     args = parser.parse_args(["get-moment-colors"])
     check_credentials()
@@ -2333,7 +2307,7 @@ def poetry_cmd_get_moment_colors():
 
 
 def poetry_cmd_get_moment_labels():
-    """Poetry script entry point for get-moment-labels command"""
+    """Console script entry point for get-moment-labels command"""
     parser = create_parser()
     args = parser.parse_args(["get-moment-labels"])
     check_credentials()
@@ -2347,7 +2321,7 @@ def poetry_cmd_get_moment_labels():
 
 
 def poetry_cmd_get_verse_colors():
-    """Poetry script entry point for get-verse-colors command"""
+    """Console script entry point for get-verse-colors command"""
     parser = create_parser()
     args = parser.parse_args(["get-verse-colors"])
     check_credentials()
@@ -2361,7 +2335,7 @@ def poetry_cmd_get_verse_colors():
 
 
 def poetry_cmd_hide_verse_colors():
-    """Poetry script entry point for hide-verse-colors command"""
+    """Console script entry point for hide-verse-colors command"""
     parser = create_parser()
     args = parser.parse_args(["hide-verse-colors"])
     check_credentials()
@@ -2375,7 +2349,7 @@ def poetry_cmd_hide_verse_colors():
 
 
 def poetry_cmd_get_moments_configuration():
-    """Poetry script entry point for get-moments-configuration command"""
+    """Console script entry point for get-moments-configuration command"""
     parser = create_parser()
     args = parser.parse_args(["get-moments-configuration"])
     check_credentials()
@@ -2389,7 +2363,7 @@ def poetry_cmd_get_moments_configuration():
 
 
 def poetry_cmd_create_comment():
-    """Poetry script entry point for create-comment command"""
+    """Console script entry point for create-comment command"""
     parser = create_parser()
     args = parser.parse_args(["create-comment"])
     check_credentials()
@@ -2403,7 +2377,7 @@ def poetry_cmd_create_comment():
 
 
 def poetry_cmd_delete_comment():
-    """Poetry script entry point for delete-comment command"""
+    """Console script entry point for delete-comment command"""
     parser = create_parser()
     args = parser.parse_args(["delete-comment"])
     check_credentials()
@@ -2417,7 +2391,7 @@ def poetry_cmd_delete_comment():
 
 
 def poetry_cmd_like_moment():
-    """Poetry script entry point for like-moment command"""
+    """Console script entry point for like-moment command"""
     parser = create_parser()
     args = parser.parse_args(["like-moment"])
     check_credentials()
@@ -2431,7 +2405,7 @@ def poetry_cmd_like_moment():
 
 
 def poetry_cmd_unlike_moment():
-    """Poetry script entry point for unlike-moment command"""
+    """Console script entry point for unlike-moment command"""
     parser = create_parser()
     args = parser.parse_args(["unlike-moment"])
     check_credentials()
@@ -2445,7 +2419,7 @@ def poetry_cmd_unlike_moment():
 
 
 def poetry_cmd_register_device():
-    """Poetry script entry point for register-device command"""
+    """Console script entry point for register-device command"""
     parser = create_parser()
     args = parser.parse_args(["register-device"])
     check_credentials()
@@ -2459,7 +2433,7 @@ def poetry_cmd_register_device():
 
 
 def poetry_cmd_unregister_device():
-    """Poetry script entry point for unregister-device command"""
+    """Console script entry point for unregister-device command"""
     parser = create_parser()
     args = parser.parse_args(["unregister-device"])
     check_credentials()
@@ -2473,7 +2447,7 @@ def poetry_cmd_unregister_device():
 
 
 def poetry_cmd_get_themes():
-    """Poetry script entry point for get-themes command"""
+    """Console script entry point for get-themes command"""
     parser = create_parser()
     args = parser.parse_args(["get-themes"])
     check_credentials()
@@ -2487,7 +2461,7 @@ def poetry_cmd_get_themes():
 
 
 def poetry_cmd_add_theme():
-    """Poetry script entry point for add-theme command"""
+    """Console script entry point for add-theme command"""
     parser = create_parser()
     args = parser.parse_args(["add-theme"])
     check_credentials()
@@ -2501,7 +2475,7 @@ def poetry_cmd_add_theme():
 
 
 def poetry_cmd_remove_theme():
-    """Poetry script entry point for remove-theme command"""
+    """Console script entry point for remove-theme command"""
     parser = create_parser()
     args = parser.parse_args(["remove-theme"])
     check_credentials()
@@ -2515,7 +2489,7 @@ def poetry_cmd_remove_theme():
 
 
 def poetry_cmd_set_theme():
-    """Poetry script entry point for set-theme command"""
+    """Console script entry point for set-theme command"""
     parser = create_parser()
     args = parser.parse_args(["set-theme"])
     check_credentials()
@@ -2529,7 +2503,7 @@ def poetry_cmd_set_theme():
 
 
 def poetry_cmd_get_theme_description():
-    """Poetry script entry point for get-theme-description command"""
+    """Console script entry point for get-theme-description command"""
     parser = create_parser()
     args = parser.parse_args(["get-theme-description"])
     check_credentials()
@@ -2543,7 +2517,7 @@ def poetry_cmd_get_theme_description():
 
 
 def poetry_cmd_send_friend_request():
-    """Poetry script entry point for send-friend-request command"""
+    """Console script entry point for send-friend-request command"""
     parser = create_parser()
     args = parser.parse_args(["send-friend-request"])
     check_credentials()
@@ -2554,20 +2528,6 @@ def poetry_cmd_send_friend_request():
     if is_running:
         return cmd_send_friend_request(args)
     asyncio.run(cmd_send_friend_request(args))
-
-
-def poetry_cmd_get_localization_items():
-    """Poetry script entry point for get-localization-items command"""
-    parser = create_parser()
-    args = parser.parse_args(["get-localization-items"])
-    check_credentials()
-    try:
-        is_running = asyncio.get_event_loop().is_running()
-    except RuntimeError:
-        is_running = False
-    if is_running:
-        return cmd_get_localization_items(args)
-    asyncio.run(cmd_get_localization_items(args))
 
 
 if __name__ == "__main__":

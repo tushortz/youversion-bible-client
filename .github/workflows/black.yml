@@ -9,16 +9,16 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        version: "latest"
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
     - name: Install dependencies
-      run: |
-        pip install poetry
-        poetry install
+      run: uv sync --dev
     - name: Analysing the code with pylint
       run: |
-        poetry run black .
-        poetry run ruff check . --fix
+        uv run black --check .
+        uv run ruff check .

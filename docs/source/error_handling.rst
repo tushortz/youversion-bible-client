@@ -83,39 +83,39 @@ Example with all error types:
                return votd
        except ValueError as e:
            # Configuration errors
-           print(f"❌ Configuration error: {e}")
+           print(f"Configuration error: {e}")
            print("Please check your credentials")
            return None
        except httpx.HTTPStatusError as e:
            # HTTP errors
            status = e.response.status_code
            if status == 401:
-               print("❌ Authentication failed")
+               print("Authentication failed")
                print("Please check your username and password")
            elif status == 403:
-               print("❌ Access forbidden")
+               print("Access forbidden")
                print("Your account may not have permission")
            elif status == 404:
-               print("❌ Resource not found")
+               print("Resource not found")
            elif status == 429:
-               print("❌ Rate limit exceeded")
+               print("Rate limit exceeded")
                print("Please wait before making more requests")
            else:
-               print(f"❌ HTTP error {status}: {e}")
+               print(f"HTTP error {status}: {e}")
            return None
        except httpx.RequestError as e:
            # Network errors
-           print(f"❌ Network error: {e}")
+           print(f"Network error: {e}")
            print("Please check your internet connection")
            return None
        except Exception as e:
            # Unexpected errors
-           print(f"❌ Unexpected error: {e}")
+           print(f"Unexpected error: {e}")
            return None
 
    result = asyncio.run(robust_api_call())
    if result:
-       print(f"✅ Success: {result.usfm}")
+       print(f"Success: {result.usfm}")
 
 Retry Logic
 -----------

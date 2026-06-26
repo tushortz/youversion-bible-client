@@ -56,7 +56,7 @@ async def fetch_single_data(
 
 async def demonstrate_gather_pattern():
     """Demonstrate using asyncio.gather() for parallel requests"""
-    print("🔄 Demonstrating asyncio.gather() pattern...")
+    print("Demonstrating asyncio.gather() pattern...")
 
     try:
         async with AsyncClient() as client:
@@ -86,20 +86,20 @@ async def demonstrate_gather_pattern():
             # Process results
             for data_type, result, error in results:
                 if error:
-                    print(f"   ❌ {data_type}: Error - {error}")
+                    print(f"   {data_type}: Error - {error}")
                 else:
                     if data_type == "votd":
-                        print(f"   📖 {data_type}: Day {result.day}")
+                        print(f"   {data_type}: Day {result.day}")
                     else:
-                        print(f"   📋 {data_type}: {len(result)} items")
+                        print(f"   {data_type}: {len(result)} items")
 
     except Exception as e:
-        print(f"   ❌ Error in gather pattern: {e}")
+        print(f"   Error in gather pattern: {e}")
 
 
 async def demonstrate_as_completed_pattern():
     """Demonstrate using asyncio.as_completed() for streaming results"""
-    print("\n🌊 Demonstrating asyncio.as_completed() pattern...")
+    print("\nDemonstrating asyncio.as_completed() pattern...")
 
     try:
         async with AsyncClient() as client:
@@ -130,25 +130,25 @@ async def demonstrate_as_completed_pattern():
 
                 if error:
                     print(
-                        f"   ❌ {data_type} (completed {completed_count}/{len(tasks)} in {elapsed:.2f}s): Error"
+                        f"   {data_type} (completed {completed_count}/{len(tasks)} in {elapsed:.2f}s): Error"
                     )
                 else:
                     if data_type == "votd":
                         print(
-                            f"   📖 {data_type} (completed {completed_count}/{len(tasks)} in {elapsed:.2f}s): Day {result.day}"
+                            f"   {data_type} (completed {completed_count}/{len(tasks)} in {elapsed:.2f}s): Day {result.day}"
                         )
                     else:
                         print(
-                            f"   📋 {data_type} (completed {completed_count}/{len(tasks)} in {elapsed:.2f}s): {len(result)} items"
+                            f"   {data_type} (completed {completed_count}/{len(tasks)} in {elapsed:.2f}s): {len(result)} items"
                         )
 
     except Exception as e:
-        print(f"   ❌ Error in as_completed pattern: {e}")
+        print(f"   Error in as_completed pattern: {e}")
 
 
 async def demonstrate_batch_requests():
     """Demonstrate batching requests with rate limiting"""
-    print("\n📦 Demonstrating batch requests with rate limiting...")
+    print("\nDemonstrating batch requests with rate limiting...")
 
     try:
         async with AsyncClient() as client:
@@ -160,7 +160,7 @@ async def demonstrate_batch_requests():
 
             for i in range(0, len(pages), batch_size):
                 batch = pages[i : i + batch_size]
-                print(f"   📄 Processing batch: pages {batch}")
+                print(f"   Processing batch: pages {batch}")
 
                 # Create tasks for this batch
                 tasks = [
@@ -175,9 +175,9 @@ async def demonstrate_batch_requests():
                 for page, batch_result in zip(batch, batch_results):
                     _data_type, result, error = batch_result
                     if error:
-                        print(f"      ❌ Page {page}: Error - {error}")
+                        print(f"      Page {page}: Error - {error}")
                     else:
-                        print(f"      ✅ Page {page}: {len(result)} moments")
+                        print(f"      Page {page}: {len(result)} moments")
                         all_moments.extend(result)
 
                 # Rate limiting: wait between batches
@@ -185,15 +185,15 @@ async def demonstrate_batch_requests():
                     print("      ⏸️  Waiting 1 second before next batch...")
                     await asyncio.sleep(1)
 
-            print(f"   📊 Total moments collected: {len(all_moments)}")
+            print(f"   Total moments collected: {len(all_moments)}")
 
     except Exception as e:
-        print(f"   ❌ Error in batch requests: {e}")
+        print(f"   Error in batch requests: {e}")
 
 
 async def demonstrate_background_tasks():
     """Demonstrate background tasks"""
-    print("\n🔄 Demonstrating background tasks...")
+    print("\nDemonstrating background tasks...")
 
     async def background_fetcher(client: AsyncClient, data_type: str, interval: float):
         """Background task that fetches data periodically"""
@@ -202,18 +202,18 @@ async def demonstrate_background_tasks():
                 data_type, result, error = await fetch_single_data(client, data_type)
 
                 if error:
-                    print(f"   🔄 Background {data_type}: Error - {error}")
+                    print(f"   Background {data_type}: Error - {error}")
                 else:
                     if data_type == "votd":
-                        print(f"   🔄 Background {data_type}: Day {result.day}")
+                        print(f"   Background {data_type}: Day {result.day}")
                     else:
-                        print(f"   🔄 Background {data_type}: {len(result)} items")
+                        print(f"   Background {data_type}: {len(result)} items")
 
                 await asyncio.sleep(interval)
         except asyncio.CancelledError:
-            print(f"   🛑 Background {data_type} task cancelled")
+            print(f"   Background {data_type} task cancelled")
         except Exception as e:
-            print(f"   ❌ Background {data_type} error: {e}")
+            print(f"   Background {data_type} error: {e}")
 
     try:
         async with AsyncClient() as client:
@@ -223,7 +223,7 @@ async def demonstrate_background_tasks():
                 asyncio.create_task(background_fetcher(client, "moments", 3.0)),
             ]
 
-            print("   🚀 Background tasks started")
+            print("   Background tasks started")
 
             # Let them run for a bit
             await asyncio.sleep(8)
@@ -235,15 +235,15 @@ async def demonstrate_background_tasks():
             # Wait for cancellation to complete
             await asyncio.gather(*tasks, return_exceptions=True)
 
-            print("   🛑 Background tasks stopped")
+            print("   Background tasks stopped")
 
     except Exception as e:
-        print(f"   ❌ Error in background tasks: {e}")
+        print(f"   Error in background tasks: {e}")
 
 
 async def demonstrate_error_handling_in_concurrent():
     """Demonstrate error handling in concurrent operations"""
-    print("\n⚠️  Demonstrating error handling in concurrent operations...")
+    print("\n️  Demonstrating error handling in concurrent operations...")
 
     async def fetch_with_retry(
         client: AsyncClient, data_type: str, max_retries: int = 3
@@ -258,11 +258,11 @@ async def demonstrate_error_handling_in_concurrent():
             except Exception as e:
                 if attempt < max_retries - 1:
                     print(
-                        f"   ⚠️  {data_type} attempt {attempt + 1} failed, retrying..."
+                        f"   ️  {data_type} attempt {attempt + 1} failed, retrying..."
                     )
                     await asyncio.sleep(1)
                 else:
-                    print(f"   ❌ {data_type} failed after {max_retries} attempts: {e}")
+                    print(f"   {data_type} failed after {max_retries} attempts: {e}")
                     raise
 
     try:
@@ -286,12 +286,12 @@ async def demonstrate_error_handling_in_concurrent():
 
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
-                    print(f"   ❌ Task {i + 1} failed: {result}")
+                    print(f"   Task {i + 1} failed: {result}")
                 else:
-                    print(f"   ✅ Task {i + 1} succeeded")
+                    print(f"   Task {i + 1} succeeded")
 
     except Exception as e:
-        print(f"   ❌ Error in concurrent error handling: {e}")
+        print(f"   Error in concurrent error handling: {e}")
 
 
 async def main():
@@ -303,12 +303,12 @@ async def main():
 
     if not username or not password:
         print(
-            "❌ Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
+            "Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
         )
         print("   Or create a .env file with your credentials")
         return
 
-    print("🚀 Starting YouVersion Bible Client Concurrent Requests Example")
+    print("Starting YouVersion Bible Client Concurrent Requests Example")
     print("=" * 75)
 
     # Run all demonstrations
@@ -318,7 +318,7 @@ async def main():
     await demonstrate_background_tasks()
     await demonstrate_error_handling_in_concurrent()
 
-    print("\n✅ Concurrent requests example completed!")
+    print("\nConcurrent requests example completed!")
 
 
 if __name__ == "__main__":

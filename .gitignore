@@ -77,3 +77,8 @@ Thumbs.db
 *.lock
 _main.py
 bandit-report.json
+
+scripts/
+
+# Live integration test API captures
+results/

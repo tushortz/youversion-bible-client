@@ -30,5 +30,5 @@ from .clients import AsyncClient, SyncClient
 AClient = AsyncClient
 Client = SyncClient
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = ["AsyncClient", "SyncClient", "AClient", "Client"]

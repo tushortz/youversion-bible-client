@@ -46,16 +46,16 @@ Asynchronous Example
        async with AsyncClient() as client:
            # Get verse of the day
            votd = await client.verse_of_the_day()
-           print(f"📖 Verse of the Day (Day {votd.day})")
+           print(f"Verse of the Day (Day {votd.day})")
            print(f"Reference: {votd.usfm}")
 
            # Get highlights
            highlights = await client.highlights(page=1)
-           print(f"\n✨ Found {len(highlights)} highlights")
+           print(f"Found {len(highlights)} highlights")
 
            # Get notes
            notes = await client.notes(page=1)
-           print(f"📝 Found {len(notes)} notes")
+           print(f"Found {len(notes)} notes")
 
    if __name__ == "__main__":
        asyncio.run(main())
@@ -70,16 +70,14 @@ Synchronous Example
    with SyncClient() as client:
        # Get verse of the day
        votd = client.verse_of_the_day()
-       print(f"📖 Verse of the Day (Day {votd.day})")
+       print(f"Verse of the Day (Day {votd.day})")
        print(f"Reference: {votd.usfm}")
 
-       # Get highlights
        highlights = client.highlights(page=1)
-       print(f"\n✨ Found {len(highlights)} highlights")
+       print(f"Found {len(highlights)} highlights")
 
-       # Get notes
        notes = client.notes(page=1)
-       print(f"📝 Found {len(notes)} notes")
+       print(f"Found {len(notes)} notes")
 
 Run Your Script
 ---------------

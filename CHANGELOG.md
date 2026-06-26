@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-26
+
+### Added
+
+- **Social APIs**: Friends, friendships, notifications, and share/invite endpoints
+- **Moments extras**: Comments, likes, moment colours/labels, client-side moments
+- **Events and devices**: Saved events, event search, device registration
+- **Themes, images, videos**: Theme catalog, verse images, video listing
+- **Integration tests**: Live API test suite with per-call JSON recording under `results/integration/`
+- **Endpoint tests**: Unit tests for HTTP client methods (`tests/test_http_client_endpoints.py`)
+- **OpenAPI catalog**: `swagger.yaml` generated from the YouVersion Android app
+
+### Changed
+
+- **Public endpoints**: `get_bible_chapter`, `get_audio_chapter`, `get_moments_configuration`, and `get_moments_votd` now use an unauthenticated HTTP client (Bearer tokens caused `authorization.not_allowed`)
+- **Locale defaults**: `get_themes` and `get_friend_suggestions` default to ISO 639-1 `language_tag="en"`
+- **Documentation**: Rewrote `README.md`, `DOCS.md`, Sphinx docs, and `examples/` — shorter, no retired APIs, sample responses from integration tests
+- **Package management**: Migrated from Poetry to uv (`uv sync`, `uv.lock`, hatchling build backend)
+
+### Removed
+
+- **Retired endpoints** (410/404 on live API): `search_suggest`, `get_badge_items`, `search_moments`, `get_localization_items` and their CLI commands
+- User badges remain available via `badges()` on the moments feed
+
+### Fixed
+
+- `delete_saved_event` and `register_device` request bodies
+- `verse_of_the_day` now requires authentication
+- Bible version lookup: `default_versions[].id` is a language id, not a Bible version id — use `get_bible_versions("eng")` or a known version id such as `1`
+
 ## [0.3.0] - 2025-10-11
 
 ### Added

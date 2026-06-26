@@ -26,9 +26,10 @@ class TestAuthenticatorExtended:
         mock_response.json.return_value = {"access_token": valid_token}
         mock_response.raise_for_status = MagicMock()
 
-        with patch("dotenv.load_dotenv"), patch(
-            "httpx.AsyncClient"
-        ) as mock_client_class:
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+        ):
             mock_client = AsyncMock()
             mock_client.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -56,11 +57,11 @@ class TestAuthenticatorExtended:
         mock_response.json.return_value = {"access_token": invalid_token}
         mock_response.raise_for_status = MagicMock()
 
-        with patch("dotenv.load_dotenv"), patch(
-            "httpx.AsyncClient"
-        ) as mock_client_class, patch(
-            "jwt.decode"
-        ) as mock_decode:
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+            patch("jwt.decode") as mock_decode,
+        ):
             # First call raises DecodeError, second succeeds with verify=False
             mock_decode.side_effect = [
                 jwt.DecodeError("Invalid token"),
@@ -92,9 +93,11 @@ class TestAuthenticatorExtended:
         mock_response.json.return_value = {"access_token": invalid_token}
         mock_response.raise_for_status = MagicMock()
 
-        with patch("dotenv.load_dotenv"), patch(
-            "httpx.AsyncClient"
-        ) as mock_client_class, patch("jwt.decode") as mock_decode:
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+            patch("jwt.decode") as mock_decode,
+        ):
             # First raises DecodeError, second raises InvalidTokenError
             # The code catches InvalidTokenError and sets user_id to None
             decode_calls = []
@@ -145,9 +148,10 @@ class TestAuthenticatorExtended:
         mock_response.json.return_value = {"access_token": valid_token}
         mock_response.raise_for_status = MagicMock()
 
-        with patch("dotenv.load_dotenv"), patch(
-            "httpx.AsyncClient"
-        ) as mock_client_class:
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+        ):
             mock_client = AsyncMock()
             mock_client.__aenter__ = AsyncMock(return_value=mock_client)
             mock_client.__aexit__ = AsyncMock(return_value=None)
@@ -161,3 +165,94 @@ class TestAuthenticatorExtended:
             # Should use sub when user_id is missing
             assert auth.user_id == "67890"
 
+    @pytest.mark.asyncio
+    async def test_authenticate_user_id_from_token(self):
+        """Verified JWT with user_id populates auth.user_id."""
+        username = "testuser"
+        password = "testpass"
+
+        token_payload = {"user_id": 555, "sub": "555"}
+        from youversion.config import Config
+
+        valid_token = jwt.encode(token_payload, Config.CLIENT_SECRET, algorithm="HS256")
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"access_token": valid_token}
+        mock_response.raise_for_status = MagicMock()
+
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+        ):
+            mock_client = AsyncMock()
+            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+            mock_client.__aexit__ = AsyncMock(return_value=None)
+            mock_client.post = AsyncMock(return_value=mock_response)
+            mock_client_class.return_value = mock_client
+
+            auth = Authenticator(username=username, password=password)
+            await auth.authenticate(username, password)
+            assert auth.user_id == 555
+
+    @pytest.mark.asyncio
+    async def test_authenticate_awaitable_token_json(self):
+        """Test authentication when response.json() returns a coroutine."""
+        username = "testuser"
+        password = "testpass"
+
+        token_payload = {"user_id": 99, "sub": "99"}
+        secret = "75cf0e141cbf41ef410adce5b6537a49"
+        valid_token = jwt.encode(token_payload, secret, algorithm="HS256")
+
+        async def async_json():
+            return {"access_token": valid_token}
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = async_json()
+        mock_response.raise_for_status = MagicMock()
+
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+        ):
+            mock_client = AsyncMock()
+            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+            mock_client.__aexit__ = AsyncMock(return_value=None)
+            mock_client.post = AsyncMock(return_value=mock_response)
+            mock_client_class.return_value = mock_client
+
+            auth = Authenticator(username=username, password=password)
+            client = await auth.authenticate(username, password)
+
+            assert client is not None
+            assert auth.user_id == 99
+
+    @pytest.mark.asyncio
+    async def test_authenticate_invalid_token_sets_user_id_none(self):
+        """InvalidTokenError on unverified decode sets user_id to None."""
+        username = "testuser"
+        password = "testpass"
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"access_token": "bad.token"}
+        mock_response.raise_for_status = MagicMock()
+
+        with (
+            patch("dotenv.load_dotenv"),
+            patch("httpx.AsyncClient") as mock_client_class,
+            patch("jwt.decode") as mock_decode,
+        ):
+            mock_decode.side_effect = jwt.InvalidTokenError("bad")
+
+            mock_client = AsyncMock()
+            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+            mock_client.__aexit__ = AsyncMock(return_value=None)
+            mock_client.post = AsyncMock(return_value=mock_response)
+            mock_client_class.return_value = mock_client
+
+            auth = Authenticator(username=username, password=password)
+            client = await auth.authenticate(username, password)
+
+            assert client is not None
+            assert auth.user_id is None
+            assert auth.access_token == "bad.token"

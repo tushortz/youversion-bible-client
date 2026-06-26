@@ -15,7 +15,7 @@ from youversion.clients import AsyncClient, SyncClient
 
 def demonstrate_sync_verse_of_the_day():
     """Demonstrate synchronous verse_of_the_day method"""
-    print("\n📖 SYNC VERSE OF THE DAY")
+    print("\nSYNC VERSE OF THE DAY")
     print("=" * 50)
 
     try:
@@ -36,42 +36,42 @@ def demonstrate_sync_verse_of_the_day():
             print(f"  Image ID: {getattr(votd_day_100, 'image_id', 'N/A')}")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 async def demonstrate_verse_of_the_day(client: AsyncClient):
     """Demonstrate verse_of_the_day method"""
-    print("\n📖 VERSE OF THE DAY")
+    print("\nVERSE OF THE DAY")
     print("-" * 30)
 
     try:
         # Get current day's verse
         votd = await client.verse_of_the_day()
-        print("✅ Current day verse:")
+        print("Current day verse:")
         print(f"   Day: {getattr(votd, 'day', 'N/A')}")
         print(f"   USFM: {getattr(votd, 'usfm', 'N/A')}")
         print(f"   Image ID: {getattr(votd, 'image_id', 'N/A')}")
 
         # Get verse for a specific day (e.g., day 100)
         votd_specific = await client.verse_of_the_day(day=100)
-        print("\n✅ Day 100 verse:")
+        print("\nDay 100 verse:")
         print(f"   Day: {getattr(votd_specific, 'day', 'N/A')}")
         print(f"   USFM: {getattr(votd_specific, 'usfm', 'N/A')}")
         print(f"   Image ID: {getattr(votd_specific, 'image_id', 'N/A')}")
 
     except Exception as e:
-        print(f"❌ Error getting verse of the day: {e}")
+        print(f"Error getting verse of the day: {e}")
 
 
 async def demonstrate_moments(client: AsyncClient):
     """Demonstrate moments method"""
-    print("\n📋 MOMENTS")
+    print("\nMOMENTS")
     print("-" * 30)
 
     try:
         # Get first page of moments
         moments = await client.moments(page=1)
-        print(f"✅ Found {len(moments)} moments on page 1")
+        print(f"Found {len(moments)} moments on page 1")
 
         if moments:
             print("   First few moments:")
@@ -92,21 +92,21 @@ async def demonstrate_moments(client: AsyncClient):
 
         # Get second page
         moments_page2 = await client.moments(page=2)
-        print(f"\n✅ Found {len(moments_page2)} moments on page 2")
+        print(f"\nFound {len(moments_page2)} moments on page 2")
 
     except Exception as e:
-        print(f"❌ Error getting moments: {e}")
+        print(f"Error getting moments: {e}")
 
 
 async def demonstrate_highlights(client: AsyncClient):
     """Demonstrate highlights method"""
-    print("\n✨ HIGHLIGHTS")
+    print("\nHIGHLIGHTS")
     print("-" * 30)
 
     try:
         # Get first page of highlights
         highlights = await client.highlights(page=1)
-        print(f"✅ Found {len(highlights)} highlights on page 1")
+        print(f"Found {len(highlights)} highlights on page 1")
 
         if highlights:
             print("   First few highlights:")
@@ -128,18 +128,18 @@ async def demonstrate_highlights(client: AsyncClient):
                 print(f"        References: {len(references)}")
 
     except Exception as e:
-        print(f"❌ Error getting highlights: {e}")
+        print(f"Error getting highlights: {e}")
 
 
 async def demonstrate_notes(client: AsyncClient):
     """Demonstrate notes method"""
-    print("\n📝 NOTES")
+    print("\nNOTES")
     print("-" * 30)
 
     try:
         # Get first page of notes
         notes = await client.notes(page=1)
-        print(f"✅ Found {len(notes)} notes on page 1")
+        print(f"Found {len(notes)} notes on page 1")
 
         if notes:
             print("   First few notes:")
@@ -160,18 +160,18 @@ async def demonstrate_notes(client: AsyncClient):
                 print(f"        Status: {status}")
 
     except Exception as e:
-        print(f"❌ Error getting notes: {e}")
+        print(f"Error getting notes: {e}")
 
 
 async def demonstrate_bookmarks(client: AsyncClient):
     """Demonstrate bookmarks method"""
-    print("\n🔖 BOOKMARKS")
+    print("\nBOOKMARKS")
     print("-" * 30)
 
     try:
         # Get first page of bookmarks
         bookmarks = await client.bookmarks(page=1)
-        print(f"✅ Found {len(bookmarks)} bookmarks on page 1")
+        print(f"Found {len(bookmarks)} bookmarks on page 1")
 
         if bookmarks:
             print("   First few bookmarks:")
@@ -187,18 +187,18 @@ async def demonstrate_bookmarks(client: AsyncClient):
                 print(f"        Title: {title}")
 
     except Exception as e:
-        print(f"❌ Error getting bookmarks: {e}")
+        print(f"Error getting bookmarks: {e}")
 
 
 async def demonstrate_my_images(client: AsyncClient):
     """Demonstrate my_images method"""
-    print("\n🖼️  MY IMAGES")
+    print("\n️  MY IMAGES")
     print("-" * 30)
 
     try:
         # Get first page of images
         images = await client.my_images(page=1)
-        print(f"✅ Found {len(images)} images on page 1")
+        print(f"Found {len(images)} images on page 1")
 
         if images:
             print("   First few images:")
@@ -212,18 +212,18 @@ async def demonstrate_my_images(client: AsyncClient):
                 print(f"        Title: {title}")
 
     except Exception as e:
-        print(f"❌ Error getting images: {e}")
+        print(f"Error getting images: {e}")
 
 
 async def demonstrate_badges(client: AsyncClient):
     """Demonstrate badges method"""
-    print("\n🏅 BADGES")
+    print("\nBADGES")
     print("-" * 30)
 
     try:
         # Get first page of badges
         badges = await client.badges(page=1)
-        print(f"✅ Found {len(badges)} badges on page 1")
+        print(f"Found {len(badges)} badges on page 1")
 
         if badges:
             print("   First few badges:")
@@ -237,18 +237,18 @@ async def demonstrate_badges(client: AsyncClient):
                 print(f"        Title: {title}")
 
     except Exception as e:
-        print(f"❌ Error getting badges: {e}")
+        print(f"Error getting badges: {e}")
 
 
 async def demonstrate_plan_progress(client: AsyncClient):
     """Demonstrate plan_progress method"""
-    print("\n📊 PLAN PROGRESS")
+    print("\nPLAN PROGRESS")
     print("-" * 30)
 
     try:
         # Get first page of plan progress
         plan_progress = await client.plan_progress(page=1)
-        print(f"✅ Found {len(plan_progress)} plan progress items on page 1")
+        print(f"Found {len(plan_progress)} plan progress items on page 1")
 
         if plan_progress:
             print("   First few plan progress items:")
@@ -264,18 +264,18 @@ async def demonstrate_plan_progress(client: AsyncClient):
                 print(f"        Title: {title}")
 
     except Exception as e:
-        print(f"❌ Error getting plan progress: {e}")
+        print(f"Error getting plan progress: {e}")
 
 
 async def demonstrate_plan_subscriptions(client: AsyncClient):
     """Demonstrate plan_subscriptions method"""
-    print("\n📅 PLAN SUBSCRIPTIONS")
+    print("\nPLAN SUBSCRIPTIONS")
     print("-" * 30)
 
     try:
         # Get first page of plan subscriptions
         plan_subs = await client.plan_subscriptions(page=1)
-        print(f"✅ Found {len(plan_subs)} plan subscriptions on page 1")
+        print(f"Found {len(plan_subs)} plan subscriptions on page 1")
 
         if plan_subs:
             print("   First few plan subscriptions:")
@@ -289,18 +289,18 @@ async def demonstrate_plan_subscriptions(client: AsyncClient):
                 print(f"        Title: {title}")
 
     except Exception as e:
-        print(f"❌ Error getting plan subscriptions: {e}")
+        print(f"Error getting plan subscriptions: {e}")
 
 
 async def demonstrate_plan_completions(client: AsyncClient):
     """Demonstrate plan_completions method"""
-    print("\n✅ PLAN COMPLETIONS")
+    print("\nPLAN COMPLETIONS")
     print("-" * 30)
 
     try:
         # Get first page of plan completions
         completions = await client.plan_completions(page=1)
-        print(f"✅ Found {len(completions)} plan completions on page 1")
+        print(f"Found {len(completions)} plan completions on page 1")
 
         if completions:
             print("   First few plan completions:")
@@ -318,18 +318,18 @@ async def demonstrate_plan_completions(client: AsyncClient):
                 print(f"        Title: {title}")
 
     except Exception as e:
-        print(f"❌ Error getting plan completions: {e}")
+        print(f"Error getting plan completions: {e}")
 
 
 async def demonstrate_convert_note_to_md(client: AsyncClient):
     """Demonstrate convert_note_to_md method"""
-    print("\n📄 CONVERT NOTE TO MARKDOWN")
+    print("\nCONVERT NOTE TO MARKDOWN")
     print("-" * 30)
 
     try:
         # Convert notes to markdown
         notes_md = await client.convert_note_to_md()
-        print(f"✅ Converted {len(notes_md)} notes to markdown")
+        print(f"Converted {len(notes_md)} notes to markdown")
 
         if notes_md:
             print("   Note data structure:")
@@ -337,12 +337,12 @@ async def demonstrate_convert_note_to_md(client: AsyncClient):
             print(f"     Length: {len(notes_md)}")
 
     except Exception as e:
-        print(f"❌ Error converting notes to markdown: {e}")
+        print(f"Error converting notes to markdown: {e}")
 
 
 async def demonstrate_concurrent_usage(client: AsyncClient):
     """Demonstrate using multiple methods concurrently"""
-    print("\n🚀 CONCURRENT USAGE")
+    print("\nCONCURRENT USAGE")
     print("-" * 30)
 
     try:
@@ -358,7 +358,7 @@ async def demonstrate_concurrent_usage(client: AsyncClient):
 
         votd, moments, highlights, notes, bookmarks = results
 
-        print("✅ Concurrent results:")
+        print("Concurrent results:")
         if isinstance(votd, Exception):
             print(f"   Verse of the day: Error - {votd}")
         else:
@@ -385,7 +385,7 @@ async def demonstrate_concurrent_usage(client: AsyncClient):
             print(f"   Bookmarks: {len(bookmarks)}")
 
     except Exception as e:
-        print(f"❌ Error in concurrent usage: {e}")
+        print(f"Error in concurrent usage: {e}")
 
 
 async def main():
@@ -397,7 +397,7 @@ async def main():
 
     if not username or not password:
         print(
-            "❌ Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
+            "Error: Please set YOUVERSION_USERNAME and YOUVERSION_PASSWORD environment variables"
         )
         print("   Or create a .env file with your credentials")
         print("   Example:")
@@ -405,14 +405,14 @@ async def main():
         print("   YOUVERSION_PASSWORD=your_password")
         return
 
-    print("🚀 Starting YouVersion Bible Client - Complete API Methods Example")
+    print("Starting YouVersion Bible Client - Complete API Methods Example")
     print("=" * 80)
 
     try:
         # Initialize client with environment variables
         async with AsyncClient() as client:
-            print(f"✅ Connected as: {client.username}")
-            print(f"✅ User ID: {client.user_id}")
+            print(f"Connected as: {client.username}")
+            print(f"User ID: {client.user_id}")
 
             # Demonstrate all public methods
             await demonstrate_verse_of_the_day(client)
@@ -428,8 +428,8 @@ async def main():
             await demonstrate_convert_note_to_md(client)
             await demonstrate_concurrent_usage(client)
 
-            print("\n✅ Complete API methods example completed successfully!")
-            print("\n📋 Summary of all public methods demonstrated:")
+            print("\nComplete API methods example completed successfully!")
+            print("\nSummary of all public methods demonstrated:")
             print("   1. verse_of_the_day(day=None) - Get verse of the day")
             print("   2. moments(page=1) - Get all moments")
             print("   3. highlights(page=1) - Get highlights only")
@@ -443,9 +443,9 @@ async def main():
             print("  11. convert_note_to_md() - Convert notes to markdown")
 
     except ValueError as e:
-        print(f"❌ Configuration error: {e}")
+        print(f"Configuration error: {e}")
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f"Unexpected error: {e}")
         print("   This might be due to:")
         print("   - Invalid credentials")
         print("   - Network connectivity issues")

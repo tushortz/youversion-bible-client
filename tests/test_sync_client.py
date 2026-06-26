@@ -39,15 +39,12 @@ class TestSyncClient:
 
     def test_get_loop_no_running_loop(self):
         """Test getting event loop when no loop is running."""
-        with patch(
-            "youversion.clients.sync_client.BaseClient"
-        ) as mock_base_class, patch(
-            "asyncio.get_running_loop"
-        ) as mock_get_running, patch(
-            "asyncio.new_event_loop"
-        ) as mock_new_loop, patch(
-            "asyncio.set_event_loop"
-        ) as mock_set_loop:
+        with (
+            patch("youversion.clients.sync_client.BaseClient") as mock_base_class,
+            patch("asyncio.get_running_loop") as mock_get_running,
+            patch("asyncio.new_event_loop") as mock_new_loop,
+            patch("asyncio.set_event_loop") as mock_set_loop,
+        ):
             mock_base_client = MagicMock()
             mock_base_class.return_value = mock_base_client
 
@@ -70,9 +67,10 @@ class TestSyncClient:
 
     def test_get_loop_existing_loop(self):
         """Test getting event loop when loop already exists."""
-        with patch(
-            "youversion.clients.sync_client.BaseClient"
-        ) as mock_base_class, patch("asyncio.get_running_loop") as mock_get_running:
+        with (
+            patch("youversion.clients.sync_client.BaseClient") as mock_base_class,
+            patch("asyncio.get_running_loop") as mock_get_running,
+        ):
             mock_base_client = MagicMock()
             mock_base_class.return_value = mock_base_client
 
@@ -91,13 +89,11 @@ class TestSyncClient:
         """Test getting event loop when existing loop is closed."""
         import asyncio
 
-        with patch(
-            "youversion.clients.sync_client.BaseClient"
-        ) as mock_base_class, patch(
-            "asyncio.get_running_loop"
-        ) as mock_get_running, patch(
-            "asyncio.set_event_loop"
-        ) as mock_set_loop:
+        with (
+            patch("youversion.clients.sync_client.BaseClient") as mock_base_class,
+            patch("asyncio.get_running_loop") as mock_get_running,
+            patch("asyncio.set_event_loop") as mock_set_loop,
+        ):
             mock_base_client = MagicMock()
             mock_base_class.return_value = mock_base_client
 
@@ -125,9 +121,10 @@ class TestSyncClient:
 
     def test_get_loop_running_loop_error(self):
         """Test getting event loop when already in async context."""
-        with patch(
-            "youversion.clients.sync_client.BaseClient"
-        ) as mock_base_class, patch("asyncio.get_running_loop") as mock_get_running:
+        with (
+            patch("youversion.clients.sync_client.BaseClient") as mock_base_class,
+            patch("asyncio.get_running_loop") as mock_get_running,
+        ):
             mock_base_client = MagicMock()
             mock_base_class.return_value = mock_base_client
 

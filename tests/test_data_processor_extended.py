@@ -1,7 +1,5 @@
 """Extended unit tests for DataProcessor class to improve coverage."""
 
-
-
 from youversion.core.data_processor import DataProcessor
 
 
@@ -465,3 +463,19 @@ class TestDataProcessorExtended:
         result = processor.process_set_theme(raw_data)
         assert result is not None
 
+    def test_process_plan_completions(self):
+        """Test processing plan completions list."""
+        processor = DataProcessor()
+        raw_data = [{"id": 1, "plan_id": 10}]
+
+        result = processor.process_plan_completions(raw_data)
+        assert len(result) == 1
+        assert hasattr(result[0], "id")
+
+    def test_process_search_bible(self):
+        """Test processing Bible search results."""
+        processor = DataProcessor()
+        raw_data = {"query": "love", "results": [{"usfm": "JHN.3.16"}]}
+
+        result = processor.process_search_bible(raw_data)
+        assert result is not None

@@ -94,7 +94,7 @@ class SyncClient(BaseClient):
         """Manually close the client."""
 
         async def _close_async():
-            await super().close()
+            await BaseClient.close(self)
 
         # Run close coroutine depending on loop ownership
         if self._loop and not self._loop.is_closed():
@@ -808,14 +808,89 @@ class SyncClient(BaseClient):
         """
         return self._run_async(super().get_theme_description(theme_id, language_tag))
 
-    # Localization API methods
-    def get_localization_items(self, language_tag: str = "eng") -> str:
-        """Get localization strings for a language.
+    # Friends API methods
+    def get_friends(self, page: int = 1) -> dict[str, Any]:
+        """Get the authenticated user's friends list."""
+        return self._run_async(super().get_friends(page))
 
-        Args:
-            language_tag: Language tag
+    def get_all_friends(self, page: int = 1) -> dict[str, Any]:
+        """Get all friends including extended metadata."""
+        return self._run_async(super().get_all_friends(page))
 
-        Returns:
-            Localization strings (PO file format)
-        """
-        return self._run_async(super().get_localization_items(language_tag))
+    def delete_friend(self, user_id: int) -> dict[str, Any]:
+        """Remove a friend by user ID."""
+        return self._run_async(super().delete_friend(user_id))
+
+    def get_incoming_friend_requests(self, page: int = 1) -> dict[str, Any]:
+        """Get incoming friend requests."""
+        return self._run_async(super().get_incoming_friend_requests(page))
+
+    def get_friend_suggestions(self, page: int = 1) -> dict[str, Any]:
+        """Get friend suggestions."""
+        return self._run_async(super().get_friend_suggestions(page))
+
+    def accept_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Accept an incoming friend request."""
+        return self._run_async(super().accept_friend_request(user_id))
+
+    def decline_friend_request(self, user_id: int) -> dict[str, Any]:
+        """Decline an incoming friend request."""
+        return self._run_async(super().decline_friend_request(user_id))
+
+    def dismiss_friend_suggestion(self, user_id: int) -> dict[str, Any]:
+        """Dismiss a friend suggestion."""
+        return self._run_async(super().dismiss_friend_suggestion(user_id))
+
+    def get_facebook_friends(self, page: int = 1) -> dict[str, Any]:
+        """Get Facebook-linked friend suggestions."""
+        return self._run_async(super().get_facebook_friends(page))
+
+    def sync_friendship_contacts(
+        self, contacts: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Upload contacts for friend matching."""
+        return self._run_async(super().sync_friendship_contacts(contacts))
+
+    # Notifications API methods
+    def get_notifications(self, page: int = 1) -> dict[str, Any]:
+        """Get notification feed items."""
+        return self._run_async(super().get_notifications(page))
+
+    def get_notification_settings(self) -> dict[str, Any]:
+        """Get notification settings."""
+        return self._run_async(super().get_notification_settings())
+
+    def update_notification_settings(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Update notification settings."""
+        return self._run_async(super().update_notification_settings(data))
+
+    def update_notifications(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Update notification read state."""
+        return self._run_async(super().update_notifications(data))
+
+    def get_votd_notification_settings(self) -> dict[str, Any]:
+        """Get VOTD notification settings."""
+        return self._run_async(super().get_votd_notification_settings())
+
+    def update_votd_notification_settings(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Update VOTD notification settings."""
+        return self._run_async(super().update_votd_notification_settings(data))
+
+    # Share API methods
+    def invite_by_email(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Send a YouVersion invite by email."""
+        return self._run_async(super().invite_by_email(data))
+
+    def invite_by_sms(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Send a YouVersion invite by SMS."""
+        return self._run_async(super().invite_by_sms(data))
+
+    # Additional moments and search API methods
+    # Additional moments API methods
+    def get_client_side_moments(self, page: int = 1) -> dict[str, Any]:
+        """Get client-side moment items."""
+        return self._run_async(super().get_client_side_moments(page))
+
+    def get_moments_votd(self, language_tag: Optional[str] = None) -> dict[str, Any]:
+        """Get verse of the day from the moments API."""
+        return self._run_async(super().get_moments_votd(language_tag))

@@ -1,6 +1,6 @@
 [project]
 name = "youversion-bible-client"
-version = "0.1.2"
+version = "0.4.0"
 description = "A Command line interface for interacting with the YouVersion Bible API"
 authors = [
     {name = "Taiwo Kareem", email = "taiwo.kareem36@gmail.com"}
@@ -46,7 +46,6 @@ get-event-configuration = "youversion.cli:poetry_cmd_get_event_configuration"
 get-event-details = "youversion.cli:poetry_cmd_get_event_details"
 get-image-upload-url = "youversion.cli:poetry_cmd_get_image_upload_url"
 get-images = "youversion.cli:poetry_cmd_get_images"
-get-localization-items = "youversion.cli:poetry_cmd_get_localization_items"
 get-moment-colors = "youversion.cli:poetry_cmd_get_moment_colors"
 get-moment-details = "youversion.cli:poetry_cmd_get_moment_details"
 get-moment-labels = "youversion.cli:poetry_cmd_get_moment_labels"
@@ -82,43 +81,23 @@ unregister-device = "youversion.cli:poetry_cmd_unregister_device"
 update-moment = "youversion.cli:poetry_cmd_update_moment"
 votd = "youversion.cli:poetry_cmd_votd"
 
-[tool.poetry]
-packages = [{ include = "youversion" }]
-exclude = [
-    "docs/**/*",
-    "docs",
-    "examples/**/*",
-    "examples",
-    "tests/**/*",
-    "tests",
-    "htmlcov/**/*",
-    "htmlcov",
-    "env/**/*",
-    "env",
-    "*.pyc",
-    "__pycache__/**/*",
-    "*.egg-info",
-    ".pytest_cache/**/*",
-    ".mypy_cache/**/*",
-    "bandit-report.json",
-    "main.py",
-    "note_to_markdown.py",
-    "run_tests.py",
+[dependency-groups]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "ruff>=0.1.2",
+    "sphinx>=7.4.0",
+    "sphinx-rtd-theme>=3.0.0",
 ]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.0"
-pytest-cov = "^4.0.0"
-pytest-asyncio = "^0.21.0"
-black = "^23.0.0"
-ruff = "^0.1.2"
-sphinx = "^7.4.0"
-sphinx-rtd-theme = "^3.0.0"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["youversion"]
 
 [tool.black]
 line-length = 88
@@ -141,6 +120,8 @@ extend-exclude = '''
 [tool.ruff]
 target-version = "py39"
 line-length = 88
+
+[tool.ruff.lint]
 select = [
   "E",  # pycodestyle errors
   "W",  # pycodestyle warnings
@@ -156,10 +137,10 @@ ignore = [
   "C901", # too complex
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["youversion"]
 
 [tool.coverage.run]
@@ -179,4 +160,6 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
     "@abstractmethod",
+    "except ImportError:",
+    "from typing_extensions import TypeAlias",
 ]

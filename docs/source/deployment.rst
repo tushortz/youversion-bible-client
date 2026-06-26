@@ -30,10 +30,8 @@ Dockerfile Example
    WORKDIR /app
 
    # Install dependencies
-   COPY pyproject.toml poetry.lock ./
-   RUN pip install poetry && \
-       poetry config virtualenvs.create false && \
-       poetry install --no-dev
+   COPY pyproject.toml uv.lock ./
+   RUN pip install uv && uv sync --frozen --no-dev
 
    # Copy application
    COPY . .

@@ -1,10 +1,8 @@
 # YouVersion Bible API Client
 
-This project came about when I was looking to export all my notes from the Youversion Bible app. Please use responsibly.
+Python client for the YouVersion Bible API. Use it to read scripture, export your notes and highlights, and work with moments, plans, events, and social features.
 
-
-A comprehensive Python client library for accessing the YouVersion Bible API. This library provides both synchronous and asynchronous interfaces to interact with all YouVersion API endpoints.
-
+Please use responsibly.
 
 ## Installation
 
@@ -25,136 +23,119 @@ pip install youversion-bible-client
 - [x] verse search
 
 
-## Quick start
+## Credentials
 
-### Client
+Set credentials via environment variables or a `.env` file:
 
-## Examples
-
-### Create sync client
-
-The sync client is a wrapper on top of the asynchronous client. See [DOCS.md](./DOCS.md) on examples on how to use
-
-```py
-from youversion.clients import SyncClient
-
-client = SyncClient()
-
-# get verse of the day
-client.verse_of_the_day()
+```env
+YOUVERSION_USERNAME=your_username
+YOUVERSION_PASSWORD=your_password
 ```
 
-### creating async client
+## Quick start
 
-```py
+### Async (recommended)
+
+```python
 import asyncio
 from youversion.clients import AsyncClient
 
 async def main():
-    # Using async context manager (recommended)
     async with AsyncClient() as client:
-        # Get verse of the day
         votd = await client.verse_of_the_day()
+        print(votd.usfm)
+
+        chapter = await client.get_bible_chapter("GEN.1", version_id=1)
+        print(chapter["reference"]["human"])
+
+asyncio.run(main())
 ```
 
+### Sync
 
-### Verse of the day
+```python
+from youversion.clients import SyncClient
 
-```py
-# get's the current day's votd
-result = client.verse_of_the_day()
-
-# get's specified votd
-client.verse_of_the_day(day=365)
+with SyncClient() as client:
+    notes = client.notes(page=1)
+    print(len(notes))
 ```
 
-### Moments
+## Common tasks
 
-#### Get moments
+| Task | Method |
+|------|--------|
+| Verse of the day | `verse_of_the_day()` |
+| Highlights, notes, bookmarks | `highlights()`, `notes()`, `bookmarks()` |
+| Bible search | `search_bible("love", version_id=1)` |
+| Bible chapter | `get_bible_chapter("GEN.1", version_id=1)` |
+| Audio chapter | `get_audio_chapter("GEN.1", version_id=1)` |
+| Reading plans | `plan_progress()`, `search_plans("daily")` |
+| Friends | `get_friends()`, `get_friend_suggestions(language_tag="en")` |
+| Notifications | `get_notifications()` |
+| Events | `search_events("church")`, `get_event_details(event_id)` |
 
-Moments fall into different categories such as `bookmark`, `highlight`, `note`, `image`, `badge`, `plan_subscription`, `plan_completion`, `plan_segment_completion`, `friendship`
+## Sample responses
 
-Moments take optional page parameters. default is page 1
+Values below are trimmed from live integration tests. User-specific fields are anonymized.
 
-```py
-client.badges()
-client.bookmarks()
-client.friendships()
-client.highlights()
-client.moments()
-client.my_images()
-client.notes()
-client.plan_completions()
-client.plan_progress()
-client.plan_subscriptions()
+**Verse of the day** (`verse_of_the_day()`):
+
+```json
+{
+  "day": 178,
+  "usfm": ["ISA.43.18", "ISA.43.19"],
+  "image_id": null
+}
 ```
 
-#### Create a moment
+**Bible chapter** (`get_bible_chapter("GEN.1", version_id=1)`):
 
-```py
-# Some fields are optional or provide default values.
-# infer those from the method type hints
-# version_id for example kjv = 1
-client.create_moment(
-    {
-        "kind": "note",
-        "content": "My genesis 10:2 note body",
-        "references": [
-            {"human": "genesis 10:2", "version_id": 1, "usfm": ["GEN.10.2"]}
-        ],
-        "title": "My genesis 10:2 note",
-        "status": "private",
-        "body": "My genesis 10:2 note body",
-        "color": "ff0000",
-        "labels": ["test"],
-        "language_tag": "en",
-    }
-)
+```json
+{
+  "reference": {
+    "usfm": ["GEN.1"],
+    "human": "Genesis 1",
+    "version_id": 1
+  },
+  "content": "<div>... verse HTML ...</div>",
+  "next": {"usfm": ["GEN.2"], "human": "Genesis 2"}
+}
 ```
 
-### Bible
+**Bible configuration** (`get_bible_configuration()`):
 
-#### Verse search
-
-```py
-client.search_bible("christ died for us")
+```json
+{
+  "short_url": "https://www.bible.com/",
+  "totals": {"versions": 3809, "languages": 2439}
+}
 ```
 
-#### Get bible chapter
+Note: `default_versions[].id` is a **language** id, not a Bible version id. Resolve a version id via `get_bible_versions("eng")` or use a known id such as `1` (KJV).
 
-```py
-client.get_bible_chapter(reference="GEN.1")
+## API notes
+
+- **Public endpoints** (no Bearer token): `get_bible_chapter`, `get_audio_chapter`, `get_moments_configuration`, `get_moments_votd`. The client handles this automatically.
+- **Friend suggestions** require `language_tag="en"` (ISO 639-1), not `eng`.
+- **User badges** come from `badges()` via the moments feed, not a separate badges service.
+
+## CLI
+
+```bash
+uv run youversion votd
+uv run youversion highlights --page 1
+uv run youversion get-bible-chapter --reference GEN.1 --version-id 1
 ```
 
-### Bible versions
+See [DOCS.md](./DOCS.md) for the full method list and [docs/](docs/) for Sphinx documentation.
 
-```py
-client.get_bible_versions()
+## Development
 
-# you can specify a 3 digit language tag. e.g. ita for italian
-# default is eng (english)
-client.get_bible_versions(language_tag="eng")
-
-# You can also get a single bible version detail
-client.get_bible_version(version_id=1)
+```bash
+uv sync
+uv run pytest
+uv run pytest tests/test_api_integration.py -m integration  # requires .env credentials
 ```
 
-### Bible Audio
-
-```py
-# version id defaults to 1 (kjv)
-client.get_audio_chapter(reference="GEN.1")
-client.get_audio_chapter(reference="GEN.1", version_id=1)
-
-# Get audio version details
-client.get_audio_version(audio_id=1)
-```
-
-
-### Friends
-
-#### Send friend request
-
-```py
-client.send_friend_request(user_id=123456789)
-```
+Integration runs save request/response JSON under `results/integration/`.
