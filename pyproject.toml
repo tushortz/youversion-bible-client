@@ -109,6 +109,8 @@ build-backend = "hatchling.build"
 exclude = [
   "/docs",
   "/tests",
+  "/examples",
+  "/results",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -131,13 +133,14 @@ extend-exclude = '''
   | dist
   | docs
   | scripts
+  | examples
 )/
 '''
 
 [tool.ruff]
 target-version = "py310"
 line-length = 88
-extend-exclude = ["docs", "scripts"]
+extend-exclude = ["docs", "scripts", "examples"]
 
 [tool.ruff.lint]
 select = [
